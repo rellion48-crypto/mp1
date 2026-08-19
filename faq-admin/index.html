@@ -399,6 +399,7 @@
             <nav class="nav-links">
                 <a href="../index.html" class="nav-btn">← 원서접수 메인 포털</a>
                 <a href="../admin/index.html" class="nav-btn">접수 관리 대장</a>
+                <button class="nav-btn" onclick="handleAdminLogout()" style="background: rgba(239, 68, 68, 0.15); border-color: #ef4444; color: #fca5a5; cursor: pointer;">🔒 로그아웃</button>
             </nav>
         </div>
     </header>
@@ -974,11 +975,90 @@
             loadInquiryStats();
         }
 
+        /* Admin Authentication & Logout Logic */
+        function checkAdminAuth() {
+            const isAuth = sessionStorage.getItem('dudu_admin_auth') === 'true';
+            const overlay = document.getElementById('adminAuthOverlay');
+            const mainContent = document.querySelector('.main-container');
+
+            if (!isAuth) {
+                if (overlay) overlay.style.display = 'flex';
+                if (mainContent) mainContent.style.display = 'none';
+                setTimeout(() => {
+                    const inp = document.getElementById('adminPasswordInput');
+                    if (inp) inp.focus();
+                }, 100);
+            } else {
+                if (overlay) overlay.style.display = 'none';
+                if (mainContent) mainContent.style.display = 'block';
+                loadDocs();
+            }
+        }
+
+        function handleAdminLogin(e) {
+            if (e) e.preventDefault();
+            const inp = document.getElementById('adminPasswordInput');
+            const err = document.getElementById('loginErrorMsg');
+            const val = (inp?.value || '').trim();
+
+            if (val === 'admin') {
+                sessionStorage.setItem('dudu_admin_auth', 'true');
+                if (err) err.style.display = 'none';
+                if (inp) inp.value = '';
+                checkAdminAuth();
+            } else {
+                if (err) {
+                    err.style.display = 'block';
+                    err.textContent = '비밀번호가 올바르지 않습니다. 다시 입력해 주세요.';
+                }
+                if (inp) {
+                    inp.style.borderColor = '#ef4444';
+                    inp.focus();
+                    inp.select();
+                }
+            }
+        }
+
+        function handleAdminLogout() {
+            if (!confirm('관리자 페이지에서 로그아웃하시겠습니까?')) return;
+            sessionStorage.removeItem('dudu_admin_auth');
+            location.reload();
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             applyFontScale();
-            loadDocs();
+            checkAdminAuth();
         });
     </script>
+
+    <!-- Admin Auth Gate Overlay -->
+    <div id="adminAuthOverlay" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(2, 6, 23, 0.96); backdrop-filter: blur(14px); display: flex; align-items: center; justify-content: center; z-index: 99999; padding: 20px;">
+        <div style="background: #1e293b; border: 2px solid #3b82f6; border-radius: 20px; padding: 36px 32px; max-width: 440px; width: 100%; box-shadow: 0 25px 60px rgba(0,0,0,0.8); text-align: center;">
+            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #1d4ed8, #3b82f6); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 18px; box-shadow: 0 8px 20px rgba(37,99,235,0.4);">
+                🔒
+            </div>
+            <h2 style="font-size: 22px; font-weight: 900; color: #ffffff; margin-bottom: 8px;">두두자격지원센터 관리자 인증</h2>
+            <p style="font-size: 14px; color: #94a3b8; line-height: 1.5; margin-bottom: 24px;">
+                사내 안내 규정 및 FAQ 관리 접근을 위해 관리자 비밀번호를 입력해 주세요.
+            </p>
+            <form onsubmit="handleAdminLogin(event)">
+                <div style="margin-bottom: 16px; text-align: left;">
+                    <label style="display: block; font-size: 13px; font-weight: 800; color: #cbd5e1; margin-bottom: 6px;">관리자 비밀번호</label>
+                    <input type="password" id="adminPasswordInput" placeholder="비밀번호를 입력하세요" required style="width: 100%; background: #020617; border: 2px solid #475569; border-radius: 10px; padding: 14px 16px; color: #ffffff; font-size: 16px; outline: none; font-weight: 600;">
+                </div>
+                <div id="loginErrorMsg" style="color: #ef4444; font-size: 13px; font-weight: 700; margin-bottom: 16px; display: none; text-align: left;">
+                    ※ 비밀번호가 올바르지 않습니다. 다시 입력해 주세요.
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 16px; font-weight: 900; border-radius: 10px; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                    관리자 로그인 ➔
+                </button>
+            </form>
+            <div style="margin-top: 20px; border-top: 1px solid #334155; padding-top: 14px;">
+                <a href="../index.html" style="color: #94a3b8; font-size: 13px; text-decoration: none; font-weight: 700;">← 원서접수 메인 포털로 돌아가기</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Guaranteed Static Chatbot DOM Elements -->
     <div id="duduChatFab" onclick="window.duduChat ? window.duduChat.toggleChat() : (document.getElementById('duduChatWindow').style.display = document.getElementById('duduChatWindow').style.display === 'flex' ? 'none' : 'flex')" onkeydown="if(event.key==='Enter') this.click()" tabindex="0" role="button" style="position: fixed !important; bottom: 30px !important; right: 30px !important; background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; color: #ffffff !important; border: 3px solid #ffffff !important; border-radius: 50px !important; padding: 16px 26px !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important; cursor: pointer !important; z-index: 2147483647 !important; font-family: 'Noto Sans KR', sans-serif !important; user-select: none !important;">
         <div style="width: 13px; height: 13px; background: #34d399; border-radius: 50%; box-shadow: 0 0 14px #34d399;"></div>
