@@ -1497,11 +1497,18 @@
         }
 
         function handlePhoneInput(input) {
-            let val = input.value.replace(/[^0-9]/g, '');
+            const rawVal = input.value;
+            const hasInvalidChar = /[^0-9\-]/.test(rawVal);
+            let val = rawVal.replace(/[^0-9]/g, '');
             const warningEl = document.getElementById('phoneWarningText');
 
-            // 010 시작 여부 실시간 검증
-            if (val.length >= 3) {
+            if (hasInvalidChar) {
+                if (warningEl) {
+                    warningEl.style.display = 'block';
+                    warningEl.textContent = "※ 휴대전화 번호에는 영문이나 특수문자를 입력할 수 없습니다.";
+                }
+                input.style.borderColor = '#ef4444';
+            } else if (val.length >= 3) {
                 if (!val.startsWith('010')) {
                     if (warningEl) {
                         warningEl.style.display = 'block';
@@ -1750,8 +1757,8 @@
             }
 
             const cleanPhone = phone.replace(/[^0-9]/g, '');
-            if (!cleanPhone.startsWith('010') || cleanPhone.length !== 11) {
-                alert('휴대전화 번호는 반드시 010으로 시작하는 11자리 번호(예: 010-1234-5678)로 입력해 주셔야 원서접수 안내 문자가 정상 발송됩니다.');
+            if (!phone || /[^0-9\-]/.test(phone) || !cleanPhone.startsWith('010') || cleanPhone.length !== 11) {
+                alert('휴대전화 번호는 영문이나 특수문자 없이 반드시 010으로 시작하는 11자리 번호(예: 010-1234-5678)로 입력해 주셔야 합니다.');
                 document.getElementById('userPhone').focus();
                 return;
             }
