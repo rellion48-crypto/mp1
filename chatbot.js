@@ -125,7 +125,12 @@ const SENIOR_SYNONYMS = {
     '쓰는 거': '필기',
     '2차': '실기',
     '실습': '실기',
-    '직접 하는 거': '실기'
+    '직접 하는 거': '실기',
+    '고마워유': '고마워',
+    '감사유': '감사',
+    '고맙구먼': '고마워',
+    '가능할까유': '가능할까',
+    '될까유': '가능할까'
 };
 
 class DuduChatbot {
@@ -468,6 +473,20 @@ class DuduChatbot {
 
         if (normalizedQuery.includes('전기') || normalizedQuery.includes('요양') || normalizedQuery.includes('위생사') || normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) {
             return '저희 센터는 현재 중장년 어르신 취업에 가장 수요가 높은 3대 핵심 국가기술자격(한식조리, 지게차운전, 굴착기운전기능사) 필기 원서접수에 집중하여 전문 지원해 드리고 있습니다. (기타 종목은 추후 지원 예정입니다.)';
+        }
+
+        // 일상 대화 및 공감/격려 의도 처리
+        if (normalizedQuery.includes('고마워') || normalizedQuery.includes('고맙') || normalizedQuery.includes('감사') || normalizedQuery.includes('수고')) {
+            return '어르신께 도움이 되어 제가 더 기쁩니다! 언제든 편하게 물어보세요. 늘 건강하시고 행복한 하루 보내세요! 😊';
+        }
+        if (normalizedQuery.includes('안녕') || normalizedQuery.includes('반가') || normalizedQuery.includes('반갑')) {
+            return '반갑습니다, 어르신! 두두자격지원센터 공식 AI 상담원입니다. 한식조리, 지게차, 굴착기운전기능사 시험 관련해 무엇이든 편하게 물어보세요!';
+        }
+        if (normalizedQuery.includes('60') || normalizedQuery.includes('70') || normalizedQuery.includes('50') || normalizedQuery.includes('나이') || normalizedQuery.includes('늙') || normalizedQuery.includes('가능할까') || normalizedQuery.includes('할 수 있') || normalizedQuery.includes('딸 수 있') || normalizedQuery.includes('어려워')) {
+            return '그럼요, 어르신! 60대, 70대 어르신들도 용기 내어 도전하시고 당당하게 합격하고 계십니다. 컴퓨터(CBT) 시험도 기출문제를 몇 번 풀어보시면 금방 익숙해지십니다. 어르신의 멋진 도전을 제가 온 마음으로 응원하겠습니다! 접수가 어려우시면 성함과 전화번호만 남겨주시면 무료로 접수를 도와드립니다. 👍';
+        }
+        if (normalizedQuery.includes('날씨') || normalizedQuery.includes('춥') || normalizedQuery.includes('더워') || normalizedQuery.includes('비와')) {
+            return '네 어르신, 날씨 변화에 항상 건강 유의하시고 따뜻하고 편안한 하루 보내세요!';
         }
 
         const isPrepIntent = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('수험표') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구');
