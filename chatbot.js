@@ -132,7 +132,7 @@ class DuduChatbot {
     constructor() {
         this.knowledgeBase = [...DEFAULT_FAQ_KNOWLEDGE];
         this.isOpen = false;
-        this.fontSize = 16;
+        this.fontSize = parseInt(localStorage.getItem('dudu_chat_font_size') || '16', 10);
         this.isAIMode = localStorage.getItem('dudu_ai_mode') !== 'false';
         this.init();
     }
@@ -141,6 +141,7 @@ class DuduChatbot {
         if (typeof document === 'undefined' || !document.body) return;
         this.injectStyles();
         this.bindEvents();
+        this.adjustChatFontSize(0);
         await this.syncWithSupabase();
     }
 
@@ -173,32 +174,8 @@ class DuduChatbot {
         const style = document.createElement('style');
         style.id = 'duduChatbotStyles';
         style.textContent = `
-            #duduChatFab {
-                position: fixed !important;
-                bottom: 30px !important;
-                right: 30px !important;
-                background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
-                color: #ffffff !important;
-                border: 3px solid #ffffff !important;
-                border-radius: 50px !important;
-                padding: 16px 26px !important;
-                display: flex !important;
-                align-items: center !important;
-                gap: 12px !important;
-                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7) !important;
-                cursor: pointer !important;
-                z-index: 2147483647 !important;
-                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                font-family: 'Noto Sans KR', sans-serif !important;
-                user-select: none !important;
-                pointer-events: auto !important;
-            }
-            #duduChatFab:hover {
-                transform: translateY(-4px) scale(1.05) !important;
-                box-shadow: 0 16px 45px rgba(37, 99, 235, 0.85) !important;
-                background: linear-gradient(135deg, #2563eb, #1e40af) !important;
-            }
             #duduChatWindow {
+                --chat-font-size: 16px;
                 position: fixed !important;
                 bottom: 105px !important;
                 right: 30px !important;
@@ -229,9 +206,10 @@ class DuduChatbot {
                 padding: 14px 18px !important;
                 border-radius: 18px !important;
                 line-height: 1.55 !important;
-                font-size: 16px !important;
+                font-size: var(--chat-font-size, 16px) !important;
                 word-break: keep-all !important;
                 font-weight: 500 !important;
+                transition: font-size 0.15s ease !important;
             }
             .chat-msg.bot {
                 align-self: flex-start !important;
@@ -259,7 +237,7 @@ class DuduChatbot {
                 color: #93c5fd !important;
                 border-radius: 14px !important;
                 padding: 8px 12px !important;
-                font-size: 13px !important;
+                font-size: calc(var(--chat-font-size, 16px) * 0.85) !important;
                 font-weight: 800 !important;
                 cursor: pointer !important;
                 transition: all 0.15s !important;
@@ -306,10 +284,22 @@ class DuduChatbot {
     }
 
     adjustChatFontSize(delta) {
-        this.fontSize = Math.max(13, Math.min(24, this.fontSize + delta));
-        document.querySelectorAll('.chat-msg').forEach(el => {
-            el.style.fontSize = `${this.fontSize}px`;
+        this.fontSize = Math.max(13, Math.min(26, this.fontSize + delta));
+        localStorage.setItem('dudu_chat_font_size', this.fontSize);
+
+        const win = document.getElementById('duduChatWindow');
+        if (win) {
+            win.style.setProperty('--chat-font-size', `${this.fontSize}px`);
+        }
+
+        document.querySelectorAll('#chatMessages .chat-msg').forEach(el => {
+            el.style.setProperty('font-size', `${this.fontSize}px`, 'important');
         });
+
+        const input = document.getElementById('chatInput');
+        if (input) {
+            input.style.setProperty('font-size', `${this.fontSize}px`, 'important');
+        }
     }
 
     toggleAIMode() {
@@ -418,7 +408,7 @@ class DuduChatbot {
         if (!container) return null;
         const msg = document.createElement('div');
         msg.className = 'chat-msg bot loading-msg';
-        msg.style.fontSize = `${this.fontSize}px`;
+        msg.style.setProperty('font-size', `${this.fontSize}px`, 'important');
         msg.innerHTML = '🤖 <em>답변을 확인하고 있습니다...</em>';
         container.appendChild(msg);
         container.scrollTop = container.scrollHeight;
@@ -437,7 +427,7 @@ class DuduChatbot {
         if (!container) return;
         const msg = document.createElement('div');
         msg.className = `chat-msg ${sender}`;
-        msg.style.fontSize = `${this.fontSize}px`;
+        msg.style.setProperty('font-size', `${this.fontSize}px`, 'important');
         msg.innerHTML = text.replace(/\n/g, '<br>');
         container.appendChild(msg);
         container.scrollTop = container.scrollHeight;
