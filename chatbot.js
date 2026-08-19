@@ -134,6 +134,7 @@ class DuduChatbot {
         this.isOpen = false;
         this.fontSize = parseInt(localStorage.getItem('dudu_chat_font_size') || '16', 10);
         this.isAIMode = localStorage.getItem('dudu_ai_mode') !== 'false';
+        this.conversationHistory = []; // Up to 5 turns (10 messages: 5 user, 5 model)
         this.init();
     }
 
@@ -374,7 +375,10 @@ class DuduChatbot {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: query }),
+                    body: JSON.stringify({
+                        message: query,
+                        history: this.conversationHistory.slice(-10) // 최대 5개 턴 (10개 메시지)
+                    }),
                     signal: controller.signal
                 });
                 clearTimeout(timeoutId);
@@ -384,6 +388,14 @@ class DuduChatbot {
                     if (data && data.answer) {
                         this.removeLoadingMessage(loadingMsg);
                         this.appendMessage(data.answer, 'bot');
+
+                        // 대화 기록 저장 (최대 5개 턴 = 10개 항목 유지)
+                        this.conversationHistory.push({ role: 'user', text: query });
+                        this.conversationHistory.push({ role: 'model', text: data.answer });
+                        if (this.conversationHistory.length > 10) {
+                            this.conversationHistory = this.conversationHistory.slice(-10);
+                        }
+
                         aiSuccess = true;
                         return;
                     }
@@ -400,6 +412,13 @@ class DuduChatbot {
         setTimeout(() => {
             const answer = this.generateResponse(query);
             this.appendMessage(answer, 'bot');
+
+            // 룰베이스 모드에서도 대화 기록 저장
+            this.conversationHistory.push({ role: 'user', text: query });
+            this.conversationHistory.push({ role: 'model', text: answer });
+            if (this.conversationHistory.length > 10) {
+                this.conversationHistory = this.conversationHistory.slice(-10);
+            }
         }, 100);
     }
 
