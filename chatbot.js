@@ -1,10 +1,10 @@
 /**
- * 두두자격지원센터 - 시니어 3대 핵심 국가기술자격 AI 안내 챗봇 (두두봇)
- * - 집중 3종: 한식조리기능사, 지게차운전기능사, 굴착기운전기능사 (상시 CBT)
- * - 사내 안내 규정 문서 기반 정밀 응답
- * - 시니어 맞춤 유의어 사전 (접수비, 포크레인, 1차, 이론 등)
- * - 철저한 환각 방지 (실기 접수 거절, 미확인 항목 단호한 '모르겠습니다' 답변)
- * - Supabase faq_documents 실시간 동기화
+ * 두두자격지원센터 - 시니어 3대 핵심 국가기술자격 AI 챗봇 (두두봇)
+ * - AI 모드 ON / OFF 전환 토글 지원
+ * - AI 모드: Gemini 3.5 Flash Vercel API 연동 (/api/chat)
+ * - 규정 모드: 100% 로컬 룰베이스 즉시 매칭 엔진
+ * - 사내 안내 규정 기반 완벽한 할루시네이션 및 실기 거절 가드레일
+ * - UI 상시 노출 보장 (z-index 2147483647, 인라인 스타일 강제)
  */
 
 const SUPABASE_CONFIG = {
@@ -110,7 +110,6 @@ const DEFAULT_FAQ_KNOWLEDGE = [
     }
 ];
 
-// 시니어 어르신 유의어 사전
 const SENIOR_SYNONYMS = {
     '접수비': '응시료',
     '시험비': '응시료',
@@ -134,6 +133,7 @@ class DuduChatbot {
         this.knowledgeBase = [...DEFAULT_FAQ_KNOWLEDGE];
         this.isOpen = false;
         this.fontSize = 16;
+        this.isAIMode = localStorage.getItem('dudu_ai_mode') !== 'false'; // Default to true
         this.init();
     }
 
@@ -160,7 +160,6 @@ class DuduChatbot {
 
                 if (!error && data && data.length > 0) {
                     this.knowledgeBase = data;
-                    console.log('🤖 챗봇: Supabase FAQ 데이터 동기화 완료 (' + data.length + '건)');
                 }
             }
         } catch (e) {
@@ -175,47 +174,48 @@ class DuduChatbot {
         const style = document.createElement('style');
         style.id = 'duduChatbotStyles';
         style.textContent = `
-            .dudu-chat-fab {
+            #duduChatFab {
                 position: fixed !important;
-                bottom: 28px !important;
-                right: 28px !important;
-                background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+                bottom: 30px !important;
+                right: 30px !important;
+                background: linear-gradient(135deg, #1d4ed8, #2563eb) !important;
                 color: #ffffff !important;
                 border: 3px solid #ffffff !important;
                 border-radius: 50px !important;
-                padding: 16px 24px !important;
+                padding: 16px 26px !important;
                 display: flex !important;
                 align-items: center !important;
-                gap: 10px !important;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+                gap: 12px !important;
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7) !important;
                 cursor: pointer !important;
-                z-index: 999999 !important;
+                z-index: 2147483647 !important;
                 transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 font-family: 'Noto Sans KR', sans-serif !important;
                 user-select: none !important;
+                pointer-events: auto !important;
             }
-            .dudu-chat-fab:hover {
-                transform: translateY(-4px) scale(1.04) !important;
-                box-shadow: 0 14px 40px rgba(37, 99, 235, 0.7) !important;
-                background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
+            #duduChatFab:hover {
+                transform: translateY(-4px) scale(1.05) !important;
+                box-shadow: 0 16px 45px rgba(37, 99, 235, 0.85) !important;
+                background: linear-gradient(135deg, #2563eb, #1e40af) !important;
             }
-            .dudu-chat-fab .fab-icon {
-                font-size: 26px !important;
+            #duduChatFab .fab-icon {
+                font-size: 28px !important;
                 display: flex !important;
                 align-items: center !important;
             }
-            .dudu-chat-fab .fab-text {
-                font-size: 18px !important;
+            #duduChatFab .fab-text {
+                font-size: 19px !important;
                 font-weight: 900 !important;
                 letter-spacing: -0.3px !important;
                 color: #ffffff !important;
             }
-            .dudu-chat-fab .fab-pulse {
-                width: 12px !important;
-                height: 12px !important;
+            #duduChatFab .fab-pulse {
+                width: 13px !important;
+                height: 13px !important;
                 background: #34d399 !important;
                 border-radius: 50% !important;
-                box-shadow: 0 0 12px #34d399 !important;
+                box-shadow: 0 0 14px #34d399 !important;
                 animation: duduPulse 1.8s infinite !important;
             }
 
@@ -225,31 +225,31 @@ class DuduChatbot {
                 100% { transform: scale(0.9); opacity: 0.8; }
             }
 
-            .dudu-chat-window {
+            #duduChatWindow {
                 position: fixed !important;
-                bottom: 96px !important;
-                right: 28px !important;
-                width: 420px !important;
+                bottom: 105px !important;
+                right: 30px !important;
+                width: 440px !important;
                 max-width: calc(100vw - 36px) !important;
-                height: 620px !important;
-                max-height: calc(100vh - 120px) !important;
+                height: 640px !important;
+                max-height: calc(100vh - 130px) !important;
                 background: #0f172a !important;
-                border: 2px solid #3b82f6 !important;
+                border: 3px solid #3b82f6 !important;
                 border-radius: 24px !important;
-                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85) !important;
+                box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important;
                 display: none;
                 flex-direction: column !important;
-                z-index: 999999 !important;
+                z-index: 2147483647 !important;
                 overflow: hidden !important;
                 font-family: 'Noto Sans KR', sans-serif !important;
             }
-            .dudu-chat-window.open {
+            #duduChatWindow.open {
                 display: flex !important;
                 animation: duduSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             }
 
             @keyframes duduSlideUp {
-                from { opacity: 0; transform: translateY(20px); }
+                from { opacity: 0; transform: translateY(25px); }
                 to { opacity: 1; transform: translateY(0); }
             }
 
@@ -306,6 +306,38 @@ class DuduChatbot {
                 cursor: pointer !important;
             }
             .tool-btn:hover {
+                background: #2563eb !important;
+            }
+
+            /* Mode Toggle Bar */
+            .chat-mode-bar {
+                background: #090d16 !important;
+                border-bottom: 1px solid #1e293b !important;
+                padding: 8px 16px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+            }
+            .chat-mode-status {
+                font-size: 13px !important;
+                font-weight: 800 !important;
+                color: #60a5fa !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+            .mode-switch-btn {
+                background: rgba(37, 99, 235, 0.25) !important;
+                border: 1px solid #3b82f6 !important;
+                color: #ffffff !important;
+                border-radius: 20px !important;
+                padding: 4px 12px !important;
+                font-size: 12px !important;
+                font-weight: 800 !important;
+                cursor: pointer !important;
+                transition: all 0.15s !important;
+            }
+            .mode-switch-btn:hover {
                 background: #2563eb !important;
             }
 
@@ -407,8 +439,8 @@ class DuduChatbot {
         if (document.getElementById('duduChatFab')) return;
 
         const fab = document.createElement('div');
-        fab.className = 'dudu-chat-fab';
         fab.id = 'duduChatFab';
+        fab.setAttribute('style', 'position: fixed !important; bottom: 30px !important; right: 30px !important; z-index: 2147483647 !important; cursor: pointer !important;');
         fab.innerHTML = `
             <div class="fab-pulse"></div>
             <div class="fab-icon">🤖</div>
@@ -416,8 +448,8 @@ class DuduChatbot {
         `;
 
         const chatWindow = document.createElement('div');
-        chatWindow.className = 'dudu-chat-window';
         chatWindow.id = 'duduChatWindow';
+        chatWindow.setAttribute('style', 'position: fixed !important; z-index: 2147483647 !important;');
         chatWindow.innerHTML = `
             <div class="dudu-chat-header">
                 <div class="chat-header-info">
@@ -433,16 +465,25 @@ class DuduChatbot {
                     <button class="tool-btn" id="chatCloseBtn">✕</button>
                 </div>
             </div>
+            <div class="chat-mode-bar">
+                <div class="chat-mode-status" id="chatModeStatusLabel">
+                    ✨ AI 정밀상담 모드 ON
+                </div>
+                <button class="mode-switch-btn" id="chatModeToggleBtn" onclick="window.duduChat.toggleAIMode()">
+                    AI 모드 끄기
+                </button>
+            </div>
             <div class="dudu-chat-messages" id="chatMessages">
                 <div class="chat-msg bot">
-                    안녕하세요, 어르신! <strong>두두자격지원센터 3대 핵심자격 전문 AI 상담원</strong>입니다.<br>
-                    <strong>한식조리, 지게차운전, 굴착기운전기능사</strong>의 응시료, 상시 접수 일정, 당일 합격 발표 등에 대해 편하게 물어보세요.
+                    안녕하세요, 어르신! <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
+                    <strong>한식조리, 지게차운전, 굴착기운전기능사</strong>의 응시료(14,500원), 상시 접수 일정, 당일 합격 발표 등에 대해 편하게 물어보세요.
                     <div class="quick-chips">
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('한식조리 접수비 얼마예요?')">💡 한식조리 응시료</div>
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('포크레인 필기 수수료')">🚜 굴착기(포크레인) 수수료</div>
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('지게차 접수 언제 하나요?')">📅 지게차 상시 접수 일정</div>
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('합격 발표는 언제 나와요?')">⏱️ 당일 합격자 발표</div>
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('실기 시험 접수도 되나요?')">🔍 실기 접수 문의</div>
+                        <div class="quick-chip" onclick="window.duduChat.askQuestion('시험장에 주차 되나요?')">🚗 주차 가능 여부</div>
                     </div>
                 </div>
             </div>
@@ -454,6 +495,7 @@ class DuduChatbot {
 
         document.body.appendChild(fab);
         document.body.appendChild(chatWindow);
+        this.updateModeUI();
     }
 
     bindEvents() {
@@ -487,6 +529,32 @@ class DuduChatbot {
         }
     }
 
+    toggleAIMode() {
+        this.isAIMode = !this.isAIMode;
+        localStorage.setItem('dudu_ai_mode', this.isAIMode);
+        this.updateModeUI();
+        const notice = this.isAIMode 
+            ? '🤖 <strong>[AI 정밀상담 모드]</strong>가 활성화되었습니다. 어르신 눈높이에 맞춰 더욱 풍부하고 친절하게 안내합니다.'
+            : '📋 <strong>[사내규정 빠른검색 모드]</strong>가 활성화되었습니다. 사내 원장 규정 문구 그대로 즉시 답변합니다.';
+        this.appendMessage(notice, 'bot');
+    }
+
+    updateModeUI() {
+        const label = document.getElementById('chatModeStatusLabel');
+        const btn = document.getElementById('chatModeToggleBtn');
+        if (label && btn) {
+            if (this.isAIMode) {
+                label.innerHTML = '✨ AI 정밀상담 모드 ON';
+                label.style.color = '#60a5fa';
+                btn.innerHTML = '규정 모드로 전환';
+            } else {
+                label.innerHTML = '📋 사내규정 빠른검색 모드 ON';
+                label.style.color = '#34d399';
+                btn.innerHTML = 'AI 모드로 전환';
+            }
+        }
+    }
+
     toggleChat(forceState) {
         if (typeof document === 'undefined') return;
         const win = document.getElementById('duduChatWindow');
@@ -508,7 +576,7 @@ class DuduChatbot {
         this.handleSend();
     }
 
-    handleSend() {
+    async handleSend() {
         if (typeof document === 'undefined') return;
         const input = document.getElementById('chatInput');
         if (!input) return;
@@ -518,10 +586,51 @@ class DuduChatbot {
         this.appendMessage(query, 'user');
         input.value = '';
 
+        // If in AI Mode, call /api/chat
+        if (this.isAIMode) {
+            const loadingMsg = this.appendLoadingMessage();
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: query })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    this.removeLoadingMessage(loadingMsg);
+                    this.appendMessage(data.answer, 'bot');
+                    return;
+                }
+            } catch (err) {
+                console.log('AI API fetch fallback:', err);
+            }
+            this.removeLoadingMessage(loadingMsg);
+        }
+
+        // Fallback or Rule-based mode
         setTimeout(() => {
             const answer = this.generateResponse(query);
             this.appendMessage(answer, 'bot');
         }, 150);
+    }
+
+    appendLoadingMessage() {
+        const container = document.getElementById('chatMessages');
+        if (!container) return null;
+        const msg = document.createElement('div');
+        msg.className = 'chat-msg bot loading-msg';
+        msg.style.fontSize = `${this.fontSize}px`;
+        msg.innerHTML = '🤖 <em>답변을 작성하고 있습니다...</em>';
+        container.appendChild(msg);
+        container.scrollTop = container.scrollHeight;
+        return msg;
+    }
+
+    removeLoadingMessage(msg) {
+        if (msg && msg.parentNode) {
+            msg.parentNode.removeChild(msg);
+        }
     }
 
     appendMessage(text, sender) {
@@ -583,14 +692,12 @@ class DuduChatbot {
             if (isPassIntent && cat.includes('합격발표')) score += 12;
             if (isSessionIntent && cat.includes('시험시간')) score += 12;
 
-            // 키워드 매칭
             keywords.forEach(kw => {
                 if (kw && normalizedQuery.includes(kw)) {
                     score += 5;
                 }
             });
 
-            // 질문 단어 매칭
             questionWords.forEach(qw => {
                 if (qw && qw.length > 1 && normalizedQuery.includes(qw)) {
                     score += 1;
@@ -603,7 +710,6 @@ class DuduChatbot {
             }
         }
 
-        // 문턱값 판정
         const THRESHOLD = 3;
         if (!bestMatch || highestScore < THRESHOLD) {
             return '해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)';
@@ -613,7 +719,7 @@ class DuduChatbot {
     }
 }
 
-// 안전한 부트스트랩 초기화
+// 안전한 부트스트랩 즉시 실행
 function bootDuduChatbot() {
     if (typeof document === 'undefined') return;
     if (!document.body) {
@@ -631,6 +737,8 @@ if (typeof document !== 'undefined') {
     } else {
         bootDuduChatbot();
     }
+    // 추가 보험 실행 (타이밍 이슈 100% 방지)
+    setTimeout(bootDuduChatbot, 100);
 }
 
 if (typeof module !== 'undefined' && module.exports) {
