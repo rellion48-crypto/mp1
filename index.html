@@ -47,7 +47,7 @@
             padding-bottom: 80px;
         }
 
-        /* Top Accessibility & Support Bar */
+        /* Top Accessibility Bar */
         .top-utility-bar {
             background: #090d16;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
@@ -340,7 +340,7 @@
             color: #60a5fa;
         }
 
-        /* Application Form Panel */
+        /* Form Panel */
         .form-panel {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
@@ -455,7 +455,7 @@
             line-height: 1.4;
         }
 
-        /* Modal Overlay */
+        /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -523,7 +523,6 @@
             width: 100%;
         }
 
-        /* Footer */
         footer {
             max-width: 1240px;
             margin: 48px auto 0;
@@ -537,8 +536,7 @@
     </style>
 </head>
 <body>
-
-    <!-- Top Utility & Font Zoom Bar -->
+    <!-- Top Utility Bar -->
     <div class="top-utility-bar">
         <div class="top-utility-container">
             <div class="hotline-badge">
@@ -571,7 +569,6 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <div class="main-container">
         <!-- Hero Banner -->
         <div class="hero-banner">
@@ -588,7 +585,7 @@
 
         <!-- 2-Column Application Section -->
         <div class="content-grid" id="application-section">
-            <!-- Left Column: Qualification Selection Grid -->
+            <!-- Left: Qualifications Grid -->
             <div>
                 <div class="section-header">
                     <div>
@@ -599,7 +596,7 @@
 
                 <div class="cards-grid" id="qualCardsContainer">
                     <!-- 1. 한식조리기능사 -->
-                    <div class="qual-card active" onclick="selectQualification('한식조리기능사', '상시CBT', '14,500원', '두두자격검정원')">
+                    <div class="qual-card active" onclick="selectQualification('한식조리기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-always">상시 접수 (CBT)</span>
@@ -614,7 +611,7 @@
                     </div>
 
                     <!-- 2. 지게차운전기능사 -->
-                    <div class="qual-card" onclick="selectQualification('지게차운전기능사', '상시CBT', '14,500원', '두두자격검정원')">
+                    <div class="qual-card" onclick="selectQualification('지게차운전기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-always">상시 접수 (CBT)</span>
@@ -629,7 +626,7 @@
                     </div>
 
                     <!-- 3. 굴착기운전기능사 -->
-                    <div class="qual-card" onclick="selectQualification('굴착기운전기능사', '상시CBT', '14,500원', '두두자격검정원')">
+                    <div class="qual-card" onclick="selectQualification('굴착기운전기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-always">상시 접수 (CBT)</span>
@@ -644,7 +641,7 @@
                     </div>
 
                     <!-- 4. 전기기능사 -->
-                    <div class="qual-card" onclick="selectQualification('전기기능사', '정기 회차', '14,500원', '두두자격검정원')">
+                    <div class="qual-card" onclick="selectQualification('전기기능사', '기능사', '정기', '14,500원', 14500, '두두자격검정원')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-regular">정기 (연 4회)</span>
@@ -659,7 +656,7 @@
                     </div>
 
                     <!-- 5. 요양보호사 -->
-                    <div class="qual-card" onclick="selectQualification('요양보호사', '상시 CBT', '32,000원', '두두보건시험원')">
+                    <div class="qual-card" onclick="selectQualification('요양보호사', '보건자격', '상시', '32,000원', 32000, '두두보건시험원')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-always">상시 접수</span>
@@ -674,7 +671,7 @@
                     </div>
 
                     <!-- 6. 위생사 -->
-                    <div class="qual-card" onclick="selectQualification('위생사', '별도 시행', '30,000원', '두두보건시험원')">
+                    <div class="qual-card" onclick="selectQualification('위생사', '보건자격', '별도', '30,000원', 30000, '두두보건시험원')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-regular">별도 시행</span>
@@ -689,7 +686,7 @@
                     </div>
 
                     <!-- 7. 손해평가사 -->
-                    <div class="qual-card" onclick="selectQualification('손해평가사', '연 1회', '1차 30,000원', '전문자격')">
+                    <div class="qual-card" onclick="selectQualification('손해평가사', '전문자격', '연1회', '1차 30,000원', 30000, '전문자격')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-annual">연 1회 시행</span>
@@ -704,7 +701,7 @@
                     </div>
 
                     <!-- 8. 공인중개사 -->
-                    <div class="qual-card" onclick="selectQualification('공인중개사', '연 1회', '1차 13,400원', '전문자격')">
+                    <div class="qual-card" onclick="selectQualification('공인중개사', '전문자격', '연1회', '1차 13,400원', 13400, '전문자격')">
                         <div>
                             <div class="card-top">
                                 <span class="card-tag tag-annual">연 1회 시행</span>
@@ -720,7 +717,7 @@
                 </div>
             </div>
 
-            <!-- Right Column: Registration Form Panel -->
+            <!-- Right: Application Form Panel -->
             <div>
                 <div class="form-panel">
                     <div class="form-panel-header">
@@ -798,7 +795,7 @@
 
             <div class="modal-receipt-box">
                 <div class="receipt-row">
-                    <span style="color: var(--text-sub);">접수 접수번호:</span>
+                    <span style="color: var(--text-sub);">접수번호:</span>
                     <strong style="color: #60a5fa;" id="receiptNo">-</strong>
                 </div>
                 <div class="receipt-row">
@@ -835,16 +832,18 @@
 
     <!-- Logic Script -->
     <script>
-        const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
-        
-        let supabase = null;
-        if (window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_CONFIG = {
+            URL: "https://amlznptemtbkhyuzdkmu.supabase.co",
+            ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg"
+        };
+
+        if (window.supabase && typeof window.supabase.createClient === 'function' && !window.supabaseClient) {
+            window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
         }
 
         let selectedData = {
             name: "한식조리기능사",
+            grade: "기능사",
             type: "상시CBT",
             fee: "14,500원",
             feeInt: 14500,
@@ -864,7 +863,6 @@
             document.documentElement.style.setProperty('--base-font-size', '16px');
         }
 
-        // Auto-hyphen for phone number
         function autoFormatPhone(input) {
             let val = input.value.replace(/[^0-9]/g, '');
             let formatted = '';
@@ -880,12 +878,13 @@
             input.value = formatted;
         }
 
-        function selectQualification(name, type, fee, org) {
+        function selectQualification(name, grade, type, fee, feeInt, org) {
             selectedData = {
                 name: name,
+                grade: grade,
                 type: type,
                 fee: fee,
-                feeInt: parseInt(fee.replace(/[^0-9]/g, '')) || 14500,
+                feeInt: feeInt,
                 org: org
             };
 
@@ -893,7 +892,6 @@
             document.getElementById('displayExamType').textContent = `${type} (필기 접수)`;
             document.getElementById('displayFeeAmount').textContent = `수수료: ${fee}`;
 
-            // Highlight cards
             const cards = document.querySelectorAll('.qual-card');
             cards.forEach(card => {
                 const title = card.querySelector('.card-name').textContent;
@@ -920,15 +918,21 @@
             btn.disabled = true;
             btn.textContent = '접수 처리 중...';
 
-            const randNo = 'DN2026' + Math.floor(100000 + Math.random() * 900000);
+            let prefix = 'DN2026';
+            if (selectedData.grade === '전문자격') prefix = 'DP2026';
+            if (selectedData.grade === '보건자격') prefix = 'DH2026';
+
+            const randNo = prefix + Math.floor(100000 + Math.random() * 900000);
             const payload = {
                 receipt_number: randNo,
                 name: name,
                 phone: phone,
                 qualification: selectedData.name,
+                grade: selectedData.grade,
                 exam_type: selectedData.type,
                 exam_stage: '필기',
                 exam_region: region,
+                exam_center: region + '시험장',
                 fee_amount: selectedData.feeInt,
                 fee_final: selectedData.feeInt,
                 payment_method: '신용카드',
@@ -939,8 +943,8 @@
             };
 
             try {
-                if (supabase) {
-                    await supabase.from('applications').insert([payload]);
+                if (window.supabaseClient) {
+                    await window.supabaseClient.from('applications').insert([payload]);
                 }
             } catch (err) {
                 console.log('Insert note:', err);

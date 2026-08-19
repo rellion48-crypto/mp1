@@ -135,6 +135,7 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-hover); }
         .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid var(--card-border); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
 
         .filter-bar {
             display: flex;
@@ -321,9 +322,7 @@
             </select>
         </div>
 
-        <div class="faq-grid" id="faqGrid">
-            <!-- Dynamic Cards -->
-        </div>
+        <div class="faq-grid" id="faqGrid"></div>
     </div>
 
     <!-- Edit Modal -->
@@ -382,20 +381,22 @@
 
     <!-- Script Logic -->
     <script>
-        const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
-        
-        let supabase = null;
-        if (window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_CONFIG = {
+            URL: "https://amlznptemtbkhyuzdkmu.supabase.co",
+            ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg"
+        };
+
+        if (window.supabase && typeof window.supabase.createClient === 'function' && !window.supabaseClient) {
+            window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
         }
 
         let allDocs = [];
 
         async function loadDocs() {
-            if (supabase) {
+            const client = window.supabaseClient;
+            if (client) {
                 try {
-                    const { data, error } = await supabase
+                    const { data, error } = await client
                         .from('faq_documents')
                         .select('*')
                         .order('id', { ascending: true });
@@ -461,7 +462,7 @@
             document.getElementById('modalTitle').textContent = id ? '사내 안내 규정 수정' : '새 안내 규정 등록';
 
             if (id) {
-                const item = allDocs.find(d => d.id === id);
+                const item = allDocs.find(d => d.id == id);
                 if (item) {
                     document.getElementById('docCategory').value = item.category || '응시료';
                     document.getElementById('docQual').value = item.qualification || '공통';
@@ -494,12 +495,13 @@
                 updated_at: new Date().toISOString()
             };
 
+            const client = window.supabaseClient;
             try {
-                if (supabase) {
+                if (client) {
                     if (id) {
-                        await supabase.from('faq_documents').update(payload).eq('id', id);
+                        await client.from('faq_documents').update(payload).eq('id', parseInt(id, 10));
                     } else {
-                        await supabase.from('faq_documents').insert([payload]);
+                        await client.from('faq_documents').insert([payload]);
                     }
                 }
             } catch (err) {
@@ -525,9 +527,10 @@
 
         async function deleteDoc(id) {
             if (!confirm('이 안내 규정을 삭제하시겠습니까?')) return;
+            const client = window.supabaseClient;
             try {
-                if (supabase) {
-                    await supabase.from('faq_documents').delete().eq('id', id);
+                if (client) {
+                    await client.from('faq_documents').delete().eq('id', parseInt(id, 10));
                 }
             } catch (e) {
                 console.warn('Delete note:', e);

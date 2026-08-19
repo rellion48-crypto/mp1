@@ -42,7 +42,6 @@
             font-size: 14px;
         }
 
-        /* Header */
         header {
             background: #0f172a;
             border-bottom: 1px solid var(--card-border);
@@ -201,7 +200,10 @@
         .btn:hover { background: var(--primary-hover); }
         .btn-success { background: var(--accent-green); }
         .btn-success:hover { background: #059669; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #dc2626; }
         .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid var(--card-border); }
+        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
 
         /* Table Container */
         .table-container {
@@ -230,6 +232,11 @@
             font-weight: 700;
             border-bottom: 1px solid var(--card-border);
             white-space: nowrap;
+            user-select: none;
+            cursor: pointer;
+        }
+        th:hover {
+            color: #ffffff;
         }
 
         td {
@@ -251,6 +258,7 @@
         }
         .status-completed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
         .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        .status-canceled { background: rgba(239, 68, 68, 0.2); color: #f87171; }
 
         /* Pagination Bar */
         .pagination-bar {
@@ -307,7 +315,7 @@
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
             padding: 30px;
-            max-width: 580px;
+            max-width: 600px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
@@ -323,7 +331,7 @@
 
         .detail-item {
             background: #090d16;
-            padding: 10px 14px;
+            padding: 12px 14px;
             border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.06);
         }
@@ -331,7 +339,7 @@
         .detail-label {
             font-size: 11px;
             color: var(--text-sub);
-            margin-bottom: 2px;
+            margin-bottom: 4px;
         }
 
         .detail-val {
@@ -362,22 +370,22 @@
         <div class="metrics-grid">
             <div class="metric-card">
                 <div class="metric-label">총 접수 건수</div>
-                <div class="metric-value" id="statTotal">0</div>
-                <div class="metric-sub">전체 누적 원서접수</div>
+                <div class="metric-value" id="statTotal">0건</div>
+                <div class="metric-sub">전체 누적 접수 현황</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">국가기술자격 (4종)</div>
-                <div class="metric-value" style="color: #60a5fa;" id="statNational">0</div>
+                <div class="metric-value" style="color: #60a5fa;" id="statNational">0건</div>
                 <div class="metric-sub">한식 / 지게차 / 굴착기 / 전기</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">두두보건 (2종)</div>
-                <div class="metric-value" style="color: #34d399;" id="statHealth">0</div>
+                <div class="metric-value" style="color: #34d399;" id="statHealth">0건</div>
                 <div class="metric-sub">요양보호사 / 위생사</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">전문자격 (2종)</div>
-                <div class="metric-value" style="color: #c084fc;" id="statProf">0</div>
+                <div class="metric-value" style="color: #c084fc;" id="statProf">0건</div>
                 <div class="metric-sub">손해평가사 / 공인중개사</div>
             </div>
         </div>
@@ -398,25 +406,21 @@
                     <option value="공인중개사">공인중개사</option>
                 </select>
                 <select id="regionFilter" class="form-select" onchange="applyFilters()">
-                    <option value="ALL">전체 지역</option>
-                    <option value="서울">서울</option>
-                    <option value="부산">부산</option>
-                    <option value="대구">대구</option>
-                    <option value="인천">인천</option>
-                    <option value="광주">광주</option>
-                    <option value="대전">대전</option>
-                    <option value="경기">경기/수원</option>
-                    <option value="강원">강원</option>
-                    <option value="충북">충북/청주</option>
-                    <option value="전북">전북/전주</option>
-                    <option value="경남">경남/울산</option>
+                    <option value="ALL">전체 지역 권역</option>
+                    <option value="서울">서울 권역</option>
+                    <option value="경기">경기 / 인천 / 수원</option>
+                    <option value="부산">부산 / 울산 / 경남</option>
+                    <option value="대구">대구 / 경북</option>
+                    <option value="대전">대전 / 충청 / 청주 / 천안</option>
+                    <option value="광주">광주 / 전라 / 전주</option>
+                    <option value="강원">강원 / 춘천</option>
                     <option value="제주">제주</option>
                 </select>
                 <select id="statusFilter" class="form-select" onchange="applyFilters()">
                     <option value="ALL">전체 접수상태</option>
                     <option value="접수완료">접수완료</option>
                     <option value="접수대기">접수대기</option>
-                    <option value="취소">취소</option>
+                    <option value="취소">취소 / 환불</option>
                 </select>
             </div>
             <div style="display: flex; gap: 8px;">
@@ -431,16 +435,16 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>접수번호</th>
-                            <th>신청자 성함</th>
+                            <th onclick="sortTable('receipt_number')">접수번호 ↕</th>
+                            <th onclick="sortTable('name')">신청자 성함 ↕</th>
                             <th>생년월일/성별</th>
                             <th>연락처</th>
-                            <th>신청 자격증</th>
+                            <th onclick="sortTable('qualification')">신청 자격증 ↕</th>
                             <th>시험지역 / 센터</th>
-                            <th>시험일자</th>
-                            <th>결제금액</th>
-                            <th>상태</th>
-                            <th>상세 / 관리</th>
+                            <th onclick="sortTable('exam_date')">시험일자 ↕</th>
+                            <th onclick="sortTable('fee_final')">결제금액 ↕</th>
+                            <th onclick="sortTable('status')">상태 ↕</th>
+                            <th>관리</th>
                         </tr>
                     </thead>
                     <tbody id="applicationTableBody">
@@ -456,11 +460,9 @@
             <!-- Pagination Bar -->
             <div class="pagination-bar">
                 <div style="color: var(--text-sub); font-size: 13px;" id="paginationInfo">
-                    총 0건 중 0 - 0건 표시
+                    총 0건
                 </div>
-                <div class="page-btns" id="pageBtnContainer">
-                    <!-- Dynamic Page Buttons -->
-                </div>
+                <div class="page-btns" id="pageBtnContainer"></div>
             </div>
         </div>
     </div>
@@ -469,27 +471,38 @@
     <div class="modal-overlay" id="detailModal">
         <div class="modal-card">
             <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px; color: #ffffff;">원서접수 상세 정보</h3>
-            <p style="font-size: 13px; color: var(--text-sub);">신청서 세부 내역 및 시험장 배정 정보</p>
+            <p style="font-size: 13px; color: var(--text-sub);">신청서 세부 내역 및 시험장 배정 정보 관리</p>
 
-            <div class="detail-grid" id="detailContent">
-                <!-- Injected via JS -->
+            <div class="detail-grid" id="detailContent"></div>
+
+            <div style="background: #090d16; padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid rgba(255,255,255,0.08);">
+                <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">접수상태 변경:</label>
+                <div style="display: flex; gap: 8px;">
+                    <select id="modalStatusSelect" class="form-select" style="flex: 1;">
+                        <option value="접수완료">접수완료</option>
+                        <option value="접수대기">접수대기 (확인중)</option>
+                        <option value="취소">취소 / 환불</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="updateCurrentStatus()">상태 저장</button>
+                </div>
             </div>
 
-            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+                <button class="btn btn-danger" onclick="deleteCurrentRecord()">접수 삭제</button>
                 <button class="btn btn-secondary" onclick="closeDetailModal()">닫기</button>
-                <button class="btn btn-success" id="btnConfirmStatus">접수 확정 처리</button>
             </div>
         </div>
     </div>
 
     <!-- Script Logic -->
     <script>
-        const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
-        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
-        
-        let supabase = null;
-        if (window.supabase) {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const SUPABASE_CONFIG = {
+            URL: "https://amlznptemtbkhyuzdkmu.supabase.co",
+            ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg"
+        };
+
+        if (window.supabase && typeof window.supabase.createClient === 'function' && !window.supabaseClient) {
+            window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
         }
 
         let allRecords = [];
@@ -497,18 +510,37 @@
         let currentPage = 1;
         const pageSize = 20;
         let debounceTimer = null;
+        let currentRecordId = null;
+        let sortCol = 'created_at';
+        let sortAsc = false;
+
+        const REGION_CLUSTER = {
+            '서울': ['서울', '서울남부', '서울동부'],
+            '경기': ['경기', '인천', '수원', '고양', '의정부', '안양'],
+            '부산': ['부산', '울산', '경남', '창원', '진주', '김해'],
+            '대구': ['대구', '경북', '포항', '구미', '안동', '경주'],
+            '대전': ['대전', '세종', '충청', '충북', '충남', '청주', '천안'],
+            '광주': ['광주', '전라', '전남', '전북', '전주', '순천', '목포', '익산'],
+            '강원': ['강원', '춘천', '원주', '강릉'],
+            '제주': ['제주']
+        };
 
         async function fetchData() {
             const tbody = document.getElementById('applicationTableBody');
             tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-sub);">데이터를 불러오는 중...</td></tr>';
 
-            if (!supabase) return;
+            const client = window.supabaseClient;
+            if (!client) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; color: #ef4444; padding: 40px;">데이터베이스 클라이언트를 불러오지 못했습니다.</td></tr>';
+                return;
+            }
 
             try {
-                const { data, error } = await supabase
+                const { data, error } = await client
                     .from('applications')
                     .select('*')
-                    .order('created_at', { ascending: false });
+                    .order('created_at', { ascending: false })
+                    .limit(5000);
 
                 if (error) throw error;
                 allRecords = data || [];
@@ -523,13 +555,13 @@
         function updateMetrics(records) {
             document.getElementById('statTotal').textContent = records.length.toLocaleString() + '건';
 
-            const nationalQuals = ['한식조리기능사', '지게차운전기능사', '굴착기운전기능사', '전기기능사'];
+            const nationalQuals = ['한식', '지게차', '굴착기', '전기'];
             const healthQuals = ['요양보호사', '위생사'];
             const profQuals = ['손해평가사', '공인중개사'];
 
-            const natCount = records.filter(r => nationalQuals.includes(r.qualification)).length;
-            const healthCount = records.filter(r => healthQuals.includes(r.qualification)).length;
-            const profCount = records.filter(r => profQuals.includes(r.qualification)).length;
+            const natCount = records.filter(r => nationalQuals.some(q => (r.qualification || '').includes(q))).length;
+            const healthCount = records.filter(r => healthQuals.some(q => (r.qualification || '').includes(q))).length;
+            const profCount = records.filter(r => profQuals.some(q => (r.qualification || '').includes(q))).length;
 
             document.getElementById('statNational').textContent = natCount.toLocaleString() + '건';
             document.getElementById('statHealth').textContent = healthCount.toLocaleString() + '건';
@@ -551,17 +583,46 @@
                 const name = (r.name || '').toLowerCase();
                 const phone = (r.phone || '').toLowerCase();
                 const receipt = (r.receipt_number || '').toLowerCase();
+                const qualName = (r.qualification || '').toLowerCase();
+                const regionName = (r.exam_region || '') + ' ' + (r.exam_center || '');
 
                 const matchQuery = !query || name.includes(query) || phone.includes(query) || receipt.includes(query);
-                const matchQual = qual === 'ALL' || (r.qualification && r.qualification.includes(qual));
-                const matchRegion = region === 'ALL' || (r.exam_region && r.exam_region.includes(region));
-                const matchStatus = status === 'ALL' || r.status === status;
+                const matchQual = qual === 'ALL' || qualName.includes(qual.toLowerCase());
+                
+                let matchRegion = true;
+                if (region !== 'ALL') {
+                    const keywords = REGION_CLUSTER[region] || [region];
+                    matchRegion = keywords.some(k => regionName.toLowerCase().includes(k.toLowerCase()));
+                }
+
+                const matchStatus = status === 'ALL' || (r.status || '접수완료').includes(status);
 
                 return matchQuery && matchQual && matchRegion && matchStatus;
             });
 
+            // Apply sort
+            filteredRecords.sort((a, b) => {
+                let vA = a[sortCol] || '';
+                let vB = b[sortCol] || '';
+                if (typeof vA === 'string') vA = vA.toLowerCase();
+                if (typeof vB === 'string') vB = vB.toLowerCase();
+                if (vA < vB) return sortAsc ? -1 : 1;
+                if (vA > vB) return sortAsc ? 1 : -1;
+                return 0;
+            });
+
             currentPage = 1;
             renderTable();
+        }
+
+        function sortTable(col) {
+            if (sortCol === col) {
+                sortAsc = !sortAsc;
+            } else {
+                sortCol = col;
+                sortAsc = true;
+            }
+            applyFilters();
         }
 
         function renderTable() {
@@ -576,27 +637,32 @@
             }
 
             const totalPages = Math.ceil(total / pageSize);
-            currentPage = Math.min(currentPage, totalPages);
+            currentPage = Math.max(1, Math.min(currentPage, totalPages));
 
             const startIdx = (currentPage - 1) * pageSize;
             const endIdx = Math.min(startIdx + pageSize, total);
             const pageData = filteredRecords.slice(startIdx, endIdx);
 
-            tbody.innerHTML = pageData.map((item, idx) => {
-                const receiptNo = item.receipt_number || ('#DN2026' + String(item.id).padStart(5, '0'));
+            tbody.innerHTML = pageData.map((item) => {
+                const receiptNo = item.receipt_number || ('DN2026' + String(item.id).padStart(6, '0'));
                 const bday = item.birth_date ? `${item.birth_date} (${item.gender || '-'})` : (item.gender || '-');
                 const fee = (item.fee_final || item.fee_amount || 0).toLocaleString() + '원';
-                const statusBadge = item.status === '접수완료' 
-                    ? `<span class="status-badge status-completed">접수완료</span>`
-                    : `<span class="status-badge status-pending">${item.status || '대기'}</span>`;
+                const st = item.status || '접수완료';
+                
+                let statusBadge = `<span class="status-badge status-completed">접수완료</span>`;
+                if (st.includes('취소') || st.includes('환불')) {
+                    statusBadge = `<span class="status-badge status-canceled">${st}</span>`;
+                } else if (st.includes('대기')) {
+                    statusBadge = `<span class="status-badge status-pending">${st}</span>`;
+                }
 
                 return `
                     <tr>
                         <td style="font-family: monospace; color: #93c5fd; font-weight: 700;">${receiptNo}</td>
-                        <td><strong>${item.name}</strong></td>
+                        <td><strong>${item.name || '-'}</strong></td>
                         <td style="color: var(--text-sub);">${bday}</td>
-                        <td>${item.phone}</td>
-                        <td><strong style="color: #60a5fa;">${item.qualification}</strong></td>
+                        <td>${item.phone || '-'}</td>
+                        <td><strong style="color: #60a5fa;">${item.qualification || '-'}</strong></td>
                         <td>${item.exam_region || '-'} ${item.exam_center ? '· ' + item.exam_center : ''}</td>
                         <td style="color: var(--text-sub);">${item.exam_date || '-'}</td>
                         <td style="font-weight: 700;">${fee}</td>
@@ -608,11 +674,10 @@
                 `;
             }).join('');
 
-            // Pagination info
-            document.getElementById('paginationInfo').textContent = `총 ${total.toLocaleString()}건 중 ${startIdx + 1} - ${endIdx}건 표시 (페이지 ${currentPage}/${totalPages})`;
+            document.getElementById('paginationInfo').textContent = `총 ${total.toLocaleString()}건 중 ${startIdx + 1} - ${endIdx}건 표시 (${currentPage}/${totalPages} 페이지)`;
 
-            // Pagination buttons
             let btnsHtml = `
+                <button class="page-btn" onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>« 처음</button>
                 <button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>이전</button>
             `;
 
@@ -628,6 +693,7 @@
 
             btnsHtml += `
                 <button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음</button>
+                <button class="page-btn" onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>끝 »</button>
             `;
             document.getElementById('pageBtnContainer').innerHTML = btnsHtml;
         }
@@ -638,6 +704,7 @@
         }
 
         function openDetail(id) {
+            currentRecordId = id;
             const item = allRecords.find(r => r.id === id);
             if (!item) return;
 
@@ -649,11 +716,11 @@
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">신청자 성함</div>
-                    <div class="detail-val">${item.name}</div>
+                    <div class="detail-val">${item.name || '-'}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">휴대전화 번호</div>
-                    <div class="detail-val">${item.phone}</div>
+                    <div class="detail-val">${item.phone || '-'}</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">생년월일 / 성별</div>
@@ -661,7 +728,7 @@
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">신청 자격종목</div>
-                    <div class="detail-val">${item.qualification} (${item.exam_type || '필기'})</div>
+                    <div class="detail-val">${item.qualification || '-'} (${item.exam_type || '필기'})</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">시험지역 및 장소</div>
@@ -685,11 +752,54 @@
                 </div>
             `;
 
+            document.getElementById('modalStatusSelect').value = item.status || '접수완료';
             document.getElementById('detailModal').style.display = 'flex';
         }
 
         function closeDetailModal() {
             document.getElementById('detailModal').style.display = 'none';
+        }
+
+        async function updateCurrentStatus() {
+            if (!currentRecordId) return;
+            const newStatus = document.getElementById('modalStatusSelect').value;
+
+            try {
+                if (window.supabaseClient) {
+                    await window.supabaseClient
+                        .from('applications')
+                        .update({ status: newStatus })
+                        .eq('id', currentRecordId);
+                }
+                const rec = allRecords.find(r => r.id === currentRecordId);
+                if (rec) rec.status = newStatus;
+                alert(`접수상태가 '${newStatus}'(으)로 변경되었습니다.`);
+                closeDetailModal();
+                applyFilters();
+            } catch (err) {
+                alert('상태 변경 실패: ' + err.message);
+            }
+        }
+
+        async function deleteCurrentRecord() {
+            if (!currentRecordId) return;
+            if (!confirm('정말로 이 접수 건을 삭제하시겠습니까? 삭제 후에는 복구할 수 없습니다.')) return;
+
+            try {
+                if (window.supabaseClient) {
+                    await window.supabaseClient
+                        .from('applications')
+                        .delete()
+                        .eq('id', currentRecordId);
+                }
+                allRecords = allRecords.filter(r => r.id !== currentRecordId);
+                alert('접수 내역이 삭제되었습니다.');
+                closeDetailModal();
+                updateMetrics(allRecords);
+                applyFilters();
+            } catch (err) {
+                alert('삭제 실패: ' + err.message);
+            }
         }
 
         function exportToCSV() {
