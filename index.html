@@ -1140,7 +1140,8 @@
                         <!-- Name Input -->
                         <div class="form-group">
                             <label class="form-label" for="userName">1. 신청자 성함</label>
-                            <input type="text" id="userName" class="form-input" placeholder="예: 홍길동" required autocomplete="name">
+                            <input type="text" id="userName" class="form-input" placeholder="예: 홍길동 (한글/영문 실명)" maxlength="20" required oninput="handleNameInput(this)" autocomplete="name">
+                            <div id="nameWarningText" style="color: #f87171; font-size: calc(13px * var(--font-scale)); font-weight: 700; margin-top: 6px; display: none;">※ 신청자 성함에는 특수문자나 숫자를 입력하실 수 없습니다.</div>
                         </div>
 
                         <!-- Phone Input with Auto-Hyphen & 010 Validation -->
@@ -1494,6 +1495,23 @@
             applyContrast();
         }
 
+        function handleNameInput(input) {
+            const rawVal = input.value;
+            const warningEl = document.getElementById('nameWarningText');
+            const hasInvalidChar = /[^가-힣a-zA-Z\s]/.test(rawVal);
+
+            if (hasInvalidChar) {
+                if (warningEl) {
+                    warningEl.style.display = 'block';
+                    warningEl.textContent = '※ 신청자 성함에는 특수문자나 숫자를 입력하실 수 없습니다 (한글/영문만 가능).';
+                }
+                input.style.borderColor = '#ef4444';
+            } else {
+                if (warningEl) warningEl.style.display = 'none';
+                input.style.borderColor = rawVal.trim().length >= 2 ? '#3b82f6' : '';
+            }
+        }
+
         function handlePhoneInput(input) {
             const rawVal = input.value;
             const hasInvalidChar = /[^0-9\-]/.test(rawVal);
@@ -1794,8 +1812,27 @@
             const region = document.getElementById('userRegion').value;
             const session = document.getElementById('userSession').value;
 
-            if (!name || name.length < 2 || /^[ㄱ-ㅎㅏ-ㅣ]+$/.test(name)) {
-                alert('신청자 성함을 올바르게 입력해 주세요 (한글 2자 이상, 단일 자음/모음 불가).');
+            // 2단계: 신청자 성함 유효성 검증 (특수문자/숫자 금지, 실명 2~20자)
+            if (!name || name.length < 2) {
+                alert('신청자 성함을 올바르게 입력해 주세요 (한글 또는 영문 2자 이상).');
+                document.getElementById('userName').focus();
+                return;
+            }
+
+            if (/^[ㄱ-ㅎㅏ-ㅣ]+$/.test(name)) {
+                alert('신청자 성함에는 단일 자음이나 모음(예: ㅎ, ㅏ)만 입력하실 수 없습니다.');
+                document.getElementById('userName').focus();
+                return;
+            }
+
+            if (/[^가-힣a-zA-Z\s]/.test(name)) {
+                alert('신청자 성함에는 특수문자나 숫자를 입력하실 수 없습니다. 한글 또는 영문 실명으로 입력해 주세요.');
+                document.getElementById('userName').focus();
+                return;
+            }
+
+            if (name.length > 20) {
+                alert('신청자 성함은 20자 이하로 입력해 주세요.');
                 document.getElementById('userName').focus();
                 return;
             }
@@ -1926,6 +1963,8 @@
             if (femaleRadio) femaleRadio.checked = false;
             updateGenderStyle();
 
+            const warningName = document.getElementById('nameWarningText');
+            if (warningName) warningName.style.display = 'none';
             const warningPhone = document.getElementById('phoneWarningText');
             if (warningPhone) warningPhone.style.display = 'none';
             const warningBirth = document.getElementById('birthDateWarningText');
