@@ -1,6 +1,7 @@
 /**
  * 두두자격지원센터 - 시니어 AI FAQ 챗봇 위젯
  * 규정 문서 기반 답변 + 환각 방지(모르는 내용 거절) + 시니어 유의어 사전 연동
+ * (data/01_form_정책.md 및 02_안내규정.md 최신 데이터 동기화)
  */
 
 const DEFAULT_FAQ_KNOWLEDGE = [
@@ -8,7 +9,7 @@ const DEFAULT_FAQ_KNOWLEDGE = [
         id: 1,
         category: '응시료',
         qualification: '기능사 4종',
-        question: '기능사 필기 응시료는 얼마인가요?',
+        question: '기능사(한식, 지게차, 굴착기, 전기) 필기 응시료는 얼마인가요?',
         keywords: '응시료,접수비,시험비,비용,얼마,한식,지게차,굴착기,전기,포크레인,수수료,돈',
         answer: '한식조리기능사, 지게차운전기능사, 굴착기운전기능사, 전기기능사 등 4개 기능사 종목의 필기 응시료는 모두 14,500원으로 동일합니다.',
         is_unknown: false
@@ -17,37 +18,37 @@ const DEFAULT_FAQ_KNOWLEDGE = [
         id: 2,
         category: '응시료',
         qualification: '요양보호사',
-        question: '요양보호사 응시료는 얼마인가요?',
-        keywords: '요양보호사,요양사,응시료,접수비,시험비,비용,얼마,돈',
-        answer: '요양보호사 응시료는 사내 원장에서 확인되지 않아 안내가 어렵습니다. (모르겠습니다)',
-        is_unknown: true
+        question: '요양보호사 응시 수수료는 얼마인가요?',
+        keywords: '요양보호사,요양사,응시료,접수비,시험비,비용,얼마,돈,수수료',
+        answer: '요양보호사 시험 응시 수수료는 32,000원입니다. (교육이수 240시간 수료 필수)',
+        is_unknown: false
     },
     {
         id: 3,
         category: '응시료',
         qualification: '위생사',
-        question: '위생사 응시료는 얼마인가요?',
-        keywords: '위생사,응시료,접수비,시험비,비용,얼마,돈',
-        answer: '위생사 응시료는 사내 원장에서 확인되지 않아 안내가 어렵습니다. (모르겠습니다)',
-        is_unknown: true
+        question: '위생사 응시 수수료는 얼마인가요?',
+        keywords: '위생사,응시료,접수비,시험비,비용,얼마,돈,수수료',
+        answer: '위생사 시험 응시 수수료는 30,000원입니다. (보건관련학과 이수자 대상)',
+        is_unknown: false
     },
     {
         id: 4,
         category: '응시료',
         qualification: '손해평가사',
-        question: '손해평가사 1차 응시료는 얼마인가요?',
-        keywords: '손해평가사,응시료,접수비,시험비,비용,얼마,1차,돈',
-        answer: '손해평가사 1차 응시료는 사내 원장에서 확인되지 않아 안내가 어렵습니다. (모르겠습니다)',
-        is_unknown: true
+        question: '손해평가사 시험 응시 수수료는 얼마인가요?',
+        keywords: '손해평가사,응시료,접수비,시험비,비용,얼마,1차,2차,돈,수수료',
+        answer: '손해평가사 수수료는 1차 30,000원, 2차 30,000원입니다.',
+        is_unknown: false
     },
     {
         id: 5,
         category: '응시료',
         qualification: '공인중개사',
-        question: '공인중개사 1차 응시료는 얼마인가요?',
-        keywords: '공인중개사,부동산,응시료,접수비,시험비,비용,얼마,1차,돈',
-        answer: '공인중개사 1차 응시료는 사내 원장에서 확인되지 않아 안내가 어렵습니다. (모르겠습니다)',
-        is_unknown: true
+        question: '공인중개사 시험 응시 수수료는 얼마인가요?',
+        keywords: '공인중개사,부동산,응시료,접수비,시험비,비용,얼마,1차,2차,돈,수수료',
+        answer: '공인중개사 수수료는 1차 13,400원, 2차 15,200원 (1·2차 동시 응시 시 28,600원)입니다.',
+        is_unknown: false
     },
     {
         id: 6,
@@ -108,7 +109,7 @@ const DEFAULT_FAQ_KNOWLEDGE = [
         category: '확인불가',
         qualification: '공통',
         question: '시험장에 주차 되나요?',
-        keywords: '주차,주차장,차량,주차가능',
+        keywords: '주차,주차장,차량,주차가능,차',
         answer: '시험장별 주차 가능 여부는 사내 원장에서 확인되지 않아 안내가 어렵습니다. (모르겠습니다)',
         is_unknown: true
     }
@@ -121,6 +122,7 @@ const SENIOR_SYNONYMS = {
     '돈 얼마': '응시료',
     '얼마예요': '응시료',
     '비용': '응시료',
+    '수수료': '응시료',
     '포크레인': '굴착기운전기능사',
     '요양사': '요양보호사',
     '지게차 면허': '지게차운전기능사',
@@ -423,9 +425,9 @@ class DuduChatbot {
                     자격증 응시료, 시험 일정, 환불 규정 등에 대해 궁금하신 점을 편하게 물어보세요.
                     <div class="quick-chips">
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('한식조리 접수비 얼마예요?')">💡 한식조리 접수비 얼마?</div>
+                        <div class="quick-chip" onclick="window.duduChat.askQuestion('요양보호사 수수료 얼마예요?')">💡 요양보호사 수수료</div>
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('전기기능사 시험 일정')">📅 전기기능사 일정</div>
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('실기 시험 접수도 되나요?')">🔍 실기 접수 문의</div>
-                        <div class="quick-chip" onclick="window.duduChat.askQuestion('요양보호사 응시료 얼마예요?')">❓ 요양보호사 응시료</div>
                         <div class="quick-chip" onclick="window.duduChat.askQuestion('시험장에 주차 되나요?')">🚗 시험장 주차 문의</div>
                     </div>
                 </div>
@@ -556,7 +558,6 @@ class DuduChatbot {
         }
 
         // 4. 문턱값(Threshold) 판정
-        // 매칭 점수가 2점 미만이거나 근거가 없으면 반드시 거절("모르겠습니다")
         const THRESHOLD = 3;
         if (!bestMatch || highestScore < THRESHOLD) {
             return '해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)';
