@@ -258,6 +258,28 @@
             background: #ffffff !important;
             color: #0f172a !important;
         }
+        body.light-contrast .official-links-section {
+            background: #ffffff !important;
+            border: 2px solid #cbd5e1 !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06) !important;
+        }
+        body.light-contrast .official-links-section h3 {
+            color: #0f172a !important;
+        }
+        body.light-contrast .external-link-card {
+            background: #f8fafc !important;
+            border-color: #93c5fd !important;
+        }
+        body.light-contrast .external-link-card:hover {
+            background: #eff6ff !important;
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12) !important;
+        }
+        body.light-contrast .external-link-card h4 {
+            color: #1e293b !important;
+        }
+        body.light-contrast .external-link-card p {
+            color: #64748b !important;
+        }
         body.light-contrast footer {
             background: #ffffff;
             border-top: 2px solid #e2e8f0;
@@ -1386,6 +1408,58 @@
                 <div id="lookupResultsList" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;"></div>
             </div>
         </div>
+        <!-- 5. Related Official Qualification Sites (유관기관 및 자격증 공식 접수처 바로가기 4종) -->
+        <div class="official-links-section" style="margin-top: 50px; background: rgba(15, 23, 42, 0.7); border: 2px solid #334155; border-radius: 20px; padding: 28px; box-shadow: 0 15px 35px rgba(0,0,0,0.3);">
+            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; border-bottom: 1.5px solid #334155; padding-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 24px;">🔗</span>
+                    <h3 style="font-size: calc(18px * var(--font-scale)); font-weight: 900; color: #ffffff; margin: 0;">국가자격증 시행기관 공식 사이트 바로가기 (4종)</h3>
+                </div>
+                <span style="font-size: calc(13px * var(--font-scale)); color: #94a3b8; font-weight: 600;">※ 직접 시험 일정 및 수수료, 수험자 가이드를 확인하실 수 있습니다.</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px;">
+                <!-- 1. 두두넷 (Q-Net) -->
+                <a href="https://www.q-net.or.kr" target="_blank" rel="noopener noreferrer" class="external-link-card" style="display: block; text-decoration: none; background: #1e293b; border: 2px solid #3b82f6; border-radius: 14px; padding: 18px; transition: all 0.2s; color: inherit;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="background: rgba(37, 99, 235, 0.25); color: #60a5fa; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #3b82f6;">상시/정기 기능사</span>
+                        <span style="font-size: 16px; color: #60a5fa;">↗</span>
+                    </div>
+                    <h4 style="font-size: calc(16px * var(--font-scale)); font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">1. 두두넷 대표 포털 (Q-Net)</h4>
+                    <p style="font-size: calc(13px * var(--font-scale)); color: #94a3b8; margin: 0; line-height: 1.45;">한식조리·지게차·굴착기·전기기능사 상시/정기 접수 (오전 10:00 오픈)</p>
+                </a>
+
+                <!-- 2. 두두넷 전문자격 전용 사이트 -->
+                <a href="https://www.q-net.or.kr/man001.do?gSite=L&gId=36" target="_blank" rel="noopener noreferrer" class="external-link-card" style="display: block; text-decoration: none; background: #1e293b; border: 2px solid #6366f1; border-radius: 14px; padding: 18px; transition: all 0.2s; color: inherit;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="background: rgba(99, 102, 241, 0.25); color: #a5b4fc; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #6366f1;">전문자격 전용</span>
+                        <span style="font-size: 16px; color: #a5b4fc;">↗</span>
+                    </div>
+                    <h4 style="font-size: calc(16px * var(--font-scale)); font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">2. 두두넷 전문자격 사이트</h4>
+                    <p style="font-size: calc(13px * var(--font-scale)); color: #94a3b8; margin: 0; line-height: 1.45;">공인중개사·손해평가사 1차/2차 전용 원서접수 (오전 09:00 오픈)</p>
+                </a>
+
+                <!-- 3. 두두보건 상시시험 사이트 (요양보호사) -->
+                <a href="https://www.kuksiwon.or.kr" target="_blank" rel="noopener noreferrer" class="external-link-card" style="display: block; text-decoration: none; background: #1e293b; border: 2px solid #10b981; border-radius: 14px; padding: 18px; transition: all 0.2s; color: inherit;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="background: rgba(16, 185, 129, 0.25); color: #34d399; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #10b981;">보건의료인 상시</span>
+                        <span style="font-size: 16px; color: #34d399;">↗</span>
+                    </div>
+                    <h4 style="font-size: calc(16px * var(--font-scale)); font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">3. 두두보건 상시시험 사이트</h4>
+                    <p style="font-size: calc(13px * var(--font-scale)); color: #94a3b8; margin: 0; line-height: 1.45;">요양보호사 CBT 상시시험 원서접수 (시험일 7일 전 접수 마감)</p>
+                </a>
+
+                <!-- 4. 두두보건 대표 사이트 (위생사) -->
+                <a href="https://www.kuksiwon.or.kr" target="_blank" rel="noopener noreferrer" class="external-link-card" style="display: block; text-decoration: none; background: #1e293b; border: 2px solid #f59e0b; border-radius: 14px; padding: 18px; transition: all 0.2s; color: inherit;">
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 6px; border: 1px solid #f59e0b;">보건의료인 대표</span>
+                        <span style="font-size: 16px; color: #fbbf24;">↗</span>
+                    </div>
+                    <h4 style="font-size: calc(16px * var(--font-scale)); font-weight: 800; color: #ffffff; margin: 0 0 6px 0;">4. 두두보건 대표 사이트</h4>
+                    <p style="font-size: calc(13px * var(--font-scale)); color: #94a3b8; margin: 0; line-height: 1.45;">위생사 국가시험 원서접수 및 합격자 발표 공지사항</p>
+                </a>
+            </div>
+        </div>
     </div>
 
     <!-- 6. Footer -->
@@ -1417,12 +1491,17 @@
                 <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn" onclick="window.duduChat ? window.duduChat.toggleChat(false) : (document.getElementById('duduChatWindow').style.display='none')" onkeydown="if(event.key==='Enter') this.click()">✕</button>
             </div>
         </div>
-        <div style="background: #090d16; border-bottom: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;">
-            <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
-                ✨ AI 정밀상담 모드 ON
+        <div id="chatModeBanner" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.75), rgba(37, 99, 235, 0.5)); border-bottom: 2px solid #3b82f6; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;">
+            <div>
+                <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
+                    🤖 <span style="color:#ffffff; font-weight:900;">AI 정밀상담 모드</span> <span style="background:#2563eb; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #60a5fa;">작동중</span>
+                </div>
+                <div id="chatModeDesc" style="font-size: 11px; color: #93c5fd; font-weight: 600; margin-top: 2px;">
+                    친절한 대화 설명 & 맥락 기억
+                </div>
             </div>
-            <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" onkeydown="if(event.key==='Enter') this.click()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer;">
-                규정 모드로 전환
+            <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" onkeydown="if(event.key==='Enter') this.click()" style="background: rgba(16, 185, 129, 0.3); border: 1.5px solid #10b981; color: #6ee7b7; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
+                ⚡ 빠른 규정 모드로
             </button>
         </div>
         <div id="chatMessages" style="flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #090d16;">

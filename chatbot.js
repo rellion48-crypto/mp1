@@ -333,23 +333,73 @@ class DuduChatbot {
         localStorage.setItem('dudu_ai_mode', this.isAIMode);
         this.updateModeUI();
         const notice = this.isAIMode 
-            ? '🤖 <strong>[AI 정밀상담 모드]</strong>가 활성화되었습니다. 어르신 눈높이에 맞춰 더욱 풍부하고 친절하게 안내합니다.'
-            : '📋 <strong>[사내규정 빠른검색 모드]</strong>가 활성화되었습니다. 사내 원장 규정 문구 그대로 즉시 답변합니다.';
+            ? '🤖 <strong>[AI 정밀상담 모드]</strong>로 전환되었습니다.<br><span style="font-size: 13px; color: #93c5fd;">※ 어르신 눈높이에 맞춰 더욱 풍부하고 친절하게 안내하며 대화 맥락을 기억합니다.</span>'
+            : '⚡ <strong>[사내규정 빠른검색 모드]</strong>로 전환되었습니다.<br><span style="font-size: 13px; color: #6ee7b7;">※ 23종 사내 원장 규정 문구 그대로 100% 빠르고 정확하게 답변합니다.</span>';
         this.appendMessage(notice, 'bot');
     }
 
     updateModeUI() {
+        const banner = document.getElementById('chatModeBanner');
         const label = document.getElementById('chatModeStatusLabel');
+        const desc = document.getElementById('chatModeDesc');
         const btn = document.getElementById('chatModeToggleBtn');
-        if (label && btn) {
-            if (this.isAIMode) {
-                label.innerHTML = '✨ AI 정밀상담 모드 ON';
-                label.style.color = '#60a5fa';
-                btn.innerHTML = '규정 모드로 전환';
-            } else {
-                label.innerHTML = '📋 사내규정 빠른검색 모드 ON';
-                label.style.color = '#34d399';
-                btn.innerHTML = 'AI 모드로 전환';
+        const win = document.getElementById('duduChatWindow');
+        const sendBtn = document.getElementById('chatSendBtn');
+        const input = document.getElementById('chatInput');
+
+        if (this.isAIMode) {
+            if (banner) {
+                banner.style.background = 'linear-gradient(135deg, rgba(30, 58, 138, 0.75), rgba(37, 99, 235, 0.5))';
+                banner.style.borderBottom = '2px solid #3b82f6';
+            }
+            if (label) {
+                label.innerHTML = '🤖 <span style="color:#ffffff; font-weight:900;">AI 정밀상담 모드</span> <span style="background:#2563eb; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #60a5fa;">작동중</span>';
+            }
+            if (desc) {
+                desc.textContent = '친절한 대화 설명 & 맥락 기억';
+                desc.style.color = '#93c5fd';
+            }
+            if (btn) {
+                btn.innerHTML = '⚡ 빠른 규정 모드로';
+                btn.style.background = 'rgba(16, 185, 129, 0.3)';
+                btn.style.borderColor = '#10b981';
+                btn.style.color = '#6ee7b7';
+            }
+            if (win) {
+                win.style.borderColor = '#3b82f6';
+            }
+            if (sendBtn) {
+                sendBtn.style.background = '#2563eb';
+            }
+            if (input) {
+                input.placeholder = '🤖 AI에게 질문하세요 (예: 한식조리 접수비 얼마?)';
+            }
+        } else {
+            if (banner) {
+                banner.style.background = 'linear-gradient(135deg, rgba(6, 78, 59, 0.8), rgba(5, 150, 105, 0.6))';
+                banner.style.borderBottom = '2px solid #10b981';
+            }
+            if (label) {
+                label.innerHTML = '⚡ <span style="color:#ffffff; font-weight:900;">사내규정 빠른검색</span> <span style="background:#059669; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #34d399;">작동중</span>';
+            }
+            if (desc) {
+                desc.textContent = '23종 사내 원장 규정 문구 100% 즉시 답변';
+                desc.style.color = '#a7f3d0';
+            }
+            if (btn) {
+                btn.innerHTML = '🤖 AI 정밀상담으로';
+                btn.style.background = 'rgba(37, 99, 235, 0.3)';
+                btn.style.borderColor = '#3b82f6';
+                btn.style.color = '#93c5fd';
+            }
+            if (win) {
+                win.style.borderColor = '#10b981';
+            }
+            if (sendBtn) {
+                sendBtn.style.background = '#059669';
+            }
+            if (input) {
+                input.placeholder = '⚡ 사내 규정 즉시 검색 (예: 지게차 준비물, 환불 규정)';
             }
         }
     }

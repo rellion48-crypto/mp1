@@ -1229,12 +1229,17 @@
                 <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn" onclick="window.duduChat ? window.duduChat.toggleChat(false) : (document.getElementById('duduChatWindow').style.display='none')" onkeydown="if(event.key==='Enter') this.click()">✕</button>
             </div>
         </div>
-        <div style="background: #090d16; border-bottom: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;">
-            <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
-                ✨ AI 정밀상담 모드 ON
+        <div id="chatModeBanner" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.75), rgba(37, 99, 235, 0.5)); border-bottom: 2px solid #3b82f6; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;">
+            <div>
+                <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
+                    🤖 <span style="color:#ffffff; font-weight:900;">AI 정밀상담 모드</span> <span style="background:#2563eb; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #60a5fa;">작동중</span>
+                </div>
+                <div id="chatModeDesc" style="font-size: 11px; color: #93c5fd; font-weight: 600; margin-top: 2px;">
+                    친절한 대화 설명 & 맥락 기억
+                </div>
             </div>
-            <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" onkeydown="if(event.key==='Enter') this.click()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer;">
-                규정 모드로 전환
+            <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" onkeydown="if(event.key==='Enter') this.click()" style="background: rgba(16, 185, 129, 0.3); border: 1.5px solid #10b981; color: #6ee7b7; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
+                ⚡ 빠른 규정 모드로
             </button>
         </div>
         <div id="chatMessages" style="flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #090d16;">
