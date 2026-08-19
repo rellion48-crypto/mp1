@@ -1840,30 +1840,60 @@
                 document.getElementById('receiptFee').textContent = `${pendingPayload.fee_final.toLocaleString()}원 ${isFeeDiscount ? '(50% 감면)' : ''}`;
 
                 document.getElementById('receiptModal').style.display = 'flex';
-
-                document.getElementById('userName').value = '';
-                document.getElementById('userPhone').value = '';
-                document.getElementById('userBirthDate').value = '';
-                const datePicker = document.getElementById('userBirthDatePicker');
-                if (datePicker) datePicker.value = '';
-                const discountCheck = document.getElementById('feeDiscountCheck');
-                if (discountCheck) discountCheck.checked = false;
-                toggleFeeDiscount(false);
-                const consentFormCheck = document.getElementById('privacyConsent');
-                if (consentFormCheck) consentFormCheck.checked = false;
-                const maleRadio = document.querySelector('input[name="userGender"][value="남"]');
-                if (maleRadio) maleRadio.checked = true;
-                updateGenderStyle();
-                const warningPhone = document.getElementById('phoneWarningText');
-                if (warningPhone) warningPhone.style.display = 'none';
-                const warningBirth = document.getElementById('birthDateWarningText');
-                if (warningBirth) warningBirth.style.display = 'none';
-                pendingPayload = null;
+                resetRegistrationForm();
             }
+        }
+
+        function resetRegistrationForm() {
+            const form = document.getElementById('seniorRegistrationForm');
+            if (form) form.reset();
+
+            const nameEl = document.getElementById('userName');
+            if (nameEl) { nameEl.value = ''; nameEl.style.borderColor = ''; }
+
+            const phoneEl = document.getElementById('userPhone');
+            if (phoneEl) { phoneEl.value = ''; phoneEl.style.borderColor = ''; }
+
+            const birthEl = document.getElementById('userBirthDate');
+            if (birthEl) { birthEl.value = ''; birthEl.style.borderColor = ''; }
+
+            const pickerEl = document.getElementById('userBirthDatePicker');
+            if (pickerEl) pickerEl.value = '';
+
+            const regionEl = document.getElementById('userRegion');
+            if (regionEl) regionEl.selectedIndex = 0;
+
+            const sessionEl = document.getElementById('userSession');
+            if (sessionEl) sessionEl.selectedIndex = 0;
+
+            const discountCheck = document.getElementById('feeDiscountCheck');
+            if (discountCheck) discountCheck.checked = false;
+            toggleFeeDiscount(false);
+
+            const privacyConsent = document.getElementById('privacyConsent');
+            if (privacyConsent) privacyConsent.checked = false;
+
+            const privacyModalCheck = document.getElementById('privacyConsentCheck');
+            if (privacyModalCheck) privacyModalCheck.checked = false;
+
+            const maleRadio = document.querySelector('input[name="userGender"][value="남"]');
+            if (maleRadio) maleRadio.checked = true;
+            const femaleRadio = document.querySelector('input[name="userGender"][value="여"]');
+            if (femaleRadio) femaleRadio.checked = false;
+            updateGenderStyle();
+
+            const warningPhone = document.getElementById('phoneWarningText');
+            if (warningPhone) warningPhone.style.display = 'none';
+            const warningBirth = document.getElementById('birthDateWarningText');
+            if (warningBirth) warningBirth.style.display = 'none';
+
+            selectQualification('한식조리기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원');
+            pendingPayload = null;
         }
 
         function closeReceiptModal() {
             document.getElementById('receiptModal').style.display = 'none';
+            resetRegistrationForm();
         }
 
         /* Lookup Modal Functions */
