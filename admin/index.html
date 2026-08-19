@@ -429,11 +429,16 @@
 
     <div class="main-container">
         <!-- Top Statistics Cards -->
-        <div class="metrics-grid">
+        <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
             <div class="metric-card">
                 <div class="metric-label">총 접수 건수</div>
                 <div class="metric-value" id="statTotal">0건</div>
                 <div class="metric-sub">3대 핵심자격 누적 접수</div>
+            </div>
+            <div class="metric-card" style="border-color: rgba(245, 158, 11, 0.5); background: rgba(245, 158, 11, 0.06);">
+                <div class="metric-label" style="color: #fbbf24;">⚡ 오늘 신규 접수</div>
+                <div class="metric-value" style="color: #fbbf24;" id="statToday">0건</div>
+                <div class="metric-sub">오늘(당일) 신규 인입</div>
             </div>
             <div class="metric-card">
                 <div class="metric-label">🍳 한식조리기능사</div>
@@ -447,7 +452,7 @@
             </div>
             <div class="metric-card">
                 <div class="metric-label">🏗️ 굴착기운전기능사</div>
-                <div class="metric-value" style="color: #fbbf24;" id="statExcavator">0건</div>
+                <div class="metric-value" style="color: #f472b6;" id="statExcavator">0건</div>
                 <div class="metric-sub">토목 / 건설 포크레인</div>
             </div>
         </div>
@@ -455,7 +460,10 @@
         <!-- Filter Controls -->
         <div class="filter-section">
             <div class="filter-inputs">
-                <input type="text" id="searchInput" class="form-input" placeholder="성함, 연락처, 접수번호 검색..." style="width: 240px;" oninput="debounceFilter()">
+                <button class="btn" id="btnTodayFilter" onclick="toggleTodayFilter()" style="background: linear-gradient(135deg, #d97706, #b45309); font-weight: 800; border: 2px solid #fbbf24; white-space: nowrap;">
+                    ⚡ 오늘 접수만 보기 (<span id="todayCountBadge">0</span>건)
+                </button>
+                <input type="text" id="searchInput" class="form-input" placeholder="성함, 연락처, 접수번호 검색..." style="width: 220px;" oninput="debounceFilter()">
                 <select id="qualFilter" class="form-select" onchange="applyFilters()">
                     <option value="ALL">전체 3대 종목 (한식·지게차·굴착기)</option>
                     <option value="한식조리">한식조리기능사</option>
@@ -623,8 +631,29 @@
             }
         }
 
+        let isTodayOnly = false;
+        let todayCountGlobal = 0;
+
         function updateMetrics(records) {
             document.getElementById('statTotal').textContent = records.length.toLocaleString() + '건';
+
+            // KST 당일 기준 (YYYY-MM-DD)
+            const now = new Date();
+            const kstOffset = 9 * 60 * 60 * 1000;
+            const kstToday = new Date(now.getTime() + kstOffset).toISOString().slice(0, 10);
+
+            const todayList = records.filter(r => {
+                if (!r.created_at) return false;
+                const itemDate = new Date(new Date(r.created_at).getTime() + kstOffset).toISOString().slice(0, 10);
+                return itemDate === kstToday;
+            });
+            todayCountGlobal = todayList.length;
+
+            const statTodayEl = document.getElementById('statToday');
+            if (statTodayEl) statTodayEl.textContent = todayCountGlobal.toLocaleString() + '건';
+
+            const badge = document.getElementById('todayCountBadge');
+            if (badge) badge.textContent = todayCountGlobal;
 
             const cookCount = records.filter(r => (r.qualification || '').includes('한식')).length;
             const forkliftCount = records.filter(r => (r.qualification || '').includes('지게차')).length;
@@ -633,6 +662,21 @@
             document.getElementById('statCook').textContent = cookCount.toLocaleString() + '건';
             document.getElementById('statForklift').textContent = forkliftCount.toLocaleString() + '건';
             document.getElementById('statExcavator').textContent = excavatorCount.toLocaleString() + '건';
+        }
+
+        function toggleTodayFilter() {
+            isTodayOnly = !isTodayOnly;
+            const btn = document.getElementById('btnTodayFilter');
+            if (isTodayOnly) {
+                btn.style.background = '#2563eb';
+                btn.style.borderColor = '#60a5fa';
+                btn.innerHTML = '📋 전체 날짜 접수 보기';
+            } else {
+                btn.style.background = 'linear-gradient(135deg, #d97706, #b45309)';
+                btn.style.borderColor = '#fbbf24';
+                btn.innerHTML = `⚡ 오늘 접수만 보기 (<span id="todayCountBadge">${todayCountGlobal}</span>건)`;
+            }
+            applyFilters();
         }
 
         function debounceFilter() {
@@ -646,7 +690,17 @@
             const region = document.getElementById('regionFilter').value;
             const status = document.getElementById('statusFilter').value;
 
+            const now = new Date();
+            const kstOffset = 9 * 60 * 60 * 1000;
+            const kstToday = new Date(now.getTime() + kstOffset).toISOString().slice(0, 10);
+
             filteredRecords = allRecords.filter(r => {
+                if (isTodayOnly) {
+                    if (!r.created_at) return false;
+                    const itemDate = new Date(new Date(r.created_at).getTime() + kstOffset).toISOString().slice(0, 10);
+                    if (itemDate !== kstToday) return false;
+                }
+
                 const name = (r.name || '').toLowerCase();
                 const phone = (r.phone || '').toLowerCase();
                 const receipt = (r.receipt_number || '').toLowerCase();

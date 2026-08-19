@@ -621,6 +621,7 @@
             </a>
             <nav class="nav-links">
                 <a href="#application-section" class="nav-btn">간편 접수 신청</a>
+                <button onclick="openLookupModal()" class="nav-btn" style="background: rgba(16, 185, 129, 0.2); border-color: #10b981; color: #34d399; cursor: pointer;">🔍 내 접수내역 간편조회</button>
                 <a href="admin/index.html" class="nav-btn nav-btn-admin">접수 관리 대장</a>
                 <a href="faq-admin/index.html" class="nav-btn">안내 규정 관리</a>
             </nav>
@@ -804,6 +805,19 @@
                             </select>
                         </div>
 
+                        <!-- 50% Fee Discount Checkbox for Seniors -->
+                        <div class="form-group" style="background: rgba(37, 99, 235, 0.12); border: 2px solid #3b82f6; padding: 14px 16px; border-radius: 12px; margin-top: 14px;">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <input type="checkbox" id="feeDiscountCheck" onchange="toggleFeeDiscount(this.checked)" style="width: 24px; height: 24px; accent-color: var(--primary); cursor: pointer;">
+                                <label for="feeDiscountCheck" style="font-size: calc(16px * var(--font-scale)); color: #ffffff; cursor: pointer; font-weight: 800;">
+                                    🎁 응시료 50% 감면 대상자 (7,250원)
+                                </label>
+                            </div>
+                            <div style="font-size: calc(13px * var(--font-scale)); color: #93c5fd; margin-top: 6px; margin-left: 36px; line-height: 1.4; font-weight: 600;">
+                                ※ 기초생활수급자 / 등록장애인 / 국가유공자 / 차상위계층 해당 시 체크
+                            </div>
+                        </div>
+
                         <!-- Privacy Consent -->
                         <div class="form-group" style="display: flex; align-items: flex-start; gap: 12px; margin-top: 20px; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px;">
                             <input type="checkbox" id="privacyConsent" required style="width: 24px; height: 24px; margin-top: 2px; accent-color: var(--primary); cursor: pointer;">
@@ -864,6 +878,41 @@
                 입력하신 휴대전화로 접수 확인 안내 문자가 발송되며, 담당 직원이 시험장 배정을 위해 연락드리겠습니다.
             </p>
             <button class="modal-btn" onclick="closeReceiptModal()">확인 및 닫기</button>
+        </div>
+    </div>
+
+    <!-- 5-1. Application Lookup Modal (응시자 접수내역 간편 조회) -->
+    <div class="modal-overlay" id="lookupModal">
+        <div class="modal-card" style="max-width: 580px; text-align: left;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 2px solid #334155; padding-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="font-size: 26px;">🔍</div>
+                    <h3 style="font-size: calc(22px * var(--font-scale)); font-weight: 900; color: #ffffff; margin: 0;">신청 내역 간편 조회</h3>
+                </div>
+                <button onclick="closeLookupModal()" style="background: none; border: none; color: #94a3b8; font-size: 24px; font-weight: 900; cursor: pointer; padding: 4px 8px;">✕</button>
+            </div>
+            <p style="font-size: calc(15px * var(--font-scale)); color: #cbd5e1; margin-bottom: 18px; line-height: 1.5;">
+                접수 시 입력하셨던 <strong>성함 또는 휴대전화 번호</strong>를 입력하시면 실시간 접수 현황을 즉시 확인하실 수 있습니다.
+            </p>
+
+            <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+                <div>
+                    <label style="font-size: calc(15px * var(--font-scale)); font-weight: 800; color: #ffffff; display: block; margin-bottom: 6px;">1. 신청자 성함</label>
+                    <input type="text" id="lookupName" class="form-input" placeholder="예: 홍길동" style="background: #020617;">
+                </div>
+                <div>
+                    <label style="font-size: calc(15px * var(--font-scale)); font-weight: 800; color: #ffffff; display: block; margin-bottom: 6px;">2. 휴대전화 번호 (또는 접수번호)</label>
+                    <input type="text" id="lookupPhone" class="form-input" placeholder="010-0000-0000 또는 접수번호" style="background: #020617;" oninput="autoFormatPhone(this)">
+                </div>
+                <button class="submit-btn" onclick="executeLookup()" style="margin-top: 6px; padding: 16px; font-size: calc(18px * var(--font-scale)); min-height: 56px;">
+                    <span>접수 내역 조회하기</span> ➔
+                </button>
+            </div>
+
+            <div id="lookupResultsArea" style="display: none; margin-top: 20px; border-top: 2px solid #334155; padding-top: 18px;">
+                <h4 style="font-size: calc(17px * var(--font-scale)); font-weight: 800; color: #60a5fa; margin-bottom: 12px;">조회 결과 (<span id="lookupCount">0</span>건)</h4>
+                <div id="lookupResultsList" style="display: flex; flex-direction: column; gap: 12px; max-height: 320px; overflow-y: auto;"></div>
+            </div>
         </div>
     </div>
 
@@ -993,6 +1042,20 @@
             input.value = formatted;
         }
 
+        let isFeeDiscount = false;
+
+        function toggleFeeDiscount(checked) {
+            isFeeDiscount = checked;
+            const feeDisplay = document.getElementById('displayFeeAmount');
+            if (isFeeDiscount) {
+                feeDisplay.textContent = '수수료: 7,250원 (50% 감면 적용)';
+                feeDisplay.style.color = '#34d399';
+            } else {
+                feeDisplay.textContent = `수수료: ${selectedData.fee}`;
+                feeDisplay.style.color = '#60a5fa';
+            }
+        }
+
         function selectQualification(name, grade, type, fee, feeInt, org) {
             selectedData = {
                 name: name,
@@ -1005,7 +1068,15 @@
 
             document.getElementById('displayQualName').textContent = name;
             document.getElementById('displayExamType').textContent = `${type} (필기 접수)`;
-            document.getElementById('displayFeeAmount').textContent = `수수료: ${fee}`;
+            
+            const feeDisplay = document.getElementById('displayFeeAmount');
+            if (isFeeDiscount) {
+                feeDisplay.textContent = '수수료: 7,250원 (50% 감면 적용)';
+                feeDisplay.style.color = '#34d399';
+            } else {
+                feeDisplay.textContent = `수수료: ${fee}`;
+                feeDisplay.style.color = '#60a5fa';
+            }
 
             const cards = document.querySelectorAll('.qual-card');
             cards.forEach(card => {
@@ -1035,6 +1106,9 @@
             btn.innerHTML = '<span>접수 처리 중...</span>';
 
             const randNo = 'DN2026' + Math.floor(100000 + Math.random() * 900000);
+            const finalFee = isFeeDiscount ? 7250 : 14500;
+            const discountLabel = isFeeDiscount ? '감면대상(50%)' : '일반';
+
             const payload = {
                 receipt_number: randNo,
                 name: name,
@@ -1047,7 +1121,8 @@
                 exam_center: region + '시험장',
                 exam_session: session + '부',
                 fee_amount: 14500,
-                fee_final: 14500,
+                fee_final: finalFee,
+                fee_discount_type: discountLabel,
                 payment_method: '신용카드',
                 payment_status: '완료',
                 status: '접수완료',
@@ -1069,17 +1144,92 @@
                 document.getElementById('receiptName').textContent = name;
                 document.getElementById('receiptQual').textContent = selectedData.name;
                 document.getElementById('receiptRegion').textContent = `${region} (${session}부)`;
-                document.getElementById('receiptFee').textContent = selectedData.fee;
+                document.getElementById('receiptFee').textContent = `${finalFee.toLocaleString()}원 ${isFeeDiscount ? '(50% 감면)' : ''}`;
 
                 document.getElementById('receiptModal').style.display = 'flex';
 
                 document.getElementById('userName').value = '';
                 document.getElementById('userPhone').value = '';
+                const discountCheck = document.getElementById('feeDiscountCheck');
+                if (discountCheck) discountCheck.checked = false;
+                toggleFeeDiscount(false);
             }
         }
 
         function closeReceiptModal() {
             document.getElementById('receiptModal').style.display = 'none';
+        }
+
+        /* Lookup Modal Functions */
+        function openLookupModal() {
+            document.getElementById('lookupModal').style.display = 'flex';
+            const nameInput = document.getElementById('lookupName');
+            if (nameInput) nameInput.focus();
+        }
+
+        function closeLookupModal() {
+            document.getElementById('lookupModal').style.display = 'none';
+        }
+
+        async function executeLookup() {
+            const name = document.getElementById('lookupName').value.trim();
+            const phone = document.getElementById('lookupPhone').value.trim();
+
+            if (!name && !phone) {
+                alert('신청자 성함 또는 휴대전화 번호를 입력해 주세요.');
+                return;
+            }
+
+            const area = document.getElementById('lookupResultsArea');
+            const list = document.getElementById('lookupResultsList');
+            const countBadge = document.getElementById('lookupCount');
+            list.innerHTML = '<div style="color: #94a3b8; text-align: center; padding: 20px;">조회 중입니다...</div>';
+            area.style.display = 'block';
+
+            try {
+                if (!window.supabaseClient) {
+                    list.innerHTML = '<div style="color: #f87171; text-align: center; padding: 20px;">데이터베이스 연결을 확인해 주세요.</div>';
+                    return;
+                }
+
+                let query = window.supabaseClient.from('applications').select('*');
+                if (name && phone) {
+                    const cleanPhone = phone.replace(/[^0-9]/g, '');
+                    query = query.ilike('name', `%${name}%`).or(`phone.ilike.%${phone}%,phone.ilike.%${cleanPhone}%,receipt_number.ilike.%${phone}%`);
+                } else if (name) {
+                    query = query.ilike('name', `%${name}%`);
+                } else if (phone) {
+                    const cleanPhone = phone.replace(/[^0-9]/g, '');
+                    query = query.or(`phone.ilike.%${phone}%,phone.ilike.%${cleanPhone}%,receipt_number.ilike.%${phone}%`);
+                }
+
+                const { data, error } = await query.order('created_at', { ascending: false }).limit(20);
+                if (error) throw error;
+
+                if (!data || data.length === 0) {
+                    countBadge.textContent = '0';
+                    list.innerHTML = '<div style="color: #cbd5e1; text-align: center; padding: 25px; background: #020617; border-radius: 10px;">일치하는 접수 내역을 찾지 못했습니다.<br><span style="font-size: 13px; color: #94a3b8;">성함과 전화번호를 다시 확인해 주세요.</span></div>';
+                    return;
+                }
+
+                countBadge.textContent = data.length;
+                list.innerHTML = data.map(item => `
+                    <div style="background: #020617; border: 1.5px solid #3b82f6; border-radius: 12px; padding: 16px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                            <span style="font-family: monospace; font-weight: 800; color: #60a5fa; font-size: 15px;"># ${item.receipt_number || ('DN2026' + item.id)}</span>
+                            <span style="background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid #10b981; border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 800;">${item.status || '접수완료'}</span>
+                        </div>
+                        <div style="font-size: 17px; font-weight: 900; color: #ffffff; margin-bottom: 6px;">${item.qualification} (${item.name} 님)</div>
+                        <div style="font-size: 14px; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px;">
+                            <div>📍 희망 지역/교시: <strong>${item.exam_region || '서울'} ${item.exam_session ? '(' + item.exam_session + ')' : ''}</strong></div>
+                            <div>💳 응시 수수료: <strong>${(item.fee_final || item.fee_amount || 14500).toLocaleString()}원</strong> ${item.fee_discount_type ? '(' + item.fee_discount_type + ')' : ''}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">접수일시: ${item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-'}</div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                list.innerHTML = `<div style="color: #f87171; text-align: center; padding: 20px;">조회 중 오류가 발생했습니다: ${err.message}</div>`;
+            }
         }
 
         window.addEventListener('DOMContentLoaded', () => {
