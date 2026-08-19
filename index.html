@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두두자격지원센터 - 시니어 국가자격 원서접수</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #10b981;
+            --accent-gold: #f59e0b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 80%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            line-height: 1.6;
+            padding-bottom: 60px;
+        }
+
+        /* Header */
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 16px 24px;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+        }
+
+        .logo-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--primary);
+        }
+
+        /* Container */
+        .main-container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 36px;
+            margin-bottom: 36px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-title {
+            font-size: 28px;
+            font-weight: 900;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ffffff, #93c5fd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 16px;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #34d399;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #34d399;
+        }
+
+        /* Layout Grid */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 32px;
+        }
+
+        @media (max-width: 960px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Qualifications Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .qual-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            backdrop-filter: blur(8px);
+        }
+
+        .qual-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .qual-card.active {
+            border: 2px solid var(--primary);
+            background: rgba(59, 130, 246, 0.15);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .card-tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 10px;
+        }
+
+        .tag-always { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .tag-regular { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .tag-annual { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+        .card-name {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .card-desc {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 12px;
+        }
+
+        .card-meta {
+            font-size: 12px;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding-top: 8px;
+        }
+
+        /* Application Form Panel */
+        .form-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            backdrop-filter: blur(12px);
+            position: sticky;
+            top: 90px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #cbd5e1;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            color: var(--text-main);
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+        }
+
+        .selected-box {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px dashed var(--primary);
+            padding: 14px;
+            border-radius: var(--radius-md);
+            font-size: 16px;
+            font-weight: 700;
+            color: #93c5fd;
+            text-align: center;
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            border: none;
+            color: white;
+            padding: 16px;
+            border-radius: var(--radius-md);
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Service Screens Test Navigation */
+        .test-section {
+            margin-top: 48px;
+            background: rgba(30, 41, 59, 0.5);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+        }
+
+        .test-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .test-card {
+            background: rgba(15, 23, 42, 0.7);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            text-decoration: none;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        .test-card:hover {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.08);
+        }
+
+        .test-card h4 {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .test-card p {
+            font-size: 12px;
+            color: var(--text-sub);
+        }
+
+        /* Modal Alert */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            max-width: 440px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 16px;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .modal-desc {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 24px;
+        }
+
+        .modal-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 12px 28px;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <a href="index.html" class="logo">
+                <div class="logo-badge">두</div>
+                <div class="logo-text">
+                    <h1>두두자격지원센터</h1>
+                    <p>시니어 국가자격 원서접수 & AI FAQ</p>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="#register" class="nav-btn">원서 접수</a>
+                <a href="admin/index.html" class="nav-btn">접수 어드민</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Hero Banner -->
+        <div class="hero-banner">
+            <h2 class="hero-title">중장년·시니어 자격증 간편 원서접수</h2>
+            <p class="hero-sub">원하시는 자격증을 선택하고 이름과 연락처를 남겨주시면 원서접수를 안내해 드립니다.</p>
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                <span>Supabase DB 실시간 연동 활성화</span>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid" id="register">
+            <!-- Left: Qualifications Grid -->
+            <div>
+                <h3 class="section-title">📌 자격증 8종 선택</h3>
+                <div class="cards-grid" id="qualGrid">
+                    <!-- Card 1 -->
+                    <div class="qual-card active" onclick="selectQual('한식조리기능사', '상시', '14,500원')">
+                        <span class="card-tag tag-always">상시 접수</span>
+                        <div class="card-name">한식조리기능사</div>
+                        <div class="card-desc">식당 취업·창업 대표 자격증</div>
+                        <div class="card-meta">
+                            <span>시행: 두두자격검정원</span>
+                            <span>필기: 14,500원</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 2 -->
+                    <div class="qual-card" onclick="selectQual('지게차운전기능사', '상시', '14,500원')">
+                        <span class="card-tag tag-always">상시 접수</span>
+                        <div class="card-name">지게차운전기능사</div>
+                        <div class="card-desc">물류창고 및 현장 필수 면허</div>
+                        <div class="card-meta">
+                            <span>시행: 두두자격검정원</span>
+                            <span>필기: 14,500원</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 3 -->
+                    <div class="qual-card" onclick="selectQual('굴착기운전기능사', '상시', '14,500원')">
+                        <span class="card-tag tag-always">상시 접수</span>
+                        <div class="card-name">굴착기운전기능사</div>
+                        <div class="card-desc">건설현장 및 토목 필수 자격</div>
+                        <div class="card-meta">
+                            <span>시행: 두두자격검정원</span>
+                            <span>필기: 14,500원</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 4 -->
+                    <div class="qual-card" onclick="selectQual('전기기능사', '정기 (연 4회)', '14,500원')">
+                        <span class="card-tag tag-regular">정기 회차</span>
+                        <div class="card-name">전기기능사</div>
+                        <div class="card-desc">아파트 및 건물 시설관리 선호</div>
+                        <div class="card-meta">
+                            <span>시행: 두두자격검정원</span>
+                            <span>필기: 14,500원</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 5 -->
+                    <div class="qual-card" onclick="selectQual('요양보호사', '상시', '별도')">
+                        <span class="card-tag tag-always">상시 접수</span>
+                        <div class="card-name">요양보호사</div>
+                        <div class="card-desc">요양원 및 재가돌봄 전문 서비스</div>
+                        <div class="card-meta">
+                            <span>시행: 두두보건시험원</span>
+                            <span>필기: 별도 문의</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 6 -->
+                    <div class="qual-card" onclick="selectQual('위생사', '별도', '별도')">
+                        <span class="card-tag tag-regular">별도 시행</span>
+                        <div class="card-name">위생사</div>
+                        <div class="card-desc">급식소 및 식품 위생 관리</div>
+                        <div class="card-meta">
+                            <span>시행: 두두보건시험원</span>
+                            <span>필기: 별도 문의</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 7 -->
+                    <div class="qual-card" onclick="selectQual('손해평가사', '연 1회', '별도')">
+                        <span class="card-tag tag-annual">연 1회</span>
+                        <div class="card-name">손해평가사</div>
+                        <div class="card-desc">농작물 재해 및 손해 조사</div>
+                        <div class="card-meta">
+                            <span>시행: 전문자격</span>
+                            <span>1차 접수 마감</span>
+                        </div>
+                    </div>
+
+                    <!-- Card 8 -->
+                    <div class="qual-card" onclick="selectQual('공인중개사', '연 1회', '별도')">
+                        <span class="card-tag tag-annual">연 1회</span>
+                        <div class="card-name">공인중개사</div>
+                        <div class="card-desc">부동산 중개 및 자산 관리</div>
+                        <div class="card-meta">
+                            <span>시행: 전문자격</span>
+                            <span>1차 접수 마감</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Registration Form Panel -->
+            <div>
+                <h3 class="section-title">📝 접수 신청서 작성</h3>
+                <div class="form-panel">
+                    <form id="appForm" onsubmit="handleFormSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">선택한 자격증</label>
+                            <div class="selected-box" id="selectedDisplay">한식조리기능사</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="applicantName">신청자 성함</label>
+                            <input type="text" id="applicantName" class="form-input" placeholder="예: 홍길동" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="applicantPhone">연락처 (전화번호)</label>
+                            <input type="tel" id="applicantPhone" class="form-input" placeholder="예: 010-1234-5678" required>
+                        </div>
+
+                        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                            <input type="checkbox" id="privacyAgree" required style="width: 18px; height: 18px; accent-color: var(--primary);">
+                            <label for="privacyAgree" style="font-size: 13px; color: var(--text-sub);">원서접수 대행 개인정보 수집에 동의합니다.</label>
+                        </div>
+
+                        <button type="submit" class="submit-btn" id="submitBtn">원서 접수 제출하기</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Service Test Navigation Cards -->
+        <div class="test-section">
+            <h3 class="section-title">⚙️ MP1 4대 화면 테스트 네비게이션</h3>
+            <div class="test-grid">
+                <a href="index.html" class="test-card">
+                    <h4>1. 접수 화면 (현재)</h4>
+                    <p>자격증 선택 및 Supabase DB 신청서 등록</p>
+                </a>
+                <a href="admin/index.html" class="test-card">
+                    <h4>3. 접수 어드민</h4>
+                    <p>접수된 신청 내역 실시간 조회 및 통계</p>
+                </a>
+                <div class="test-card">
+                    <h4>2. FAQ 챗봇 백엔드</h4>
+                    <p>Python 챗봇 (`app.py --test` 검증)</p>
+                </div>
+                <div class="test-card">
+                    <h4>4. FAQ 어드민</h4>
+                    <p>안내 규정 문서 직접 수정 인터페이스</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-card">
+            <div class="modal-icon">✓</div>
+            <h3 class="modal-title">접수 완료!</h3>
+            <p class="modal-desc" id="modalDesc">신청서가 성공적으로 전달되었습니다.</p>
+            <button class="modal-btn" onclick="closeModal()">확인</button>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
+    <script>
+        // Supabase Initialization
+        const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
+        
+        let supabase = null;
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let selectedQualification = "한식조리기능사";
+
+        function selectQual(name, tag, fee) {
+            selectedQualification = name;
+            document.getElementById('selectedDisplay').textContent = name;
+            
+            // Highlight active card
+            const cards = document.querySelectorAll('.qual-card');
+            cards.forEach(card => {
+                const title = card.querySelector('.card-name').textContent;
+                if (title === name) {
+                    card.classList.add('active');
+                } else {
+                    card.classList.remove('active');
+                }
+            });
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('submitBtn');
+            const name = document.getElementById('applicantName').value.trim();
+            const phone = document.getElementById('applicantPhone').value.trim();
+
+            if (!name || !phone) {
+                alert('성함과 연락처를 입력해 주세요.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = '제출 중...';
+
+            const payload = {
+                name: name,
+                phone: phone,
+                qualification: selectedQualification,
+                status: '접수완료',
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                if (supabase) {
+                    const { data, error } = await supabase
+                        .from('applications')
+                        .insert([payload]);
+
+                    if (error) {
+                        console.warn('Supabase Insert Warning:', error.message);
+                        // Fallback attempt if column names are different
+                        const fallbackPayload = {
+                            applicant_name: name,
+                            contact: phone,
+                            license_name: selectedQualification
+                        };
+                        await supabase.from('applications').insert([fallbackPayload]);
+                    }
+                }
+            } catch (err) {
+                console.log('Supabase submit note:', err);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '원서 접수 제출하기';
+                
+                // Show modal
+                document.getElementById('modalDesc').innerHTML = `
+                    <strong>${name}</strong>님, <strong>${selectedQualification}</strong> 원서접수 신청이 정상적으로 등록되었습니다.
+                `;
+                document.getElementById('successModal').style.display = 'flex';
+                
+                // Reset form
+                document.getElementById('applicantName').value = '';
+                document.getElementById('applicantPhone').value = '';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('successModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

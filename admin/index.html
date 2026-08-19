@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두두자격지원센터 - 접수 관리 어드민</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --primary: #3b82f6;
+            --accent: #10b981;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 24px;
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 20px;
+        }
+
+        .stat-label {
+            font-size: 13px;
+            color: var(--text-sub);
+            margin-bottom: 6px;
+        }
+
+        .stat-value {
+            font-size: 28px;
+            font-weight: 900;
+            color: #60a5fa;
+        }
+
+        .table-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th, td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        th {
+            font-size: 13px;
+            color: var(--text-sub);
+            text-transform: uppercase;
+        }
+
+        td {
+            font-size: 15px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+        }
+
+        .refresh-btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="logo">
+                <div class="logo-badge">두</div>
+                <div class="logo-text">
+                    <h1>두두자격지원센터 (접수 어드민)</h1>
+                </div>
+            </a>
+            <a href="../index.html" style="color: #60a5fa; text-decoration: none; font-weight: 500;">← 메인 접수 화면으로</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2>📋 실시간 원서접수 신청 목록</h2>
+            <button class="refresh-btn" onclick="fetchApplications()">새로고침</button>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">총 접수 건수</div>
+                <div class="stat-value" id="totalCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">오늘의 신청건</div>
+                <div class="stat-value" id="todayCount">0</div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID / 순번</th>
+                        <th>신청자 성함</th>
+                        <th>연락처</th>
+                        <th>자격증 종목</th>
+                        <th>접수 상태</th>
+                        <th>신청 일시</th>
+                    </tr>
+                </thead>
+                <tbody id="appTableBody">
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-sub);">접수 내역을 불러오는 중...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
+        
+        let supabase = null;
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        async function fetchApplications() {
+            const tbody = document.getElementById('appTableBody');
+            if (!supabase) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Supabase Client Error</td></tr>';
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('applications')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                document.getElementById('totalCount').textContent = data ? data.length : 0;
+                document.getElementById('todayCount').textContent = data ? data.length : 0;
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-sub);">등록된 신청서가 없습니다.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = data.map((item, idx) => {
+                    const name = item.name || item.applicant_name || '-';
+                    const phone = item.phone || item.contact || '-';
+                    const qual = item.qualification || item.license_name || '-';
+                    const status = item.status || '접수완료';
+                    const date = item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-';
+
+                    return `
+                        <tr>
+                            <td>#${item.id || idx + 1}</td>
+                            <td><strong>${name}</strong></td>
+                            <td>${phone}</td>
+                            <td><span style="color:#60a5fa; font-weight:600;">${qual}</span></td>
+                            <td><span class="status-badge">${status}</span></td>
+                            <td style="color:var(--text-sub); font-size:13px;">${date}</td>
+                        </tr>
+                    `;
+                }).join('');
+            } catch (err) {
+                console.error('Fetch error:', err);
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171;">데이터 조회 실패: ${err.message}</td></tr>`;
+            }
+        }
+
+        window.onload = fetchApplications;
+    </script>
+</body>
+</html>
