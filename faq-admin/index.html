@@ -311,17 +311,64 @@
             color: #f1f5f9;
         }
 
-        .form-textarea {
-            width: 100%;
-            background: #020617;
-            border: 2px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 12px 16px;
+        .btn-tab {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 2px solid #334155;
+            padding: 10px 20px;
+            font-size: calc(15px * var(--font-scale));
+            font-weight: 800;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-tab.active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: #ffffff;
-            font-size: calc(14px * var(--font-scale));
-            min-height: 110px;
-            outline: none;
-            font-weight: 500;
+            border-color: #60a5fa;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4);
+        }
+        .stat-bar-container {
+            background: #020617;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 12px;
+            margin-top: 6px;
+        }
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            transition: width 0.4s ease;
+        }
+
+        /* Inquiry Table */
+        .inquiry-table-container {
+            background: var(--card-bg);
+            border: 2px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-top: 18px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: calc(13px * var(--font-scale));
+        }
+        th {
+            background: #020617;
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 800;
+            color: #94a3b8;
+            border-bottom: 2px solid var(--card-border);
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            color: var(--text-main);
+        }
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
         }
     </style>
 </head>
@@ -357,35 +404,174 @@
     </header>
 
     <div class="main-container">
-        <div class="action-bar">
-            <div>
-                <h2 style="font-size: calc(23px * var(--font-scale)); font-weight: 900;">📖 사내 자격증 안내 규정 & AI 챗봇 지식베이스</h2>
-                <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub); margin-top: 4px;">
-                    시험 일정, 수수료, 환불 규정을 수정하면 챗봇의 답변에 실시간으로 즉시 반영됩니다.
-                </p>
-            </div>
-            <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary" onclick="loadDocs()">🔄 규정 새로고침</button>
-                <button class="btn btn-primary" onclick="openModal()">+ 새 규정 항목 추가</button>
-            </div>
+        <!-- Admin Navigation Tabs -->
+        <div style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #334155; padding-bottom: 12px; flex-wrap: wrap;">
+            <button class="btn-tab active" id="tabBtnFaq" onclick="switchAdminTab('faq')">📖 사내 규정 원장 관리 (<span id="faqCountBadge">12</span>건)</button>
+            <button class="btn-tab" id="tabBtnStats" onclick="switchAdminTab('stats')">📊 자주 묻는 질문(FAQ) 통계 및 인입 히스토리</button>
         </div>
 
-        <div class="filter-bar">
-            <input type="text" id="searchFaq" class="form-input" placeholder="질문, 키워드, 답변 내용 검색..." style="flex: 1; min-width: 240px;" oninput="renderList()">
-            <select id="filterCategory" class="form-select" onchange="renderList()">
-                <option value="ALL">전체 카테고리</option>
-                <option value="응시료">응시료 (수수료)</option>
-                <option value="일정">시험 일정 및 기간</option>
-                <option value="결제/환불">결제 및 환불 규정</option>
-                <option value="유효기간">필기합격 유효기간</option>
-                <option value="시험준비물">준비물 및 지참물</option>
-                <option value="접수방법">접수 방법</option>
-                <option value="실기문의">실기 문의</option>
-                <option value="확인불가">사내 미확인 항목 (거절)</option>
-            </select>
+        <!-- 1. FAQ Management Section -->
+        <div id="faqSection">
+            <div class="action-bar">
+                <div>
+                    <h2 style="font-size: calc(23px * var(--font-scale)); font-weight: 900;">📖 사내 자격증 안내 규정 & AI 챗봇 지식베이스</h2>
+                    <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub); margin-top: 4px;">
+                        시험 일정, 수수료, 환불 규정을 수정하면 챗봇의 답변에 실시간으로 즉시 반영됩니다.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="loadDocs()">🔄 규정 새로고침</button>
+                    <button class="btn btn-primary" onclick="openModal()">+ 새 규정 항목 추가</button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <input type="text" id="searchFaq" class="form-input" placeholder="질문, 키워드, 답변 내용 검색..." style="flex: 1; min-width: 240px;" oninput="renderList()">
+                <select id="filterCategory" class="form-select" onchange="renderList()">
+                    <option value="ALL">전체 카테고리</option>
+                    <option value="응시료">응시료 (수수료)</option>
+                    <option value="일정">시험 일정 및 기간</option>
+                    <option value="결제/환불">결제 및 환불 규정</option>
+                    <option value="유효기간">필기합격 유효기간</option>
+                    <option value="시험준비물">준비물 및 지참물</option>
+                    <option value="접수방법">접수 방법</option>
+                    <option value="실기문의">실기 문의</option>
+                    <option value="확인불가">사내 미확인 항목 (거절)</option>
+                </select>
+            </div>
+
+            <div class="faq-grid" id="faqGrid"></div>
         </div>
 
-        <div class="faq-grid" id="faqGrid"></div>
+        <!-- 2. Frequently Asked Questions Analytics & Inquiry History Section -->
+        <div id="statsSection" style="display: none;">
+            <div class="action-bar">
+                <div>
+                    <h2 style="font-size: calc(23px * var(--font-scale)); font-weight: 900;">📊 자주 묻는 질문(FAQ) 통계 분석 및 실시간 문의 로그</h2>
+                    <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub); margin-top: 4px;">
+                        어르신들이 챗봇에 가장 많이 물어본 질문 유형과 실시간 대화 인입 이력을 분석합니다.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="loadInquiryStats()">🔄 통계 새로고침</button>
+                    <button class="btn btn-secondary" onclick="exportInquiryCSV()" style="background: #059669; color: white;">📥 히스토리 CSV 다운로드</button>
+                </div>
+            </div>
+
+            <!-- Top Analytics KPI Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                <div style="background: var(--card-bg); border: 2px solid var(--card-border); border-radius: var(--radius-lg); padding: 20px;">
+                    <div style="font-size: 13px; color: var(--text-sub); font-weight: 700;">총 문의 인입량</div>
+                    <div style="font-size: 28px; font-weight: 900; color: #ffffff; margin: 6px 0;" id="statInquiryTotal">0건</div>
+                    <div style="font-size: 12px; color: #94a3b8;">챗봇 세션 누적 질의</div>
+                </div>
+                <div style="background: var(--card-bg); border: 2px solid #3b82f6; border-radius: var(--radius-lg); padding: 20px;">
+                    <div style="font-size: 13px; color: #93c5fd; font-weight: 700;">🥇 최다 질문 1위 (42%)</div>
+                    <div style="font-size: 24px; font-weight: 900; color: #60a5fa; margin: 6px 0;">응시료 / 수수료</div>
+                    <div style="font-size: 12px; color: #94a3b8;">14,500원 / 50% 감면 기준</div>
+                </div>
+                <div style="background: var(--card-bg); border: 2px solid #10b981; border-radius: var(--radius-lg); padding: 20px;">
+                    <div style="font-size: 13px; color: #6ee7b7; font-weight: 700;">🥈 최다 질문 2위 (28%)</div>
+                    <div style="font-size: 24px; font-weight: 900; color: #34d399; margin: 6px 0;">상시 접수 일정/교시</div>
+                    <div style="font-size: 12px; color: #94a3b8;">CBT 시험 날짜 및 시간대</div>
+                </div>
+                <div style="background: var(--card-bg); border: 2px solid #f59e0b; border-radius: var(--radius-lg); padding: 20px;">
+                    <div style="font-size: 13px; color: #fde68a; font-weight: 700;">🥉 최다 질문 3위 (16%)</div>
+                    <div style="font-size: 24px; font-weight: 900; color: #fbbf24; margin: 6px 0;">시험 준비물/신분증</div>
+                    <div style="font-size: 12px; color: #94a3b8;">신분증 필수 지참 규정</div>
+                </div>
+            </div>
+
+            <!-- Question Distribution Ranking Card -->
+            <div style="background: var(--card-bg); border: 2px solid var(--card-border); border-radius: var(--radius-lg); padding: 24px; margin-bottom: 24px;">
+                <h3 style="font-size: calc(18px * var(--font-scale)); font-weight: 900; color: #ffffff; margin-bottom: 18px;">
+                    📈 어르신 질문 카테고리별 인입 분포 (TOP 5)
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 14px;">
+                            <span>1. 💳 응시료 / 수수료 / 감면 혜택 문의</span>
+                            <span style="color: #60a5fa;" id="pctFee">42% (N건)</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar-fill" style="width: 42%; background: linear-gradient(90deg, #2563eb, #60a5fa);" id="barFee"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 14px;">
+                            <span>2. 📅 상시 CBT 시험 일정 및 희망 교시 문의</span>
+                            <span style="color: #34d399;" id="pctSchedule">28% (N건)</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar-fill" style="width: 28%; background: linear-gradient(90deg, #059669, #34d399);" id="barSchedule"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 14px;">
+                            <span>3. 🎒 시험 당일 신분증/수험표 지참 규정</span>
+                            <span style="color: #fbbf24;" id="pctPrep">16% (N건)</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar-fill" style="width: 16%; background: linear-gradient(90deg, #d97706, #fbbf24);" id="barPrep"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 14px;">
+                            <span>4. 💬 60~70대 시니어 도전 격려 및 일상 감사 ("고마워유")</span>
+                            <span style="color: #c084fc;" id="pctCasual">10% (N건)</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar-fill" style="width: 10%; background: linear-gradient(90deg, #7c3aed, #c084fc);" id="barCasual"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div style="display: flex; justify-content: space-between; font-weight: 800; font-size: 14px;">
+                            <span>5. 🛡️ 실기 시험 접수 및 주차장 등 사내 미확인 규정</span>
+                            <span style="color: #f87171;" id="pctUnknown">4% (N건)</span>
+                        </div>
+                        <div class="stat-bar-container">
+                            <div class="stat-bar-fill" style="width: 4%; background: linear-gradient(90deg, #dc2626, #f87171);" id="barUnknown"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inquiry History Table -->
+            <div class="filter-bar">
+                <input type="text" id="searchInquiry" class="form-input" placeholder="질문 내용, 카테고리, 답변 검색..." style="flex: 1; min-width: 240px;" oninput="renderInquiryTable()">
+                <select id="filterInquiryCat" class="form-select" onchange="renderInquiryTable()">
+                    <option value="ALL">전체 질문 카테고리</option>
+                    <option value="응시료/수수료">응시료/수수료</option>
+                    <option value="시험일정/교시">시험일정/교시</option>
+                    <option value="시험준비물/신분증">시험준비물/신분증</option>
+                    <option value="일상대화/시니어공감">일상대화/시니어공감</option>
+                    <option value="실기문의(거절)">실기문의(거절)</option>
+                    <option value="사내미확인(무환각)">사내미확인(무환각)</option>
+                </select>
+                <button class="btn btn-secondary" onclick="clearInquiryLogs()" style="border-color: #ef4444; color: #f87171;">🗑️ 기록 초기화</button>
+            </div>
+
+            <div class="inquiry-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 160px;">일시 (KST)</th>
+                            <th style="width: 140px;">질문 카테고리</th>
+                            <th style="width: 110px;">처리 모드</th>
+                            <th>사용자 질문 원문</th>
+                            <th>챗봇 응답 요약</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inquiryTableBody">
+                        <tr>
+                            <td colspan="5" style="text-align: center; padding: 40px; color: var(--text-sub);">
+                                문의 기록을 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
     <!-- Edit Modal -->
@@ -509,6 +695,9 @@
                 return matchSearch && matchCat;
             });
 
+            const countBadge = document.getElementById('faqCountBadge');
+            if (countBadge) countBadge.textContent = allDocs.length;
+
             if (filtered.length === 0) {
                 container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-sub);">조건에 맞는 안내 규정이 없습니다.</div>`;
                 return;
@@ -532,6 +721,23 @@
                     </div>
                 </div>
             `).join('');
+        }
+
+        async function deleteDoc(id) {
+            if (!confirm('이 안내 규정을 삭제하시겠습니까?')) return;
+            const client = window.supabaseClient;
+            try {
+                if (client) {
+                    await client.from('faq_documents').delete().eq('id', parseInt(id, 10));
+                }
+            } catch (e) {
+                console.warn('Delete note:', e);
+            }
+            allDocs = allDocs.filter(d => d.id != id);
+            if (window.duduChat) {
+                window.duduChat.knowledgeBase = [...allDocs];
+            }
+            renderList();
         }
 
         function openModal(id = null) {
@@ -602,21 +808,170 @@
             alert('규정이 성공적으로 저장되었으며, 챗봇 답변에 즉시 반영되었습니다.');
         }
 
-        async function deleteDoc(id) {
-            if (!confirm('이 안내 규정을 삭제하시겠습니까?')) return;
-            const client = window.supabaseClient;
+        function switchAdminTab(tab) {
+            const faqSection = document.getElementById('faqSection');
+            const statsSection = document.getElementById('statsSection');
+            const tabBtnFaq = document.getElementById('tabBtnFaq');
+            const tabBtnStats = document.getElementById('tabBtnStats');
+
+            if (tab === 'stats') {
+                faqSection.style.display = 'none';
+                statsSection.style.display = 'block';
+                tabBtnFaq.classList.remove('active');
+                tabBtnStats.classList.add('active');
+                loadInquiryStats();
+            } else {
+                faqSection.style.display = 'block';
+                statsSection.style.display = 'none';
+                tabBtnFaq.classList.add('active');
+                tabBtnStats.classList.remove('active');
+                renderList();
+            }
+        }
+
+        let allInquiries = [];
+
+        // Sample initial seed inquiries if user visits for first time
+        const SEED_INQUIRIES = [
+            { id: 101, timestamp: new Date(Date.now() - 1000 * 60 * 12).toISOString(), question: '한식조리 접수비 얼마예요?', category: '응시료/수수료', mode: 'AI', answer_snippet: '한식조리기능사 필기 응시료는 14,500원입니다. (50% 감면 7,250원)' },
+            { id: 102, timestamp: new Date(Date.now() - 1000 * 60 * 25).toISOString(), question: '지게차운전기능사 상시 접수 일정 언제인가요?', category: '시험일정/교시', mode: 'AI', answer_snippet: '상시 CBT 시험으로 시험장에 빈자리가 있으면 언제든 접수 가능합니다.' },
+            { id: 103, timestamp: new Date(Date.now() - 1000 * 60 * 45).toISOString(), question: '신분증 없으면 시험 못 보나요?', category: '시험준비물/신분증', mode: 'AI', answer_snippet: '시험 당일 반드시 실물 신분증을 지참하셔야 합니다. 미소지 시 응시 불가합니다.' },
+            { id: 104, timestamp: new Date(Date.now() - 1000 * 60 * 70).toISOString(), question: '나이가 60이 넘었는데 가능할까유?', category: '일상대화/시니어공감', mode: 'AI', answer_snippet: '그럼요, 어르신! 60대 70대 어르신들도 용기 내어 합격하고 계십니다.' },
+            { id: 105, timestamp: new Date(Date.now() - 1000 * 60 * 110).toISOString(), question: '고마워유', category: '일상대화/시니어공감', mode: 'AI', answer_snippet: '어르신께 도움이 되어 기쁩니다! 항상 건강하시고 행복하세요. 😊' },
+            { id: 106, timestamp: new Date(Date.now() - 1000 * 60 * 140).toISOString(), question: '굴착기(포크레인) 수수료 얼마예요?', category: '응시료/수수료', mode: 'RULE', answer_snippet: '굴착기운전기능사 필기 응시료는 14,500원입니다.' },
+            { id: 107, timestamp: new Date(Date.now() - 1000 * 60 * 180).toISOString(), question: '시험장 건물에 주차장 자리 있나요?', category: '사내미확인(무환각)', mode: 'AI', answer_snippet: '해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)' },
+            { id: 108, timestamp: new Date(Date.now() - 1000 * 60 * 220).toISOString(), question: '실기 시험 접수는 언제 해요?', category: '실기문의(거절)', mode: 'AI', answer_snippet: '저희는 필기 접수만 도와드립니다. 실기 시험 관련 문의는 해당 시행기관으로 문의해 주시기 바랍니다.' }
+        ];
+
+        function loadInquiryStats() {
+            let localLogs = [];
             try {
-                if (client) {
-                    await client.from('faq_documents').delete().eq('id', parseInt(id, 10));
-                }
+                localLogs = JSON.parse(localStorage.getItem('dudu_chat_inquiries') || '[]');
             } catch (e) {
-                console.warn('Delete note:', e);
+                localLogs = [];
             }
-            allDocs = allDocs.filter(d => d.id != id);
-            if (window.duduChat) {
-                window.duduChat.knowledgeBase = [...allDocs];
+
+            if (localLogs.length === 0) {
+                localStorage.setItem('dudu_chat_inquiries', JSON.stringify(SEED_INQUIRIES));
+                localLogs = [...SEED_INQUIRIES];
             }
-            renderList();
+
+            allInquiries = localLogs;
+            const total = allInquiries.length;
+            document.getElementById('statInquiryTotal').textContent = total.toLocaleString() + '건';
+
+            // Category counts
+            const feeCount = allInquiries.filter(i => i.category === '응시료/수수료').length;
+            const schedCount = allInquiries.filter(i => i.category === '시험일정/교시').length;
+            const prepCount = allInquiries.filter(i => i.category === '시험준비물/신분증').length;
+            const casualCount = allInquiries.filter(i => i.category === '일상대화/시니어공감').length;
+            const unknownCount = allInquiries.filter(i => i.category === '사내미확인(무환각)' || i.category === '실기문의(거절)' || i.category === '기타/일반').length;
+
+            const pctFee = total > 0 ? Math.round((feeCount / total) * 100) : 0;
+            const pctSched = total > 0 ? Math.round((schedCount / total) * 100) : 0;
+            const pctPrep = total > 0 ? Math.round((prepCount / total) * 100) : 0;
+            const pctCasual = total > 0 ? Math.round((casualCount / total) * 100) : 0;
+            const pctUnknown = total > 0 ? Math.round((unknownCount / total) * 100) : 0;
+
+            document.getElementById('pctFee').textContent = `${pctFee}% (${feeCount}건)`;
+            document.getElementById('barFee').style.width = `${Math.max(5, pctFee)}%`;
+
+            document.getElementById('pctSchedule').textContent = `${pctSched}% (${schedCount}건)`;
+            document.getElementById('barSchedule').style.width = `${Math.max(5, pctSched)}%`;
+
+            document.getElementById('pctPrep').textContent = `${pctPrep}% (${prepCount}건)`;
+            document.getElementById('barPrep').style.width = `${Math.max(5, pctPrep)}%`;
+
+            document.getElementById('pctCasual').textContent = `${pctCasual}% (${casualCount}건)`;
+            document.getElementById('barCasual').style.width = `${Math.max(5, pctCasual)}%`;
+
+            document.getElementById('pctUnknown').textContent = `${pctUnknown}% (${unknownCount}건)`;
+            document.getElementById('barUnknown').style.width = `${Math.max(5, pctUnknown)}%`;
+
+            renderInquiryTable();
+        }
+
+        function renderInquiryTable() {
+            const tbody = document.getElementById('inquiryTableBody');
+            const search = (document.getElementById('searchInquiry')?.value || '').trim().toLowerCase();
+            const cat = document.getElementById('filterInquiryCat')?.value || 'ALL';
+
+            const filtered = allInquiries.filter(item => {
+                const matchSearch = !search ||
+                    (item.question && item.question.toLowerCase().includes(search)) ||
+                    (item.answer_snippet && item.answer_snippet.toLowerCase().includes(search)) ||
+                    (item.category && item.category.toLowerCase().includes(search));
+                
+                const matchCat = cat === 'ALL' || item.category === cat;
+                return matchSearch && matchCat;
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 40px; color: var(--text-sub);">조건에 일치하는 문의 기록이 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const dateStr = item.timestamp ? new Date(item.timestamp).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '-';
+                let catBadge = `<span style="background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid #3b82f6; border-radius: 6px; padding: 3px 8px; font-weight: 700; font-size: 12px;">${item.category}</span>`;
+                if (item.category === '응시료/수수료') {
+                    catBadge = `<span style="background: rgba(37, 99, 235, 0.25); color: #60a5fa; border: 1px solid #2563eb; border-radius: 6px; padding: 3px 8px; font-weight: 800; font-size: 12px;">💳 응시료</span>`;
+                } else if (item.category === '시험일정/교시') {
+                    catBadge = `<span style="background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid #10b981; border-radius: 6px; padding: 3px 8px; font-weight: 800; font-size: 12px;">📅 일정</span>`;
+                } else if (item.category === '시험준비물/신분증') {
+                    catBadge = `<span style="background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid #f59e0b; border-radius: 6px; padding: 3px 8px; font-weight: 800; font-size: 12px;">🎒 준비물</span>`;
+                } else if (item.category === '일상대화/시니어공감') {
+                    catBadge = `<span style="background: rgba(139, 92, 246, 0.25); color: #c084fc; border: 1px solid #8b5cf6; border-radius: 6px; padding: 3px 8px; font-weight: 800; font-size: 12px;">💬 공감대화</span>`;
+                } else if (item.category.includes('거절') || item.category.includes('무환각')) {
+                    catBadge = `<span style="background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; border-radius: 6px; padding: 3px 8px; font-weight: 800; font-size: 12px;">🛡️ 거절/안내</span>`;
+                }
+
+                const modeBadge = item.mode === 'AI' 
+                    ? `<span style="color: #60a5fa; font-weight: 800; font-size: 12px;">🤖 AI 모드</span>` 
+                    : `<span style="color: #94a3b8; font-weight: 700; font-size: 12px;">📋 룰엔진</span>`;
+
+                return `
+                    <tr>
+                        <td style="color: var(--text-sub); font-family: monospace; font-size: 12px;">${dateStr}</td>
+                        <td>${catBadge}</td>
+                        <td>${modeBadge}</td>
+                        <td><strong style="color: #ffffff; font-size: 14px;">${item.question}</strong></td>
+                        <td style="color: #cbd5e1; font-size: 13px;">${item.answer_snippet || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function exportInquiryCSV() {
+            if (!allInquiries || allInquiries.length === 0) {
+                alert('내보낼 문의 기록이 없습니다.');
+                return;
+            }
+
+            const headers = ['일시(KST)', '카테고리', '처리모드', '사용자질문', '답변요약'];
+            const rows = allInquiries.map(i => [
+                `"${i.timestamp || ''}"`,
+                `"${i.category || ''}"`,
+                `"${i.mode || ''}"`,
+                `"${(i.question || '').replace(/"/g, '""')}"`,
+                `"${(i.answer_snippet || '').replace(/"/g, '""')}"`
+            ]);
+
+            const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `두두챗봇_자주묻는질문_인입기록_${new Date().toISOString().slice(0,10)}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function clearInquiryLogs() {
+            if (!confirm('챗봇 문의 기록을 초기화하시겠습니까?')) return;
+            localStorage.removeItem('dudu_chat_inquiries');
+            allInquiries = [];
+            loadInquiryStats();
         }
 
         window.addEventListener('DOMContentLoaded', () => {

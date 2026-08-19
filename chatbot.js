@@ -404,6 +404,9 @@ class DuduChatbot {
                             this.conversationHistory = this.conversationHistory.slice(-10);
                         }
 
+                        // 관리자용 문의 히스토리 로깅
+                        this.recordInquiryLog(query, data.answer, 'AI');
+
                         aiSuccess = true;
                         return;
                     }
@@ -427,7 +430,48 @@ class DuduChatbot {
             if (this.conversationHistory.length > 10) {
                 this.conversationHistory = this.conversationHistory.slice(-10);
             }
+
+            // 관리자용 문의 히스토리 로깅
+            this.recordInquiryLog(query, answer, 'RULE');
         }, 100);
+    }
+
+    recordInquiryLog(query, answer, mode) {
+        try {
+            let category = '기타/일반';
+            const q = query.toLowerCase();
+            if (q.includes('응시료') || q.includes('접수비') || q.includes('시험비') || q.includes('비용') || q.includes('수수료') || q.includes('얼마') || q.includes('돈')) {
+                category = '응시료/수수료';
+            } else if (q.includes('일정') || q.includes('언제') || q.includes('기간') || q.includes('상시') || q.includes('시간') || q.includes('교시')) {
+                category = '시험일정/교시';
+            } else if (q.includes('준비물') || q.includes('신분증') || q.includes('수험표') || q.includes('필기구')) {
+                category = '시험준비물/신분증';
+            } else if (q.includes('실기') || q.includes('2차') || q.includes('실습')) {
+                category = '실기문의(거절)';
+            } else if (q.includes('환불') || q.includes('취소')) {
+                category = '결제/환불';
+            } else if (q.includes('고마워') || q.includes('감사') || q.includes('안녕') || q.includes('나이') || q.includes('60') || q.includes('70') || q.includes('가능할까')) {
+                category = '일상대화/시니어공감';
+            } else if (q.includes('주차') || q.includes('식당') || q.includes('버스') || q.includes('교재')) {
+                category = '사내미확인(무환각)';
+            }
+
+            const logItem = {
+                id: Date.now() + Math.floor(Math.random() * 1000),
+                timestamp: new Date().toISOString(),
+                question: query,
+                category: category,
+                mode: mode,
+                answer_snippet: (answer || '').replace(/<[^>]*>?/gm, '').slice(0, 120)
+            };
+
+            const existing = JSON.parse(localStorage.getItem('dudu_chat_inquiries') || '[]');
+            existing.unshift(logItem);
+            if (existing.length > 500) existing.length = 500;
+            localStorage.setItem('dudu_chat_inquiries', JSON.stringify(existing));
+        } catch (e) {
+            // ignore
+        }
     }
 
     appendLoadingMessage() {
