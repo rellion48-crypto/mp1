@@ -1849,6 +1849,15 @@
                 const discountCheck = document.getElementById('feeDiscountCheck');
                 if (discountCheck) discountCheck.checked = false;
                 toggleFeeDiscount(false);
+                const consentFormCheck = document.getElementById('privacyConsent');
+                if (consentFormCheck) consentFormCheck.checked = false;
+                const maleRadio = document.querySelector('input[name="userGender"][value="남"]');
+                if (maleRadio) maleRadio.checked = true;
+                updateGenderStyle();
+                const warningPhone = document.getElementById('phoneWarningText');
+                if (warningPhone) warningPhone.style.display = 'none';
+                const warningBirth = document.getElementById('birthDateWarningText');
+                if (warningBirth) warningBirth.style.display = 'none';
                 pendingPayload = null;
             }
         }
