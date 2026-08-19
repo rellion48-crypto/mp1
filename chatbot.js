@@ -1,10 +1,8 @@
 /**
  * 두두자격지원센터 - 시니어 3대 핵심 국가기술자격 AI 챗봇 (두두봇)
- * - AI 모드 ON / OFF 전환 토글 지원
- * - AI 모드: Gemini 3.5 Flash Vercel API 연동 (/api/chat)
- * - 규정 모드: 100% 로컬 룰베이스 즉시 매칭 엔진
+ * - AI 모드 ON / OFF 전환 토글 지원 (Gemini 3.5 Flash Vercel API /api/chat)
+ * - 정적 DOM 및 동적 주입 완벽 연동
  * - 사내 안내 규정 기반 완벽한 할루시네이션 및 실기 거절 가드레일
- * - UI 상시 노출 보장 (z-index 2147483647, 인라인 스타일 강제)
  */
 
 const SUPABASE_CONFIG = {
@@ -12,7 +10,6 @@ const SUPABASE_CONFIG = {
     ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg"
 };
 
-// Supabase 전역 클라이언트 인스턴스 초기화 (싱글톤)
 if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.createClient === 'function' && !window.supabaseClient) {
     window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
 }
@@ -133,14 +130,14 @@ class DuduChatbot {
         this.knowledgeBase = [...DEFAULT_FAQ_KNOWLEDGE];
         this.isOpen = false;
         this.fontSize = 16;
-        this.isAIMode = localStorage.getItem('dudu_ai_mode') !== 'false'; // Default to true
+        this.isAIMode = localStorage.getItem('dudu_ai_mode') !== 'false';
         this.init();
     }
 
     async init() {
         if (typeof document === 'undefined' || !document.body) return;
         this.injectStyles();
-        this.injectHTML();
+        this.ensureDOM();
         this.bindEvents();
         await this.syncWithSupabase();
     }
@@ -252,191 +249,16 @@ class DuduChatbot {
                 from { opacity: 0; transform: translateY(25px); }
                 to { opacity: 1; transform: translateY(0); }
             }
-
-            .dudu-chat-header {
-                background: #1e293b !important;
-                border-bottom: 2px solid #334155 !important;
-                padding: 16px 20px !important;
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-            }
-            .chat-header-info {
-                display: flex !important;
-                align-items: center !important;
-                gap: 12px !important;
-            }
-            .chat-header-badge {
-                width: 42px !important;
-                height: 42px !important;
-                background: #2563eb !important;
-                border-radius: 12px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                font-size: 22px !important;
-                font-weight: 900 !important;
-                color: #ffffff !important;
-            }
-            .chat-header-title h4 {
-                color: #ffffff !important;
-                font-size: 17px !important;
-                font-weight: 900 !important;
-                margin: 0 !important;
-            }
-            .chat-header-title p {
-                color: #94a3b8 !important;
-                font-size: 12px !important;
-                font-weight: 600 !important;
-                margin: 0 !important;
-            }
-            .chat-header-tools {
-                display: flex !important;
-                align-items: center !important;
-                gap: 6px !important;
-            }
-            .tool-btn {
-                background: #334155 !important;
-                border: 1px solid #475569 !important;
-                color: #ffffff !important;
-                border-radius: 6px !important;
-                padding: 5px 10px !important;
-                font-size: 13px !important;
-                font-weight: 800 !important;
-                cursor: pointer !important;
-            }
-            .tool-btn:hover {
-                background: #2563eb !important;
-            }
-
-            /* Mode Toggle Bar */
-            .chat-mode-bar {
-                background: #090d16 !important;
-                border-bottom: 1px solid #1e293b !important;
-                padding: 8px 16px !important;
-                display: flex !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-            }
-            .chat-mode-status {
-                font-size: 13px !important;
-                font-weight: 800 !important;
-                color: #60a5fa !important;
-                display: flex !important;
-                align-items: center !important;
-                gap: 6px !important;
-            }
-            .mode-switch-btn {
-                background: rgba(37, 99, 235, 0.25) !important;
-                border: 1px solid #3b82f6 !important;
-                color: #ffffff !important;
-                border-radius: 20px !important;
-                padding: 4px 12px !important;
-                font-size: 12px !important;
-                font-weight: 800 !important;
-                cursor: pointer !important;
-                transition: all 0.15s !important;
-            }
-            .mode-switch-btn:hover {
-                background: #2563eb !important;
-            }
-
-            .dudu-chat-messages {
-                flex: 1 !important;
-                padding: 18px !important;
-                overflow-y: auto !important;
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 16px !important;
-                background: #090d16 !important;
-            }
-            .chat-msg {
-                max-width: 88% !important;
-                padding: 14px 18px !important;
-                border-radius: 18px !important;
-                line-height: 1.55 !important;
-                font-size: 16px !important;
-                word-break: keep-all !important;
-                font-weight: 500 !important;
-            }
-            .chat-msg.bot {
-                align-self: flex-start !important;
-                background: #1e293b !important;
-                color: #ffffff !important;
-                border: 2px solid #334155 !important;
-                border-bottom-left-radius: 4px !important;
-            }
-            .chat-msg.user {
-                align-self: flex-end !important;
-                background: #2563eb !important;
-                color: #ffffff !important;
-                border-bottom-right-radius: 4px !important;
-                font-weight: 700 !important;
-            }
-
-            .quick-chips {
-                display: flex !important;
-                flex-wrap: wrap !important;
-                gap: 8px !important;
-                margin-top: 14px !important;
-            }
-            .quick-chip {
-                background: rgba(37, 99, 235, 0.25) !important;
-                border: 1.5px solid #3b82f6 !important;
-                color: #93c5fd !important;
-                border-radius: 14px !important;
-                padding: 8px 12px !important;
-                font-size: 13px !important;
-                font-weight: 800 !important;
-                cursor: pointer !important;
-                transition: all 0.15s !important;
-            }
-            .quick-chip:hover {
-                background: #2563eb !important;
-                color: #ffffff !important;
-            }
-
-            .dudu-chat-input-box {
-                padding: 16px !important;
-                background: #1e293b !important;
-                border-top: 2px solid #334155 !important;
-                display: flex !important;
-                gap: 10px !important;
-            }
-            .dudu-chat-input {
-                flex: 1 !important;
-                background: #020617 !important;
-                border: 2px solid #475569 !important;
-                border-radius: 12px !important;
-                padding: 14px 16px !important;
-                color: #ffffff !important;
-                font-size: 16px !important;
-                font-weight: 600 !important;
-                outline: none !important;
-            }
-            .dudu-chat-input:focus {
-                border-color: #3b82f6 !important;
-            }
-            .dudu-chat-send-btn {
-                background: #2563eb !important;
-                border: none !important;
-                color: white !important;
-                border-radius: 12px !important;
-                padding: 0 22px !important;
-                font-weight: 900 !important;
-                font-size: 16px !important;
-                cursor: pointer !important;
-            }
-            .dudu-chat-send-btn:hover {
-                background: #1d4ed8 !important;
-            }
         `;
         document.head.appendChild(style);
     }
 
-    injectHTML() {
+    ensureDOM() {
         if (typeof document === 'undefined' || !document.body) return;
-        if (document.getElementById('duduChatFab')) return;
+        if (document.getElementById('duduChatFab')) {
+            this.updateModeUI();
+            return;
+        }
 
         const fab = document.createElement('div');
         fab.id = 'duduChatFab';
@@ -451,45 +273,45 @@ class DuduChatbot {
         chatWindow.id = 'duduChatWindow';
         chatWindow.setAttribute('style', 'position: fixed !important; z-index: 2147483647 !important;');
         chatWindow.innerHTML = `
-            <div class="dudu-chat-header">
-                <div class="chat-header-info">
-                    <div class="chat-header-badge">두</div>
-                    <div class="chat-header-title">
-                        <h4>3대 자격증 AI 안내 상담원</h4>
-                        <p>한식·지게차·굴착기 상시 CBT 정밀 안내</p>
+            <div style="background: #1e293b; border-bottom: 2px solid #334155; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 42px; height: 42px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #ffffff;">두</div>
+                    <div>
+                        <h4 style="color: #ffffff; font-size: 17px; font-weight: 900; margin: 0;">3대 자격증 AI 안내 상담원</h4>
+                        <p style="color: #94a3b8; font-size: 12px; font-weight: 600; margin: 0;">한식·지게차·굴착기 상시 CBT 정밀 안내</p>
                     </div>
                 </div>
-                <div class="chat-header-tools">
-                    <button class="tool-btn" id="chatFontDown">가-</button>
-                    <button class="tool-btn" id="chatFontUp">가+</button>
-                    <button class="tool-btn" id="chatCloseBtn">✕</button>
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontDown">가-</button>
+                    <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontUp">가+</button>
+                    <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn">✕</button>
                 </div>
             </div>
-            <div class="chat-mode-bar">
-                <div class="chat-mode-status" id="chatModeStatusLabel">
+            <div style="background: #090d16; border-bottom: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;">
+                <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
                     ✨ AI 정밀상담 모드 ON
                 </div>
-                <button class="mode-switch-btn" id="chatModeToggleBtn" onclick="window.duduChat.toggleAIMode()">
-                    AI 모드 끄기
+                <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer;">
+                    규정 모드로 전환
                 </button>
             </div>
-            <div class="dudu-chat-messages" id="chatMessages">
-                <div class="chat-msg bot">
+            <div id="chatMessages" style="flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #090d16;">
+                <div class="chat-msg bot" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #334155; border-bottom-left-radius: 4px; padding: 14px 18px; border-radius: 18px; line-height: 1.55; font-size: 16px; word-break: keep-all; font-weight: 500;">
                     안녕하세요, 어르신! <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
                     <strong>한식조리, 지게차운전, 굴착기운전기능사</strong>의 응시료(14,500원), 상시 접수 일정, 당일 합격 발표 등에 대해 편하게 물어보세요.
-                    <div class="quick-chips">
-                        <div class="quick-chip" onclick="window.duduChat.askQuestion('한식조리 접수비 얼마예요?')">💡 한식조리 응시료</div>
-                        <div class="quick-chip" onclick="window.duduChat.askQuestion('포크레인 필기 수수료')">🚜 굴착기(포크레인) 수수료</div>
-                        <div class="quick-chip" onclick="window.duduChat.askQuestion('지게차 접수 언제 하나요?')">📅 지게차 상시 접수 일정</div>
-                        <div class="quick-chip" onclick="window.duduChat.askQuestion('합격 발표는 언제 나와요?')">⏱️ 당일 합격자 발표</div>
-                        <div class="quick-chip" onclick="window.duduChat.askQuestion('실기 시험 접수도 되나요?')">🔍 실기 접수 문의</div>
-                        <div class="quick-chip" onclick="window.duduChat.askQuestion('시험장에 주차 되나요?')">🚗 주차 가능 여부</div>
+                    <div class="quick-chips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
+                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('한식조리 접수비 얼마예요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">💡 한식조리 응시료</div>
+                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('포크레인 필기 수수료')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">🚜 굴착기(포크레인) 수수료</div>
+                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('지게차 접수 언제 하나요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">📅 지게차 상시 접수 일정</div>
+                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('합격 발표는 언제 나와요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">⏱️ 당일 합격자 발표</div>
+                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('실기 시험 접수도 되나요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">🔍 실기 접수 문의</div>
+                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('시험장에 주차 되나요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">🚗 주차 가능 여부</div>
                     </div>
                 </div>
             </div>
-            <div class="dudu-chat-input-box">
-                <input type="text" class="dudu-chat-input" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)">
-                <button class="dudu-chat-send-btn" id="chatSendBtn">전송</button>
+            <div style="padding: 16px; background: #1e293b; border-top: 2px solid #334155; display: flex; gap: 10px;">
+                <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
+                <button id="chatSendBtn" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
             </div>
         `;
 
@@ -561,10 +383,12 @@ class DuduChatbot {
         if (!win) return;
         this.isOpen = (forceState !== undefined) ? forceState : !this.isOpen;
         if (this.isOpen) {
+            win.style.display = 'flex';
             win.classList.add('open');
             const inp = document.getElementById('chatInput');
             if (inp) inp.focus();
         } else {
+            win.style.display = 'none';
             win.classList.remove('open');
         }
     }
@@ -586,7 +410,6 @@ class DuduChatbot {
         this.appendMessage(query, 'user');
         input.value = '';
 
-        // If in AI Mode, call /api/chat
         if (this.isAIMode) {
             const loadingMsg = this.appendLoadingMessage();
             try {
@@ -603,12 +426,11 @@ class DuduChatbot {
                     return;
                 }
             } catch (err) {
-                console.log('AI API fetch fallback:', err);
+                console.log('AI API fetch note:', err);
             }
             this.removeLoadingMessage(loadingMsg);
         }
 
-        // Fallback or Rule-based mode
         setTimeout(() => {
             const answer = this.generateResponse(query);
             this.appendMessage(answer, 'bot');
@@ -648,12 +470,10 @@ class DuduChatbot {
     generateResponse(rawQuery) {
         const query = rawQuery.toLowerCase().replace(/\s+/g, ' ');
 
-        // 1. 가드레일: 실기(Practical) 문의 엄격 차단
         if (query.includes('실기') || query.includes('2차') || query.includes('실습') || query.includes('직접 하는')) {
             return '저희는 필기 접수만 도와드립니다. 실기 시험 관련 문의는 해당 시행기관으로 문의해 주시기 바랍니다.';
         }
 
-        // 2. 시니어 유의어 치환 및 정규화
         let normalizedQuery = query;
         for (const [slang, standard] of Object.entries(SENIOR_SYNONYMS)) {
             if (normalizedQuery.includes(slang.toLowerCase())) {
@@ -661,12 +481,10 @@ class DuduChatbot {
             }
         }
 
-        // 3. 기타 자격증(전기, 요양, 공인중개사 등) 문의 시 3대 핵심 집중 안내
         if (normalizedQuery.includes('전기') || normalizedQuery.includes('요양') || normalizedQuery.includes('위생사') || normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) {
             return '저희 센터는 현재 중장년 어르신 취업에 가장 수요가 높은 3대 핵심 국가기술자격(한식조리, 지게차운전, 굴착기운전기능사) 필기 원서접수에 집중하여 전문 지원해 드리고 있습니다. (기타 종목은 추후 지원 예정입니다.)';
         }
 
-        // 4. 의도 가중치 분류
         const isPrepIntent = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('수험표') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구');
         const isRefundIntent = normalizedQuery.includes('환불') || normalizedQuery.includes('취소') || normalizedQuery.includes('돈돌려');
         const isDurationIntent = normalizedQuery.includes('유효기간') || normalizedQuery.includes('면제') || normalizedQuery.includes('몇년');
@@ -719,7 +537,6 @@ class DuduChatbot {
     }
 }
 
-// 안전한 부트스트랩 즉시 실행
 function bootDuduChatbot() {
     if (typeof document === 'undefined') return;
     if (!document.body) {
@@ -737,7 +554,6 @@ if (typeof document !== 'undefined') {
     } else {
         bootDuduChatbot();
     }
-    // 추가 보험 실행 (타이밍 이슈 100% 방지)
     setTimeout(bootDuduChatbot, 100);
 }
 
