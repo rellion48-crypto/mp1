@@ -12,19 +12,29 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
+            --font-scale: 1;
             --bg-page: #0b1120;
             --card-bg: #1e293b;
-            --card-border: rgba(255, 255, 255, 0.1);
+            --card-border: #334155;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
             --accent-green: #10b981;
             --accent-purple: #8b5cf6;
-            --accent-gold: #f59e0b;
             --danger: #ef4444;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
+            --text-main: #ffffff;
+            --text-sub: #cbd5e1;
             --radius-lg: 16px;
             --radius-md: 10px;
+        }
+
+        body.light-contrast {
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --card-border: #cbd5e1;
+            --primary: #1d4ed8;
+            --primary-hover: #1e40af;
+            --text-main: #0f172a;
+            --text-sub: #334155;
         }
 
         * {
@@ -39,13 +49,45 @@
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 80px;
-            font-size: 14px;
+            font-size: calc(14px * var(--font-scale));
         }
 
+        /* Top Utility Bar */
+        .top-utility-bar {
+            background: #020617;
+            border-bottom: 2px solid #1e293b;
+            padding: 10px 24px;
+        }
+        .top-utility-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .accessibility-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .zoom-btn {
+            background: #1e293b;
+            border: 2px solid #475569;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .zoom-btn:hover { background: var(--primary); }
+
         header {
-            background: #0f172a;
-            border-bottom: 1px solid var(--card-border);
-            padding: 14px 24px;
+            background: var(--card-bg);
+            border-bottom: 2px solid var(--card-border);
+            padding: 16px 24px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -70,10 +112,10 @@
         .logo-badge {
             background: linear-gradient(135deg, var(--primary), var(--accent-green));
             color: #fff;
-            font-size: 18px;
+            font-size: calc(18px * var(--font-scale));
             font-weight: 900;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -81,7 +123,7 @@
         }
 
         .logo-text h1 {
-            font-size: 18px;
+            font-size: calc(19px * var(--font-scale));
             font-weight: 800;
         }
 
@@ -92,18 +134,17 @@
 
         .nav-btn {
             background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             color: var(--text-main);
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 600;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 700;
             text-decoration: none;
             transition: all 0.2s;
         }
 
         .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
             border-color: var(--primary);
         }
 
@@ -113,49 +154,50 @@
             padding: 0 24px;
         }
 
-        /* Metric Cards Grid */
+        /* Metric Cards */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
 
         .metric-card {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 20px;
+            padding: 22px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
         .metric-label {
-            font-size: 13px;
+            font-size: calc(14px * var(--font-scale));
             color: var(--text-sub);
-            font-weight: 600;
+            font-weight: 700;
             margin-bottom: 6px;
         }
 
         .metric-value {
-            font-size: 28px;
+            font-size: calc(30px * var(--font-scale));
             font-weight: 900;
             color: #ffffff;
         }
 
         .metric-sub {
-            font-size: 12px;
+            font-size: calc(13px * var(--font-scale));
             color: var(--text-sub);
             margin-top: 6px;
+            font-weight: 600;
         }
 
         /* Filter Controls */
         .filter-section {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 18px 20px;
+            padding: 20px;
             margin-bottom: 20px;
             display: flex;
             flex-wrap: wrap;
@@ -172,12 +214,13 @@
         }
 
         .form-input, .form-select {
-            background: #090d16;
-            border: 1px solid var(--card-border);
+            background: #020617;
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-md);
-            padding: 9px 14px;
-            color: var(--text-main);
-            font-size: 13px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 600;
             outline: none;
         }
 
@@ -189,12 +232,13 @@
             background: var(--primary);
             border: none;
             color: white;
-            padding: 9px 16px;
+            padding: 10px 18px;
             border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 700;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 800;
             cursor: pointer;
             transition: all 0.2s;
+            min-height: 42px;
         }
 
         .btn:hover { background: var(--primary-hover); }
@@ -202,13 +246,12 @@
         .btn-success:hover { background: #059669; }
         .btn-danger { background: var(--danger); }
         .btn-danger:hover { background: #dc2626; }
-        .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid var(--card-border); }
-        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 2px solid var(--card-border); }
 
-        /* Table Container */
+        /* Table */
         .table-container {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-lg);
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -222,15 +265,15 @@
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-            font-size: 13px;
+            font-size: calc(14px * var(--font-scale));
         }
 
         th {
-            background: #0f172a;
+            background: #020617;
             color: var(--text-sub);
-            padding: 14px 16px;
-            font-weight: 700;
-            border-bottom: 1px solid var(--card-border);
+            padding: 16px 18px;
+            font-weight: 800;
+            border-bottom: 2px solid var(--card-border);
             white-space: nowrap;
             user-select: none;
             cursor: pointer;
@@ -240,36 +283,36 @@
         }
 
         td {
-            padding: 13px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             white-space: nowrap;
         }
 
         tr:hover td {
-            background: rgba(255, 255, 255, 0.02);
+            background: rgba(255, 255, 255, 0.03);
         }
 
         .status-badge {
             display: inline-block;
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 20px;
-            font-size: 11px;
-            font-weight: 700;
+            font-size: calc(12px * var(--font-scale));
+            font-weight: 800;
         }
-        .status-completed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-        .status-canceled { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .status-completed { background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid #10b981; }
+        .status-pending { background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid #f59e0b; }
+        .status-canceled { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; }
 
         /* Pagination Bar */
         .pagination-bar {
-            padding: 14px 20px;
-            background: #0f172a;
-            border-top: 1px solid var(--card-border);
+            padding: 16px 22px;
+            background: #020617;
+            border-top: 2px solid var(--card-border);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
 
         .page-btns {
@@ -278,23 +321,24 @@
         }
 
         .page-btn {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--card-border);
+            background: #1e293b;
+            border: 2px solid var(--card-border);
             color: var(--text-main);
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 800;
             cursor: pointer;
         }
 
         .page-btn.active {
             background: var(--primary);
             border-color: var(--primary);
+            color: #ffffff;
         }
 
         .page-btn:disabled {
-            opacity: 0.4;
+            opacity: 0.35;
             cursor: not-allowed;
         }
 
@@ -302,21 +346,22 @@
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            padding: 20px;
         }
 
         .modal-card {
             background: #1e293b;
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--primary);
             border-radius: var(--radius-lg);
-            padding: 30px;
-            max-width: 600px;
-            width: 90%;
+            padding: 32px;
+            max-width: 620px;
+            width: 100%;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -326,29 +371,45 @@
             grid-template-columns: 1fr 1fr;
             gap: 14px;
             margin: 20px 0;
-            font-size: 13px;
+            font-size: calc(14px * var(--font-scale));
         }
 
         .detail-item {
-            background: #090d16;
-            padding: 12px 14px;
+            background: #020617;
+            padding: 14px 16px;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .detail-label {
-            font-size: 11px;
+            font-size: calc(12px * var(--font-scale));
             color: var(--text-sub);
             margin-bottom: 4px;
+            font-weight: 700;
         }
 
         .detail-val {
-            font-weight: 700;
+            font-weight: 800;
             color: #ffffff;
         }
     </style>
 </head>
 <body>
+    <!-- Top Utility Bar -->
+    <div class="top-utility-bar">
+        <div class="top-utility-container">
+            <div style="font-weight: 800; color: #93c5fd;">
+                🏛️ 두두자격지원센터 운영관리 시스템 (ADMIN PORTAL)
+            </div>
+            <div class="accessibility-controls">
+                <span style="font-weight: 700;">🔍 글자 크기:</span>
+                <button class="zoom-btn" onclick="adjustFontScale(-0.1)">가- 작게</button>
+                <button class="zoom-btn" onclick="adjustFontScale(0.1)">가+ 크게</button>
+                <button class="zoom-btn" onclick="resetFontScale()">기본</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Header -->
     <header>
         <div class="header-container">
@@ -390,10 +451,10 @@
             </div>
         </div>
 
-        <!-- Filter & Search Controls -->
+        <!-- Filter Controls -->
         <div class="filter-section">
             <div class="filter-inputs">
-                <input type="text" id="searchInput" class="form-input" placeholder="성함, 연락처, 접수번호 검색..." style="width: 220px;" oninput="debounceFilter()">
+                <input type="text" id="searchInput" class="form-input" placeholder="성함, 연락처, 접수번호 검색..." style="width: 240px;" oninput="debounceFilter()">
                 <select id="qualFilter" class="form-select" onchange="applyFilters()">
                     <option value="ALL">전체 자격종목 (8종)</option>
                     <option value="한식조리기능사">한식조리기능사</option>
@@ -459,7 +520,7 @@
 
             <!-- Pagination Bar -->
             <div class="pagination-bar">
-                <div style="color: var(--text-sub); font-size: 13px;" id="paginationInfo">
+                <div style="color: var(--text-sub); font-weight: 700;" id="paginationInfo">
                     총 0건
                 </div>
                 <div class="page-btns" id="pageBtnContainer"></div>
@@ -470,13 +531,13 @@
     <!-- Application Detail Modal -->
     <div class="modal-overlay" id="detailModal">
         <div class="modal-card">
-            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px; color: #ffffff;">원서접수 상세 정보</h3>
-            <p style="font-size: 13px; color: var(--text-sub);">신청서 세부 내역 및 시험장 배정 정보 관리</p>
+            <h3 style="font-size: calc(21px * var(--font-scale)); font-weight: 900; margin-bottom: 6px; color: #ffffff;">원서접수 상세 정보</h3>
+            <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub);">신청서 세부 내역 및 시험장 배정 정보 관리</p>
 
             <div class="detail-grid" id="detailContent"></div>
 
-            <div style="background: #090d16; padding: 14px; border-radius: 8px; margin-top: 16px; border: 1px solid rgba(255,255,255,0.08);">
-                <label style="font-size: 12px; color: var(--text-sub); font-weight: 700; display: block; margin-bottom: 6px;">접수상태 변경:</label>
+            <div style="background: #020617; padding: 16px; border-radius: 10px; margin-top: 16px; border: 2px solid var(--card-border);">
+                <label style="font-size: calc(13px * var(--font-scale)); color: #93c5fd; font-weight: 800; display: block; margin-bottom: 8px;">접수상태 변경:</label>
                 <div style="display: flex; gap: 8px;">
                     <select id="modalStatusSelect" class="form-select" style="flex: 1;">
                         <option value="접수완료">접수완료</option>
@@ -487,7 +548,7 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 22px;">
                 <button class="btn btn-danger" onclick="deleteCurrentRecord()">접수 삭제</button>
                 <button class="btn btn-secondary" onclick="closeDetailModal()">닫기</button>
             </div>
@@ -513,6 +574,20 @@
         let currentRecordId = null;
         let sortCol = 'created_at';
         let sortAsc = false;
+
+        let currentScale = parseFloat(localStorage.getItem('dudu_font_scale') || '1.0');
+        function applyFontScale() {
+            document.documentElement.style.setProperty('--font-scale', currentScale);
+            localStorage.setItem('dudu_font_scale', currentScale);
+        }
+        function adjustFontScale(delta) {
+            currentScale = Math.max(0.85, Math.min(1.45, parseFloat((currentScale + delta).toFixed(2))));
+            applyFontScale();
+        }
+        function resetFontScale() {
+            currentScale = 1.0;
+            applyFontScale();
+        }
 
         const REGION_CLUSTER = {
             '서울': ['서울', '서울남부', '서울동부'],
@@ -600,7 +675,6 @@
                 return matchQuery && matchQual && matchRegion && matchStatus;
             });
 
-            // Apply sort
             filteredRecords.sort((a, b) => {
                 let vA = a[sortCol] || '';
                 let vB = b[sortCol] || '';
@@ -658,17 +732,17 @@
 
                 return `
                     <tr>
-                        <td style="font-family: monospace; color: #93c5fd; font-weight: 700;">${receiptNo}</td>
+                        <td style="font-family: monospace; color: #93c5fd; font-weight: 800;">${receiptNo}</td>
                         <td><strong>${item.name || '-'}</strong></td>
                         <td style="color: var(--text-sub);">${bday}</td>
                         <td>${item.phone || '-'}</td>
                         <td><strong style="color: #60a5fa;">${item.qualification || '-'}</strong></td>
                         <td>${item.exam_region || '-'} ${item.exam_center ? '· ' + item.exam_center : ''}</td>
                         <td style="color: var(--text-sub);">${item.exam_date || '-'}</td>
-                        <td style="font-weight: 700;">${fee}</td>
+                        <td style="font-weight: 800;">${fee}</td>
                         <td>${statusBadge}</td>
                         <td>
-                            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="openDetail(${item.id})">상세보기</button>
+                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: calc(13px * var(--font-scale));" onclick="openDetail(${item.id})">상세보기</button>
                         </td>
                     </tr>
                 `;
@@ -837,7 +911,10 @@
             document.body.removeChild(link);
         }
 
-        window.onload = fetchData;
+        window.addEventListener('DOMContentLoaded', () => {
+            applyFontScale();
+            fetchData();
+        });
     </script>
     <!-- Floating AI FAQ Chatbot Widget -->
     <script src="../chatbot.js"></script>

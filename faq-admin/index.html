@@ -12,19 +12,30 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
+            --font-scale: 1;
             --bg-page: #0b1120;
             --card-bg: #1e293b;
-            --card-border: rgba(255, 255, 255, 0.1);
+            --card-border: #334155;
             --primary: #3b82f6;
             --primary-hover: #2563eb;
             --accent-purple: #8b5cf6;
             --accent-green: #10b981;
             --danger: #ef4444;
             --warning: #f59e0b;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
+            --text-main: #ffffff;
+            --text-sub: #cbd5e1;
             --radius-lg: 16px;
             --radius-md: 10px;
+        }
+
+        body.light-contrast {
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --card-border: #cbd5e1;
+            --primary: #1d4ed8;
+            --primary-hover: #1e40af;
+            --text-main: #0f172a;
+            --text-sub: #334155;
         }
 
         * {
@@ -39,13 +50,45 @@
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 80px;
-            font-size: 14px;
+            font-size: calc(14px * var(--font-scale));
         }
 
+        /* Top Utility Bar */
+        .top-utility-bar {
+            background: #020617;
+            border-bottom: 2px solid #1e293b;
+            padding: 10px 24px;
+        }
+        .top-utility-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .accessibility-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .zoom-btn {
+            background: #1e293b;
+            border: 2px solid #475569;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: calc(13px * var(--font-scale));
+            font-weight: 800;
+            cursor: pointer;
+        }
+        .zoom-btn:hover { background: var(--primary); }
+
         header {
-            background: #0f172a;
-            border-bottom: 1px solid var(--card-border);
-            padding: 14px 24px;
+            background: var(--card-bg);
+            border-bottom: 2px solid var(--card-border);
+            padding: 16px 24px;
             position: sticky;
             top: 0;
             z-index: 100;
@@ -70,10 +113,10 @@
         .logo-badge {
             background: linear-gradient(135deg, var(--accent-purple), var(--primary));
             color: #fff;
-            font-size: 18px;
+            font-size: calc(18px * var(--font-scale));
             font-weight: 900;
-            width: 40px;
-            height: 40px;
+            width: 44px;
+            height: 44px;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -81,7 +124,7 @@
         }
 
         .logo-text h1 {
-            font-size: 18px;
+            font-size: calc(19px * var(--font-scale));
             font-weight: 800;
         }
 
@@ -92,18 +135,17 @@
 
         .nav-btn {
             background: rgba(255, 255, 255, 0.08);
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             color: var(--text-main);
-            padding: 8px 14px;
+            padding: 8px 16px;
             border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 600;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 700;
             text-decoration: none;
             transition: all 0.2s;
         }
 
         .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
             border-color: var(--primary);
         }
 
@@ -125,8 +167,8 @@
         .btn {
             padding: 10px 18px;
             border-radius: var(--radius-md);
-            font-size: 13px;
-            font-weight: 700;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 800;
             cursor: pointer;
             border: none;
             transition: all 0.2s ease;
@@ -134,8 +176,7 @@
 
         .btn-primary { background: var(--primary); color: white; }
         .btn-primary:hover { background: var(--primary-hover); }
-        .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid var(--card-border); }
-        .btn-secondary:hover { background: rgba(255,255,255,0.15); }
+        .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 2px solid var(--card-border); }
 
         .filter-bar {
             display: flex;
@@ -145,13 +186,14 @@
         }
 
         .form-input, .form-select {
-            background: #090d16;
-            border: 1px solid var(--card-border);
+            background: #020617;
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-md);
-            padding: 10px 14px;
-            color: var(--text-main);
+            padding: 12px 16px;
+            color: #ffffff;
             outline: none;
-            font-size: 13px;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 600;
         }
 
         .form-input:focus, .form-select:focus {
@@ -160,15 +202,15 @@
 
         .faq-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
             gap: 18px;
         }
 
         .faq-card {
             background: var(--card-bg);
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 22px;
+            padding: 24px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -188,37 +230,41 @@
         }
 
         .tag {
-            font-size: 11px;
-            font-weight: 700;
-            padding: 3px 8px;
+            font-size: calc(12px * var(--font-scale));
+            font-weight: 800;
+            padding: 4px 10px;
             border-radius: 6px;
         }
-        .tag-category { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
-        .tag-qual { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
-        .tag-unknown { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .tag-category { background: rgba(139, 92, 246, 0.25); color: #c084fc; border: 1px solid #8b5cf6; }
+        .tag-qual { background: rgba(59, 130, 246, 0.25); color: #93c5fd; border: 1px solid #3b82f6; }
+        .tag-unknown { background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; }
 
         .faq-q {
-            font-size: 16px;
-            font-weight: 800;
+            font-size: calc(17px * var(--font-scale));
+            font-weight: 900;
             color: #ffffff;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            line-height: 1.35;
         }
 
         .faq-a {
-            font-size: 13px;
+            font-size: calc(14px * var(--font-scale));
             color: #cbd5e1;
-            line-height: 1.5;
-            background: #090d16;
-            padding: 12px;
+            line-height: 1.55;
+            background: #020617;
+            padding: 14px;
             border-radius: var(--radius-md);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
             white-space: pre-wrap;
+            font-weight: 500;
+            border: 1px solid rgba(255,255,255,0.06);
         }
 
         .faq-meta {
-            font-size: 12px;
+            font-size: calc(13px * var(--font-scale));
             color: var(--text-sub);
             margin-bottom: 14px;
+            font-weight: 600;
         }
 
         .faq-card-actions {
@@ -226,28 +272,29 @@
             justify-content: flex-end;
             gap: 8px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
-            padding-top: 12px;
+            padding-top: 14px;
         }
 
         /* Modal */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.85);
             backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            padding: 20px;
         }
 
         .modal-card {
             background: #1e293b;
-            border: 1px solid var(--card-border);
+            border: 2px solid var(--primary);
             border-radius: var(--radius-lg);
-            padding: 30px;
-            max-width: 560px;
-            width: 90%;
+            padding: 32px;
+            max-width: 580px;
+            width: 100%;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -258,26 +305,42 @@
 
         .form-label {
             display: block;
-            font-size: 13px;
-            font-weight: 700;
+            font-size: calc(14px * var(--font-scale));
+            font-weight: 800;
             margin-bottom: 6px;
             color: #f1f5f9;
         }
 
         .form-textarea {
             width: 100%;
-            background: #090d16;
-            border: 1px solid var(--card-border);
+            background: #020617;
+            border: 2px solid var(--card-border);
             border-radius: var(--radius-md);
-            padding: 10px 14px;
-            color: var(--text-main);
-            font-size: 13px;
-            min-height: 100px;
+            padding: 12px 16px;
+            color: #ffffff;
+            font-size: calc(14px * var(--font-scale));
+            min-height: 110px;
             outline: none;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
+    <!-- Top Utility Bar -->
+    <div class="top-utility-bar">
+        <div class="top-utility-container">
+            <div style="font-weight: 800; color: #c084fc;">
+                📖 두두자격지원센터 사내 안내 규정 관리 (FAQ Knowledgebase)
+            </div>
+            <div class="accessibility-controls">
+                <span style="font-weight: 700;">🔍 글자 크기:</span>
+                <button class="zoom-btn" onclick="adjustFontScale(-0.1)">가- 작게</button>
+                <button class="zoom-btn" onclick="adjustFontScale(0.1)">가+ 크게</button>
+                <button class="zoom-btn" onclick="resetFontScale()">기본</button>
+            </div>
+        </div>
+    </div>
+
     <header>
         <div class="header-container">
             <a href="../index.html" class="logo">
@@ -296,8 +359,8 @@
     <div class="main-container">
         <div class="action-bar">
             <div>
-                <h2 style="font-size: 22px; font-weight: 800;">📖 사내 자격증 안내 규정 & AI 챗봇 지식베이스</h2>
-                <p style="font-size: 13px; color: var(--text-sub); margin-top: 4px;">
+                <h2 style="font-size: calc(23px * var(--font-scale)); font-weight: 900;">📖 사내 자격증 안내 규정 & AI 챗봇 지식베이스</h2>
+                <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub); margin-top: 4px;">
                     시험 일정, 수수료, 환불 규정을 수정하면 챗봇의 답변에 실시간으로 즉시 반영됩니다.
                 </p>
             </div>
@@ -328,7 +391,7 @@
     <!-- Edit Modal -->
     <div class="modal-overlay" id="editModal">
         <div class="modal-card">
-            <h3 id="modalTitle" style="font-size: 18px; font-weight: 800; margin-bottom: 16px;">안내 규정 편집</h3>
+            <h3 id="modalTitle" style="font-size: calc(20px * var(--font-scale)); font-weight: 900; margin-bottom: 16px;">안내 규정 편집</h3>
             <form id="faqEditForm" onsubmit="saveDoc(event)">
                 <input type="hidden" id="docId">
 
@@ -367,11 +430,11 @@
                 </div>
 
                 <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
-                    <input type="checkbox" id="docIsUnknown" style="width: 18px; height: 18px;">
-                    <label for="docIsUnknown" style="font-size: 13px; color: #f87171;">확인 불가 항목 ('모르겠습니다' 답변 강제)</label>
+                    <input type="checkbox" id="docIsUnknown" style="width: 20px; height: 20px; accent-color: var(--danger);">
+                    <label for="docIsUnknown" style="font-size: calc(14px * var(--font-scale)); color: #f87171; font-weight: 700;">확인 불가 항목 ('모르겠습니다' 답변 강제)</label>
                 </div>
 
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px;">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">취소</button>
                     <button type="submit" class="btn btn-primary">규정 저장 및 챗봇 동기화</button>
                 </div>
@@ -391,6 +454,20 @@
         }
 
         let allDocs = [];
+
+        let currentScale = parseFloat(localStorage.getItem('dudu_font_scale') || '1.0');
+        function applyFontScale() {
+            document.documentElement.style.setProperty('--font-scale', currentScale);
+            localStorage.setItem('dudu_font_scale', currentScale);
+        }
+        function adjustFontScale(delta) {
+            currentScale = Math.max(0.85, Math.min(1.45, parseFloat((currentScale + delta).toFixed(2))));
+            applyFontScale();
+        }
+        function resetFontScale() {
+            currentScale = 1.0;
+            applyFontScale();
+        }
 
         async function loadDocs() {
             const client = window.supabaseClient;
@@ -450,8 +527,8 @@
                         <div class="faq-meta">🔑 <strong>키워드:</strong> ${item.keywords || '-'}</div>
                     </div>
                     <div class="faq-card-actions">
-                        <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px;" onclick="openModal(${item.id})">규정 수정</button>
-                        <button class="btn btn-secondary" style="padding: 5px 12px; font-size: 12px; color: #ef4444;" onclick="deleteDoc(${item.id})">삭제</button>
+                        <button class="btn btn-secondary" style="padding: 6px 14px; font-size: calc(13px * var(--font-scale));" onclick="openModal(${item.id})">규정 수정</button>
+                        <button class="btn btn-secondary" style="padding: 6px 14px; font-size: calc(13px * var(--font-scale)); color: #ef4444;" onclick="deleteDoc(${item.id})">삭제</button>
                     </div>
                 </div>
             `).join('');
@@ -542,7 +619,10 @@
             renderList();
         }
 
-        window.onload = loadDocs;
+        window.addEventListener('DOMContentLoaded', () => {
+            applyFontScale();
+            loadDocs();
+        });
     </script>
     <!-- Floating AI FAQ Chatbot Widget -->
     <script src="../chatbot.js"></script>
