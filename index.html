@@ -893,17 +893,24 @@
                 <button onclick="closeLookupModal()" style="background: none; border: none; color: #94a3b8; font-size: 24px; font-weight: 900; cursor: pointer; padding: 4px 8px;">✕</button>
             </div>
             <p style="font-size: calc(15px * var(--font-scale)); color: #cbd5e1; margin-bottom: 18px; line-height: 1.5;">
-                접수 시 입력하셨던 <strong>성함 또는 휴대전화 번호</strong>를 입력하시면 실시간 접수 현황을 즉시 확인하실 수 있습니다.
+                접수 시 등록하셨던 <strong>성함(필수)</strong>을 입력하시면 실시간 접수 현황을 즉시 확인하실 수 있습니다.<br>
+                <span style="font-size: calc(13px * var(--font-scale)); color: #94a3b8;">(전화번호를 함께 입력하시면 동명이인 없이 본인 접수 건만 더욱 정확하게 조회됩니다.)</span>
             </p>
 
             <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
                 <div>
-                    <label style="font-size: calc(15px * var(--font-scale)); font-weight: 800; color: #ffffff; display: block; margin-bottom: 6px;">1. 신청자 성함</label>
-                    <input type="text" id="lookupName" class="form-input" placeholder="예: 홍길동" style="background: #020617;">
+                    <label style="font-size: calc(15px * var(--font-scale)); font-weight: 800; color: #ffffff; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <span>1. 신청자 성함</span>
+                        <span style="background: rgba(37,99,235,0.25); color: #60a5fa; border: 1px solid #3b82f6; font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 4px;">필수 입력</span>
+                    </label>
+                    <input type="text" id="lookupName" class="form-input" placeholder="예: 홍길동 (필수 입력)" required style="background: #020617;" onkeydown="if(event.key==='Enter') executeLookup()">
                 </div>
                 <div>
-                    <label style="font-size: calc(15px * var(--font-scale)); font-weight: 800; color: #ffffff; display: block; margin-bottom: 6px;">2. 휴대전화 번호 (또는 접수번호)</label>
-                    <input type="text" id="lookupPhone" class="form-input" placeholder="010-0000-0000 또는 접수번호" style="background: #020617;" oninput="autoFormatPhone(this)">
+                    <label style="font-size: calc(15px * var(--font-scale)); font-weight: 800; color: #cbd5e1; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                        <span>2. 휴대전화 번호 (또는 접수번호)</span>
+                        <span style="background: rgba(148,163,184,0.15); color: #94a3b8; border: 1px solid #475569; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px;">선택 입력</span>
+                    </label>
+                    <input type="text" id="lookupPhone" class="form-input" placeholder="010-0000-0000 또는 접수번호 (선택)" style="background: #020617;" oninput="autoFormatPhone(this)" onkeydown="if(event.key==='Enter') executeLookup()">
                 </div>
                 <button class="submit-btn" onclick="executeLookup()" style="margin-top: 6px; padding: 16px; font-size: calc(18px * var(--font-scale)); min-height: 56px;">
                     <span>접수 내역 조회하기</span> ➔
@@ -1209,8 +1216,9 @@
             const name = document.getElementById('lookupName').value.trim();
             const phone = document.getElementById('lookupPhone').value.trim();
 
-            if (!name && !phone) {
-                alert('신청자 성함 또는 휴대전화 번호를 입력해 주세요.');
+            if (!name) {
+                alert('신청자 성함을 반드시 입력해 주세요. (성함은 필수 입력 항목입니다)');
+                document.getElementById('lookupName').focus();
                 return;
             }
 
