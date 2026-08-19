@@ -31,11 +31,120 @@
         body.light-contrast {
             --bg-page: #f8fafc;
             --card-bg: #ffffff;
-            --card-border: #cbd5e1;
-            --primary: #1d4ed8;
-            --primary-hover: #1e40af;
+            --card-border: #e2e8f0;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
             --text-main: #0f172a;
             --text-sub: #334155;
+            --text-muted: #64748b;
+        }
+
+        body.light-contrast .top-utility-bar {
+            background: #ffffff;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        body.light-contrast .zoom-btn {
+            background: #f1f5f9;
+            border: 2px solid #cbd5e1;
+            color: #0f172a;
+        }
+        body.light-contrast .theme-toggle-btn {
+            background: #e2e8f0;
+            border: 2px solid #94a3b8;
+            color: #0f172a;
+        }
+        body.light-contrast header {
+            background: #ffffff;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        body.light-contrast .logo-text h1 {
+            color: #0f172a;
+        }
+        body.light-contrast .nav-btn {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #0f172a;
+        }
+        body.light-contrast .btn-tab {
+            background: #f1f5f9;
+            border-color: #cbd5e1;
+            color: #475569;
+        }
+        body.light-contrast .btn-tab.active {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border-color: #60a5fa;
+        }
+        body.light-contrast .filter-card {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+        }
+        body.light-contrast .form-input,
+        body.light-contrast .form-select {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            color: #0f172a;
+        }
+        body.light-contrast .faq-card {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        body.light-contrast .faq-q {
+            color: #0f172a;
+        }
+        body.light-contrast .faq-a {
+            background: #f8fafc;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+        body.light-contrast .modal-overlay {
+            background: rgba(15, 23, 42, 0.6);
+        }
+        body.light-contrast .modal-card {
+            background: #ffffff !important;
+            border: 2px solid #93c5fd !important;
+            color: #0f172a !important;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2) !important;
+        }
+        body.light-contrast .modal-card h3,
+        body.light-contrast .modal-card h4,
+        body.light-contrast .modal-card label {
+            color: #0f172a !important;
+        }
+        body.light-contrast .inquiry-table-container {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        body.light-contrast th {
+            background: #f8fafc;
+            color: #334155;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        body.light-contrast td {
+            border-bottom: 1px solid #f1f5f9;
+            color: #0f172a;
+        }
+        body.light-contrast tr:hover td {
+            background: #f8fafc;
+        }
+        body.light-contrast .stat-bar-container {
+            background: #e2e8f0;
+        }
+        body.light-contrast .metric-card {
+            background: #ffffff;
+            border: 2px solid #e2e8f0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        body.light-contrast .metric-label {
+            color: #475569;
+        }
+        body.light-contrast .metric-value {
+            color: #0f172a;
+        }
+        body.light-contrast .metric-sub {
+            color: #64748b;
         }
 
         * {
@@ -384,6 +493,7 @@
                 <button class="zoom-btn" onclick="adjustFontScale(-0.1)">가- 작게</button>
                 <button class="zoom-btn" onclick="adjustFontScale(0.1)">가+ 크게</button>
                 <button class="zoom-btn" onclick="resetFontScale()">기본</button>
+                <button class="theme-toggle-btn" onclick="toggleContrast()" id="btnContrast">☀️ 밝은 화면</button>
             </div>
         </div>
     </div>
@@ -654,6 +764,24 @@
         function resetFontScale() {
             currentScale = 1.0;
             applyFontScale();
+        }
+
+        let isLightContrast = localStorage.getItem('dudu_contrast') !== 'dark';
+        function applyContrast() {
+            if (isLightContrast) {
+                document.body.classList.add('light-contrast');
+                const btn = document.getElementById('btnContrast');
+                if (btn) btn.textContent = '🌙 어두운 화면';
+            } else {
+                document.body.classList.remove('light-contrast');
+                const btn = document.getElementById('btnContrast');
+                if (btn) btn.textContent = '☀️ 밝은 화면';
+            }
+            localStorage.setItem('dudu_contrast', isLightContrast ? 'light' : 'dark');
+        }
+        function toggleContrast() {
+            isLightContrast = !isLightContrast;
+            applyContrast();
         }
 
         async function loadDocs() {
@@ -1027,6 +1155,7 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             applyFontScale();
+            applyContrast();
             checkAdminAuth();
         });
     </script>
