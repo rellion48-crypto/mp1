@@ -782,11 +782,15 @@
                         <!-- Birth Date Input (Numbers & Calendar Picker) -->
                         <div class="form-group">
                             <label class="form-label" for="userBirthDate">3. 생년월일 (8자리 숫자 입력 또는 달력 선택)</label>
-                            <div style="display: flex; gap: 8px; align-items: center;">
-                                <input type="text" id="userBirthDate" class="form-input" placeholder="예: 1965-08-15 (또는 19650815)" maxlength="10" required oninput="handleBirthDateInput(this)" style="flex: 1;" autocomplete="bday">
-                                <input type="date" id="userBirthDatePicker" class="form-input" style="width: 52px; padding: 12px 8px; cursor: pointer;" title="달력에서 생년월일 선택" onchange="handleDatePickerChange(this)">
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="text" id="userBirthDate" class="form-input" placeholder="예: 1965-08-15 (숫자 8자리 입력)" maxlength="10" required oninput="handleBirthDateInput(this)" onblur="validateBirthDateOnBlur(this)" style="padding-right: 54px; width: 100%;" autocomplete="bday">
+                                <button type="button" onclick="triggerDatePicker()" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); background: #1e293b; border: 1px solid #475569; color: #60a5fa; border-radius: 8px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: all 0.2s;" title="달력에서 생년월일 선택" onmouseover="this.style.background='#334155'" onmouseout="this.style.background='#1e293b'">
+                                    📅
+                                </button>
+                                <input type="date" id="userBirthDatePicker" min="1900-01-01" style="position: absolute; right: 8px; top: 50%; transform: translateY(-50%); opacity: 0; width: 38px; height: 38px; pointer-events: none;" onchange="handleDatePickerChange(this)">
                             </div>
-                            <div class="phone-helper-text">※ 8자리 숫자(예: 19650815)를 직접 입력하시거나 우측 📅 달력 아이콘을 눌러 선택하세요.</div>
+                            <div id="birthDateWarningText" style="color: #f87171; font-size: calc(13px * var(--font-scale)); font-weight: 700; margin-top: 6px; display: none;">※ 1900년 1월 1일부터 오늘 날짜까지만 입력 가능합니다.</div>
+                            <div class="phone-helper-text">※ 8자리 숫자(예: 19650815)를 직접 누르시거나 우측 📅 달력 버튼을 눌러 선택하세요. (1900년~오늘)</div>
                         </div>
 
                         <!-- Gender Selection -->
@@ -1158,6 +1162,52 @@
             input.value = formatted;
         }
 
+        function getTodayKSTString() {
+            const now = new Date();
+            const kstOffset = 9 * 60 * 60 * 1000;
+            return new Date(now.getTime() + kstOffset).toISOString().slice(0, 10);
+        }
+
+        function triggerDatePicker() {
+            const picker = document.getElementById('userBirthDatePicker');
+            if (picker) {
+                picker.max = getTodayKSTString();
+                picker.min = '1900-01-01';
+                if (typeof picker.showPicker === 'function') {
+                    picker.showPicker();
+                } else {
+                    picker.click();
+                }
+            }
+        }
+
+        function checkBirthDateValidity(dateStr) {
+            if (!dateStr || dateStr.length !== 10) return { valid: false, msg: '생년월일을 8자리 숫자(예: 1965-08-15)로 입력해 주세요.' };
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return { valid: false, msg: '생년월일 형식이 올바르지 않습니다.' };
+            const y = parseInt(parts[0], 10);
+            const m = parseInt(parts[1], 10);
+            const d = parseInt(parts[2], 10);
+
+            if (isNaN(y) || isNaN(m) || isNaN(d)) return { valid: false, msg: '생년월일 숫자를 확인해 주세요.' };
+            if (y < 1900) return { valid: false, msg: '1900년 1월 1일 이후의 생년월일만 입력 가능합니다.' };
+            if (m < 1 || m > 12) return { valid: false, msg: '월은 01부터 12 사이로 입력해 주세요.' };
+            if (d < 1 || d > 31) return { valid: false, msg: '일은 01부터 31 사이로 입력해 주세요.' };
+
+            const parsedDate = new Date(`${parts[0]}-${parts[1].padStart(2, '0')}-${parts[2].padStart(2, '0')}`);
+            if (isNaN(parsedDate.getTime())) return { valid: false, msg: '유효하지 않은 날짜입니다.' };
+
+            const todayStr = getTodayKSTString();
+            if (dateStr > todayStr) {
+                return { valid: false, msg: '생년월일은 미래 날짜일 수 없습니다. 오늘 이전 날짜를 입력해 주세요.' };
+            }
+            if (dateStr < '1900-01-01') {
+                return { valid: false, msg: '1900-01-01 이후 날짜만 입력 가능합니다.' };
+            }
+
+            return { valid: true };
+        }
+
         function handleBirthDateInput(input) {
             let val = input.value.replace(/[^0-9]/g, '');
             if (val.length > 8) val = val.slice(0, 8);
@@ -1172,10 +1222,41 @@
             }
             input.value = formatted;
 
-            // 달력 피커 동기화
-            const picker = document.getElementById('userBirthDatePicker');
-            if (picker && val.length === 8) {
-                picker.value = formatted;
+            const warningEl = document.getElementById('birthDateWarningText');
+
+            if (val.length === 8) {
+                const res = checkBirthDateValidity(formatted);
+                if (!res.valid) {
+                    if (warningEl) {
+                        warningEl.textContent = `※ ${res.msg}`;
+                        warningEl.style.display = 'block';
+                    }
+                    input.style.borderColor = '#ef4444';
+                } else {
+                    if (warningEl) warningEl.style.display = 'none';
+                    input.style.borderColor = '#3b82f6';
+                    const picker = document.getElementById('userBirthDatePicker');
+                    if (picker) picker.value = formatted;
+                }
+            } else {
+                if (warningEl) warningEl.style.display = 'none';
+                input.style.borderColor = '';
+            }
+        }
+
+        function validateBirthDateOnBlur(input) {
+            if (!input.value) return;
+            const res = checkBirthDateValidity(input.value);
+            const warningEl = document.getElementById('birthDateWarningText');
+            if (!res.valid) {
+                if (warningEl) {
+                    warningEl.textContent = `※ ${res.msg}`;
+                    warningEl.style.display = 'block';
+                }
+                input.style.borderColor = '#ef4444';
+            } else {
+                if (warningEl) warningEl.style.display = 'none';
+                input.style.borderColor = '';
             }
         }
 
@@ -1183,6 +1264,7 @@
             const textInput = document.getElementById('userBirthDate');
             if (textInput && picker.value) {
                 textInput.value = picker.value;
+                handleBirthDateInput(textInput);
             }
         }
 
@@ -1279,8 +1361,9 @@
                 return;
             }
 
-            if (!birthDate || birthDate.length < 10) {
-                alert('생년월일을 8자리 숫자(예: 1965-08-15)로 입력하시거나 달력에서 선택해 주세요.');
+            const birthCheck = checkBirthDateValidity(birthDate);
+            if (!birthCheck.valid) {
+                alert(`생년월일 입력 오류: ${birthCheck.msg}`);
                 document.getElementById('userBirthDate').focus();
                 return;
             }
