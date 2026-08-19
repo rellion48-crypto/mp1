@@ -1022,9 +1022,13 @@
                     </div>
                 </div>
 
+                <div id="qualWarningBubble" style="display: none; background: #fee2e2; border: 2px solid #ef4444; border-radius: 12px; padding: 14px 18px; margin-bottom: 16px; color: #991b1b; font-weight: 800; font-size: calc(14px * var(--font-scale)); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15);">
+                    ⚠️ <strong>[자격증 선택 필수]</strong> 아래 3대 자격증(한식조리, 지게차, 굴착기) 카드 중 응시하실 자격증 1개를 클릭해 주세요. (다시 클릭 시 선택 취소)
+                </div>
+
                 <div class="cards-3grid" id="qualCardsContainer">
                     <!-- 1. 한식조리기능사 -->
-                    <div class="qual-card active" onclick="selectQualification('한식조리기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
+                    <div class="qual-card" onclick="selectQualification('한식조리기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
                         <div class="card-top">
                             <span class="card-tag">상시 접수 (CBT)</span>
                             <span class="selected-badge">✓ 선택됨</span>
@@ -1125,11 +1129,12 @@
                     <form id="seniorRegistrationForm" onsubmit="handleRegistrationSubmit(event)">
                         <!-- Selected Summary -->
                         <div class="selected-summary-box">
-                            <div class="selected-qual-title" id="displayQualName">한식조리기능사</div>
+                            <div class="selected-qual-title" id="displayQualName" style="color: #94a3b8;">자격증을 선택해 주세요</div>
                             <div class="selected-qual-info">
-                                <span id="displayExamType">상시CBT 시험 (필기)</span>
-                                <span id="displayFeeAmount" style="color: #60a5fa;">수수료: 14,500원</span>
+                                <span id="displayExamType">좌측 1단계에서 원하시는 자격증 카드를 클릭하세요.</span>
+                                <span id="displayFeeAmount" style="color: #94a3b8;">수수료: - 원</span>
                             </div>
+                            <div id="formQualWarningText" style="color: #ef4444; font-size: calc(13px * var(--font-scale)); font-weight: 800; margin-top: 6px; display: none;">※ 1단계에서 자격증(한식, 지게차, 굴착기)을 먼저 선택해 주세요.</div>
                         </div>
 
                         <!-- Name Input -->
@@ -1450,14 +1455,7 @@
             window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
         }
 
-        let selectedData = {
-            name: "한식조리기능사",
-            grade: "기능사",
-            type: "상시CBT",
-            fee: "14,500원",
-            feeInt: 14500,
-            org: "두두자격검정원"
-        };
+        let selectedData = null;
 
         let currentScale = parseFloat(localStorage.getItem('dudu_font_scale') || '1.0');
 
@@ -1701,12 +1699,40 @@
                 feeDisplay.textContent = '수수료: 7,250원 (50% 감면 적용)';
                 feeDisplay.style.color = '#34d399';
             } else {
-                feeDisplay.textContent = `수수료: ${selectedData.fee}`;
-                feeDisplay.style.color = '#60a5fa';
+                if (selectedData && selectedData.fee) {
+                    feeDisplay.textContent = `수수료: ${selectedData.fee}`;
+                    feeDisplay.style.color = document.body.classList.contains('light-contrast') ? '#1d4ed8' : '#60a5fa';
+                } else {
+                    feeDisplay.textContent = '수수료: - 원';
+                    feeDisplay.style.color = '#94a3b8';
+                }
             }
         }
 
         function selectQualification(name, grade, type, fee, feeInt, org) {
+            const cards = document.querySelectorAll('.qual-card');
+            const qualWarning = document.getElementById('qualWarningBubble');
+            if (qualWarning) qualWarning.style.display = 'none';
+            const formWarning = document.getElementById('formQualWarningText');
+            if (formWarning) formWarning.style.display = 'none';
+
+            // If already selected, clicking it again cancels the selection (선택 취소)
+            if (selectedData && selectedData.name === name) {
+                selectedData = null;
+                cards.forEach(card => card.classList.remove('active'));
+
+                const qualTitle = document.getElementById('displayQualName');
+                qualTitle.textContent = '자격증을 선택해 주세요';
+                qualTitle.style.color = '#94a3b8';
+
+                document.getElementById('displayExamType').textContent = '좌측 1단계에서 원하시는 자격증 카드를 클릭하세요.';
+                const feeDisplay = document.getElementById('displayFeeAmount');
+                feeDisplay.textContent = '수수료: - 원';
+                feeDisplay.style.color = '#94a3b8';
+                return;
+            }
+
+            // Select clicked qualification
             selectedData = {
                 name: name,
                 grade: grade,
@@ -1716,7 +1742,10 @@
                 org: org
             };
 
-            document.getElementById('displayQualName').textContent = name;
+            const qualTitle = document.getElementById('displayQualName');
+            qualTitle.textContent = name;
+            qualTitle.style.color = document.body.classList.contains('light-contrast') ? '#1d4ed8' : '#ffffff';
+
             document.getElementById('displayExamType').textContent = `${type} (필기 접수)`;
             
             const feeDisplay = document.getElementById('displayFeeAmount');
@@ -1725,10 +1754,9 @@
                 feeDisplay.style.color = '#34d399';
             } else {
                 feeDisplay.textContent = `수수료: ${fee}`;
-                feeDisplay.style.color = '#60a5fa';
+                feeDisplay.style.color = document.body.classList.contains('light-contrast') ? '#1d4ed8' : '#60a5fa';
             }
 
-            const cards = document.querySelectorAll('.qual-card');
             cards.forEach(card => {
                 const title = card.querySelector('.card-name').textContent;
                 if (title.includes(name)) {
@@ -1743,6 +1771,22 @@
 
         function handleRegistrationSubmit(e) {
             e.preventDefault();
+
+            // 1단계: 자격증 선택 여부 검증
+            if (!selectedData) {
+                const qualWarning = document.getElementById('qualWarningBubble');
+                if (qualWarning) qualWarning.style.display = 'block';
+                const formWarning = document.getElementById('formQualWarningText');
+                if (formWarning) formWarning.style.display = 'block';
+
+                alert('⚠️ 준비하시는 자격증이 선택되지 않았습니다.\n1단계 화면에서 자격증(한식조리 / 지게차 / 굴착기) 카드 중 하나를 먼저 클릭해 주세요.');
+                const step1Section = document.getElementById('application-section');
+                if (step1Section) {
+                    step1Section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                return;
+            }
+
             const name = document.getElementById('userName').value.trim();
             const phone = document.getElementById('userPhone').value.trim();
             const birthDate = document.getElementById('userBirthDate').value.trim();
@@ -1750,8 +1794,8 @@
             const region = document.getElementById('userRegion').value;
             const session = document.getElementById('userSession').value;
 
-            if (!name) {
-                alert('신청자 성함을 입력해 주세요.');
+            if (!name || name.length < 2 || /^[ㄱ-ㅎㅏ-ㅣ]+$/.test(name)) {
+                alert('신청자 성함을 올바르게 입력해 주세요 (한글 2자 이상, 단일 자음/모음 불가).');
                 document.getElementById('userName').focus();
                 return;
             }
@@ -1887,7 +1931,27 @@
             const warningBirth = document.getElementById('birthDateWarningText');
             if (warningBirth) warningBirth.style.display = 'none';
 
-            selectQualification('한식조리기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원');
+            selectedData = null;
+            const cards = document.querySelectorAll('.qual-card');
+            cards.forEach(card => card.classList.remove('active'));
+
+            const qualTitle = document.getElementById('displayQualName');
+            if (qualTitle) {
+                qualTitle.textContent = '자격증을 선택해 주세요';
+                qualTitle.style.color = '#94a3b8';
+            }
+            const examTypeEl = document.getElementById('displayExamType');
+            if (examTypeEl) examTypeEl.textContent = '좌측 1단계에서 원하시는 자격증 카드를 클릭하세요.';
+            const feeDisplay = document.getElementById('displayFeeAmount');
+            if (feeDisplay) {
+                feeDisplay.textContent = '수수료: - 원';
+                feeDisplay.style.color = '#94a3b8';
+            }
+            const qualWarning = document.getElementById('qualWarningBubble');
+            if (qualWarning) qualWarning.style.display = 'none';
+            const formWarning = document.getElementById('formQualWarningText');
+            if (formWarning) formWarning.style.display = 'none';
+
             pendingPayload = null;
         }
 
