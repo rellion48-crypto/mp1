@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>두두자격지원센터 - 원서접수 통합 관리 대장 (ADMIN)</title>
+    <title>두두자격지원센터 - 3대 핵심자격 원서접수 통합 관리 대장 (ADMIN)</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,6 +20,7 @@
             --primary-hover: #2563eb;
             --accent-green: #10b981;
             --accent-purple: #8b5cf6;
+            --accent-gold: #f59e0b;
             --danger: #ef4444;
             --text-main: #ffffff;
             --text-sub: #cbd5e1;
@@ -157,7 +158,7 @@
         /* Metric Cards */
         .metrics-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -180,7 +181,7 @@
         }
 
         .metric-value {
-            font-size: calc(30px * var(--font-scale));
+            font-size: calc(28px * var(--font-scale));
             font-weight: 900;
             color: #ffffff;
         }
@@ -399,7 +400,7 @@
     <div class="top-utility-bar">
         <div class="top-utility-container">
             <div style="font-weight: 800; color: #93c5fd;">
-                🏛️ 두두자격지원센터 운영관리 시스템 (ADMIN PORTAL)
+                🏛️ 두두자격지원센터 3대 국가기술자격 접수 대장 (ADMIN PORTAL)
             </div>
             <div class="accessibility-controls">
                 <span style="font-weight: 700;">🔍 글자 크기:</span>
@@ -416,7 +417,7 @@
             <a href="../index.html" class="logo">
                 <div class="logo-badge">대장</div>
                 <div class="logo-text">
-                    <h1>두두자격지원센터 (통합 접수 관리 대장)</h1>
+                    <h1>두두자격지원센터 (3대 핵심자격 접수 관리 대장)</h1>
                 </div>
             </a>
             <nav class="nav-links">
@@ -432,22 +433,22 @@
             <div class="metric-card">
                 <div class="metric-label">총 접수 건수</div>
                 <div class="metric-value" id="statTotal">0건</div>
-                <div class="metric-sub">전체 누적 접수 현황</div>
+                <div class="metric-sub">3대 핵심자격 누적 접수</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">국가기술자격 (4종)</div>
-                <div class="metric-value" style="color: #60a5fa;" id="statNational">0건</div>
-                <div class="metric-sub">한식 / 지게차 / 굴착기 / 전기</div>
+                <div class="metric-label">🍳 한식조리기능사</div>
+                <div class="metric-value" style="color: #60a5fa;" id="statCook">0건</div>
+                <div class="metric-sub">음식점 창업 / 조리원</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">두두보건 (2종)</div>
-                <div class="metric-value" style="color: #34d399;" id="statHealth">0건</div>
-                <div class="metric-sub">요양보호사 / 위생사</div>
+                <div class="metric-label">🚜 지게차운전기능사</div>
+                <div class="metric-value" style="color: #34d399;" id="statForklift">0건</div>
+                <div class="metric-sub">물류 / 유통 / 제조 면허</div>
             </div>
             <div class="metric-card">
-                <div class="metric-label">전문자격 (2종)</div>
-                <div class="metric-value" style="color: #c084fc;" id="statProf">0건</div>
-                <div class="metric-sub">손해평가사 / 공인중개사</div>
+                <div class="metric-label">🏗️ 굴착기운전기능사</div>
+                <div class="metric-value" style="color: #fbbf24;" id="statExcavator">0건</div>
+                <div class="metric-sub">토목 / 건설 포크레인</div>
             </div>
         </div>
 
@@ -456,15 +457,10 @@
             <div class="filter-inputs">
                 <input type="text" id="searchInput" class="form-input" placeholder="성함, 연락처, 접수번호 검색..." style="width: 240px;" oninput="debounceFilter()">
                 <select id="qualFilter" class="form-select" onchange="applyFilters()">
-                    <option value="ALL">전체 자격종목 (8종)</option>
-                    <option value="한식조리기능사">한식조리기능사</option>
-                    <option value="지게차운전기능사">지게차운전기능사</option>
-                    <option value="굴착기운전기능사">굴착기운전기능사</option>
-                    <option value="전기기능사">전기기능사</option>
-                    <option value="요양보호사">요양보호사</option>
-                    <option value="위생사">위생사</option>
-                    <option value="손해평가사">손해평가사</option>
-                    <option value="공인중개사">공인중개사</option>
+                    <option value="ALL">전체 3대 종목 (한식·지게차·굴착기)</option>
+                    <option value="한식조리">한식조리기능사</option>
+                    <option value="지게차">지게차운전기능사</option>
+                    <option value="굴착기">굴착기운전기능사 (포크레인)</option>
                 </select>
                 <select id="regionFilter" class="form-select" onchange="applyFilters()">
                     <option value="ALL">전체 지역 권역</option>
@@ -630,17 +626,13 @@
         function updateMetrics(records) {
             document.getElementById('statTotal').textContent = records.length.toLocaleString() + '건';
 
-            const nationalQuals = ['한식', '지게차', '굴착기', '전기'];
-            const healthQuals = ['요양보호사', '위생사'];
-            const profQuals = ['손해평가사', '공인중개사'];
+            const cookCount = records.filter(r => (r.qualification || '').includes('한식')).length;
+            const forkliftCount = records.filter(r => (r.qualification || '').includes('지게차')).length;
+            const excavatorCount = records.filter(r => (r.qualification || '').includes('굴착기') || (r.qualification || '').includes('포크레인')).length;
 
-            const natCount = records.filter(r => nationalQuals.some(q => (r.qualification || '').includes(q))).length;
-            const healthCount = records.filter(r => healthQuals.some(q => (r.qualification || '').includes(q))).length;
-            const profCount = records.filter(r => profQuals.some(q => (r.qualification || '').includes(q))).length;
-
-            document.getElementById('statNational').textContent = natCount.toLocaleString() + '건';
-            document.getElementById('statHealth').textContent = healthCount.toLocaleString() + '건';
-            document.getElementById('statProf').textContent = profCount.toLocaleString() + '건';
+            document.getElementById('statCook').textContent = cookCount.toLocaleString() + '건';
+            document.getElementById('statForklift').textContent = forkliftCount.toLocaleString() + '건';
+            document.getElementById('statExcavator').textContent = excavatorCount.toLocaleString() + '건';
         }
 
         function debounceFilter() {
@@ -802,7 +794,7 @@
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">신청 자격종목</div>
-                    <div class="detail-val">${item.qualification || '-'} (${item.exam_type || '필기'})</div>
+                    <div class="detail-val">${item.qualification || '-'} (${item.exam_type || '상시CBT'})</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">시험지역 및 장소</div>
@@ -810,15 +802,11 @@
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">시험일자 및 교시</div>
-                    <div class="detail-val">${item.exam_date || '-'} (${item.exam_session || '1교시'})</div>
+                    <div class="detail-val">${item.exam_date || '-'} (${item.exam_session || '1부'})</div>
                 </div>
                 <div class="detail-item">
                     <div class="detail-label">최종 결제금액</div>
                     <div class="detail-val">${(item.fee_final || item.fee_amount || 0).toLocaleString()}원 (${item.payment_method || '신용카드'})</div>
-                </div>
-                <div class="detail-item" style="grid-column: 1 / -1;">
-                    <div class="detail-label">교육기관 및 이수시간 (보건자격)</div>
-                    <div class="detail-val">${item.training_institution || '해당없음'} ${item.training_hours ? `(${item.training_hours}시간 이수)` : ''}</div>
                 </div>
                 <div class="detail-item" style="grid-column: 1 / -1;">
                     <div class="detail-label">접수 신청 일시</div>

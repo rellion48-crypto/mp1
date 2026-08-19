@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>두두자격지원센터 - 시니어 국가자격 간편 원서접수</title>
+    <title>두두자격지원센터 - 시니어 3대 핵심 국가기술자격 간편 원서접수</title>
     <!-- Google Fonts: Noto Sans KR -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -28,7 +28,6 @@
             --focus-ring: #60a5fa;
         }
 
-        /* High Contrast Light Theme Support */
         body.light-contrast {
             --bg-page: #f8fafc;
             --card-bg: #ffffff;
@@ -56,7 +55,7 @@
             transition: background-color 0.2s ease, color 0.2s ease;
         }
 
-        /* 1. Senior Accessibility & Zoom Utility Bar */
+        /* 1. Top Utility Bar */
         .top-utility-bar {
             background: #020617;
             border-bottom: 2px solid #1e293b;
@@ -99,7 +98,6 @@
             font-size: calc(14px * var(--font-scale));
             font-weight: 800;
             cursor: pointer;
-            transition: all 0.15s;
             min-height: 38px;
         }
         .zoom-btn:hover {
@@ -203,7 +201,7 @@
             padding: 0 24px;
         }
 
-        /* Senior Friendly Hero Callout */
+        /* Hero Callout */
         .hero-banner {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 2px solid #3b82f6;
@@ -291,34 +289,30 @@
             font-weight: 500;
         }
 
-        /* 5. Qualification Selection Cards */
-        .cards-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
+        /* 5. 3 Major Qualification Cards */
+        .cards-3grid {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
         }
         .qual-card {
             background: var(--card-bg);
             border: 2px solid var(--card-border);
-            border-radius: var(--radius-md);
-            padding: 22px;
+            border-radius: var(--radius-lg);
+            padding: 26px;
             cursor: pointer;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
             position: relative;
-            min-height: 180px;
         }
         .qual-card:hover {
             border-color: #60a5fa;
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.3);
         }
         .qual-card.active {
             border: 3px solid #3b82f6;
             background: rgba(37, 99, 235, 0.18);
-            box-shadow: 0 0 25px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.45);
         }
         .card-top {
             display: flex;
@@ -327,47 +321,69 @@
             margin-bottom: 12px;
         }
         .card-tag {
-            font-size: calc(13px * var(--font-scale));
+            font-size: calc(14px * var(--font-scale));
             font-weight: 800;
-            padding: 4px 10px;
-            border-radius: 6px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            background: rgba(5, 150, 105, 0.25);
+            color: #34d399;
+            border: 1px solid #059669;
         }
-        .tag-always { background: rgba(5, 150, 105, 0.25); color: #34d399; border: 1px solid #059669; }
-        .tag-regular { background: rgba(37, 99, 235, 0.25); color: #93c5fd; border: 1px solid #2563eb; }
-        .tag-annual { background: rgba(217, 119, 6, 0.25); color: #fde68a; border: 1px solid #d97706; }
-
         .selected-badge {
             display: none;
             background: #2563eb;
             color: #ffffff;
-            font-size: calc(12px * var(--font-scale));
+            font-size: calc(13px * var(--font-scale));
             font-weight: 900;
-            padding: 3px 8px;
-            border-radius: 6px;
+            padding: 4px 10px;
+            border-radius: 8px;
         }
         .qual-card.active .selected-badge {
             display: inline-block;
         }
 
         .card-name {
-            font-size: calc(21px * var(--font-scale));
+            font-size: calc(23px * var(--font-scale));
             font-weight: 900;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
             color: var(--text-main);
             line-height: 1.2;
         }
         .card-desc {
-            font-size: calc(15px * var(--font-scale));
+            font-size: calc(16px * var(--font-scale));
             color: var(--text-sub);
-            margin-bottom: 16px;
-            line-height: 1.45;
+            margin-bottom: 18px;
+            line-height: 1.5;
             font-weight: 500;
         }
-        .card-meta {
+        .card-details-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.25);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 14px;
             font-size: calc(14px * var(--font-scale));
+        }
+        .card-detail-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .card-detail-label {
+            font-size: calc(12px * var(--font-scale));
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .card-detail-val {
+            font-weight: 800;
+            color: #93c5fd;
+        }
+        .card-meta {
+            font-size: calc(15px * var(--font-scale));
             color: var(--text-muted);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
-            padding-top: 10px;
+            padding-top: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -375,11 +391,11 @@
         }
         .card-fee {
             font-weight: 900;
-            font-size: calc(16px * var(--font-scale));
+            font-size: calc(18px * var(--font-scale));
             color: #60a5fa;
         }
 
-        /* 6. Form Panel (Large, Senior-friendly Inputs) */
+        /* 6. Form Panel */
         .form-panel {
             background: var(--card-bg);
             border: 2px solid var(--card-border);
@@ -431,7 +447,7 @@
             margin-bottom: 22px;
         }
         .selected-qual-title {
-            font-size: calc(20px * var(--font-scale));
+            font-size: calc(21px * var(--font-scale));
             font-weight: 900;
             color: #93c5fd;
             margin-bottom: 6px;
@@ -581,7 +597,7 @@
     <div class="top-utility-bar">
         <div class="top-utility-container">
             <div class="hotline-badge">
-                📞 원서접수 직통 무료 전화: 02-1544-2026 (평일 09:00 ~ 18:00)
+                📞 3대 핵심자격증 직통 무료 상담 전화: 02-1544-2026 (평일 09:00 ~ 18:00)
             </div>
             <div class="accessibility-controls">
                 <span class="zoom-label">🔍 글자 크기:</span>
@@ -600,7 +616,7 @@
                 <div class="logo-badge">두</div>
                 <div class="logo-text">
                     <h1>두두자격지원센터</h1>
-                    <p>중장년·시니어 국가기술 & 전문자격 원서접수 지원 포털</p>
+                    <p>중장년·시니어 취업 3대 핵심 국가기술자격 간편 원서접수 포털</p>
                 </div>
             </a>
             <nav class="nav-links">
@@ -615,155 +631,111 @@
     <div class="main-container">
         <!-- Hero Callout -->
         <div class="hero-banner">
-            <h2 class="hero-title">어르신의 인생 2막 도전을 <span>두두자격지원센터</span>가 돕습니다</h2>
+            <h2 class="hero-title">어르신 취업 최고 인기 <span>3대 국가기술자격증</span> 간편 접수</h2>
             <p class="hero-sub">
-                어려운 공인인증서나 복잡한 절차 없이, 원하시는 자격증을 누르고 성함과 전화번호만 적어주시면 접수가 완료됩니다.
+                복잡한 인터넷 회원가입이나 공동인증서 없이, 원하시는 자격증을 누르고 성함과 전화번호만 남겨주시면 시험장 배정 및 원서접수를 신속히 대행해 드립니다.
             </p>
             <div class="features-pill-group">
-                <div class="feature-pill">✓ 8대 핵심 취업 자격증 간편 접수</div>
-                <div class="feature-pill">✓ 원하는 시험장소 및 시간대 무료 상담</div>
-                <div class="feature-pill">✓ 24시간 실시간 AI 챗봇 안내 상담</div>
+                <div class="feature-pill">✓ 한식조리 / 지게차운전 / 굴착기운전 3종 집중 지원</div>
+                <div class="feature-pill">✓ 상시 CBT 시험 (시험 당일 즉시 합격 발표)</div>
+                <div class="feature-pill">✓ 응시수수료 14,500원 동일 적용</div>
             </div>
         </div>
 
         <!-- 4. Application Section (Step 1 & Step 2) -->
         <div class="content-grid" id="application-section">
-            <!-- Left: Step 1 Qualification Selection -->
+            <!-- Left: Step 1 Qualification Selection (3 Core Qualifications) -->
             <div>
                 <div class="step-header">
                     <span class="step-badge">1단계</span>
                     <div class="step-title-group">
-                        <h3>준비하시는 자격증을 선택해 주세요</h3>
-                        <p>아래 자격증 중 하나를 누르시면 오른쪽에 바로 반영됩니다.</p>
+                        <h3>준비하시는 자격증을 선택해 주세요 (3종)</h3>
+                        <p>원하시는 자격증 카드를 누르시면 오른쪽에 바로 반영됩니다.</p>
                     </div>
                 </div>
 
-                <div class="cards-grid" id="qualCardsContainer">
+                <div class="cards-3grid" id="qualCardsContainer">
                     <!-- 1. 한식조리기능사 -->
                     <div class="qual-card active" onclick="selectQualification('한식조리기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-always">상시 접수 (CBT)</span>
-                                <span class="selected-badge">✓ 선택됨</span>
+                        <div class="card-top">
+                            <span class="card-tag">상시 접수 (CBT)</span>
+                            <span class="selected-badge">✓ 선택됨</span>
+                        </div>
+                        <div class="card-name">1. 한식조리기능사</div>
+                        <div class="card-desc">음식점 창업, 단체급식소 조리원 취업 대표 자격증 (시험 종료 즉시 합격 발표)</div>
+                        <div class="card-details-grid">
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">시험 방식</span>
+                                <span class="card-detail-val">컴퓨터 CBT</span>
                             </div>
-                            <div class="card-name">한식조리기능사</div>
-                            <div class="card-desc">식당 취업 및 조리 관련 창업 대표 자격증 (시험 당일 합격 발표)</div>
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">시행 기관</span>
+                                <span class="card-detail-val">두두자격검정원</span>
+                            </div>
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">합격 발표</span>
+                                <span class="card-detail-val">시험 당일 즉시</span>
+                            </div>
                         </div>
                         <div class="card-meta">
-                            <span>시행: 두두자격검정원</span>
+                            <span>접수 기간: 상시 (원하는 날짜 선택)</span>
                             <span class="card-fee">14,500원</span>
                         </div>
                     </div>
 
                     <!-- 2. 지게차운전기능사 -->
                     <div class="qual-card" onclick="selectQualification('지게차운전기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-always">상시 접수 (CBT)</span>
-                                <span class="selected-badge">✓ 선택됨</span>
+                        <div class="card-top">
+                            <span class="card-tag">상시 접수 (CBT)</span>
+                            <span class="selected-badge">✓ 선택됨</span>
+                        </div>
+                        <div class="card-name">2. 지게차운전기능사</div>
+                        <div class="card-desc">물류센터, 유통 및 제조 현장 취업 필수 면허 자격 (남녀 중장년 선호 1위)</div>
+                        <div class="card-details-grid">
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">시험 방식</span>
+                                <span class="card-detail-val">컴퓨터 CBT</span>
                             </div>
-                            <div class="card-name">지게차운전기능사</div>
-                            <div class="card-desc">물류센터, 유통 및 제조 현장 취업 필수 면허 자격</div>
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">시행 기관</span>
+                                <span class="card-detail-val">두두자격검정원</span>
+                            </div>
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">합격 발표</span>
+                                <span class="card-detail-val">시험 당일 즉시</span>
+                            </div>
                         </div>
                         <div class="card-meta">
-                            <span>시행: 두두자격검정원</span>
+                            <span>접수 기간: 상시 (원하는 날짜 선택)</span>
                             <span class="card-fee">14,500원</span>
                         </div>
                     </div>
 
                     <!-- 3. 굴착기운전기능사 -->
                     <div class="qual-card" onclick="selectQualification('굴착기운전기능사', '기능사', '상시CBT', '14,500원', 14500, '두두자격검정원')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-always">상시 접수 (CBT)</span>
-                                <span class="selected-badge">✓ 선택됨</span>
+                        <div class="card-top">
+                            <span class="card-tag">상시 접수 (CBT)</span>
+                            <span class="selected-badge">✓ 선택됨</span>
+                        </div>
+                        <div class="card-name">3. 굴착기운전기능사 (포크레인)</div>
+                        <div class="card-desc">토목 공사현장 및 중장비 운전 기술 자격증 (정년 없는 평생 기술)</div>
+                        <div class="card-details-grid">
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">시험 방식</span>
+                                <span class="card-detail-val">컴퓨터 CBT</span>
                             </div>
-                            <div class="card-name">굴착기운전기능사</div>
-                            <div class="card-desc">토목 공사현장 및 중장비 운전 기술 자격증 (포크레인)</div>
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">시행 기관</span>
+                                <span class="card-detail-val">두두자격검정원</span>
+                            </div>
+                            <div class="card-detail-item">
+                                <span class="card-detail-label">합격 발표</span>
+                                <span class="card-detail-val">시험 당일 즉시</span>
+                            </div>
                         </div>
                         <div class="card-meta">
-                            <span>시행: 두두자격검정원</span>
+                            <span>접수 기간: 상시 (원하는 날짜 선택)</span>
                             <span class="card-fee">14,500원</span>
-                        </div>
-                    </div>
-
-                    <!-- 4. 전기기능사 -->
-                    <div class="qual-card" onclick="selectQualification('전기기능사', '기능사', '정기', '14,500원', 14500, '두두자격검정원')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-regular">정기 (연 4회)</span>
-                                <span class="selected-badge">✓ 선택됨</span>
-                            </div>
-                            <div class="card-name">전기기능사</div>
-                            <div class="card-desc">아파트 단지, 빌딩 및 공공시설 시설관리직 최고 선호 자격</div>
-                        </div>
-                        <div class="card-meta">
-                            <span>제4회: 08.24~08.27</span>
-                            <span class="card-fee">14,500원</span>
-                        </div>
-                    </div>
-
-                    <!-- 5. 요양보호사 -->
-                    <div class="qual-card" onclick="selectQualification('요양보호사', '보건자격', '상시', '32,000원', 32000, '두두보건시험원')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-always">상시 접수</span>
-                                <span class="selected-badge">✓ 선택됨</span>
-                            </div>
-                            <div class="card-name">요양보호사</div>
-                            <div class="card-desc">요양원, 주야간보호센터, 재가돌봄 전문 자격 (240시간 수료 필수)</div>
-                        </div>
-                        <div class="card-meta">
-                            <span>시행: 두두보건시험원</span>
-                            <span class="card-fee">32,000원</span>
-                        </div>
-                    </div>
-
-                    <!-- 6. 위생사 -->
-                    <div class="qual-card" onclick="selectQualification('위생사', '보건자격', '별도', '30,000원', 30000, '두두보건시험원')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-regular">별도 시행</span>
-                                <span class="selected-badge">✓ 선택됨</span>
-                            </div>
-                            <div class="card-name">위생사</div>
-                            <div class="card-desc">단체급식소 및 공중위생 관리 전문 자격 (보건관련학과 이수자)</div>
-                        </div>
-                        <div class="card-meta">
-                            <span>시행: 두두보건시험원</span>
-                            <span class="card-fee">30,000원</span>
-                        </div>
-                    </div>
-
-                    <!-- 7. 손해평가사 -->
-                    <div class="qual-card" onclick="selectQualification('손해평가사', '전문자격', '연1회', '1차 30,000원', 30000, '전문자격')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-annual">연 1회 시행</span>
-                                <span class="selected-badge">✓ 선택됨</span>
-                            </div>
-                            <div class="card-name">손해평가사</div>
-                            <div class="card-desc">농작물 및 가축 재해 손해 평가 전문직 (2026년 1차 마감)</div>
-                        </div>
-                        <div class="card-meta">
-                            <span>시행: 전문자격</span>
-                            <span class="card-fee">30,000원</span>
-                        </div>
-                    </div>
-
-                    <!-- 8. 공인중개사 -->
-                    <div class="qual-card" onclick="selectQualification('공인중개사', '전문자격', '연1회', '1차 13,400원', 13400, '전문자격')">
-                        <div>
-                            <div class="card-top">
-                                <span class="card-tag tag-annual">연 1회 시행</span>
-                                <span class="selected-badge">✓ 선택됨</span>
-                            </div>
-                            <div class="card-name">공인중개사</div>
-                            <div class="card-desc">부동산 중개 사무소 개업 및 자산 관리 전문 자격</div>
-                        </div>
-                        <div class="card-meta">
-                            <span>시행: 전문자격</span>
-                            <span class="card-fee">13,400원</span>
                         </div>
                     </div>
                 </div>
@@ -810,13 +782,25 @@
                             <label class="form-label" for="userRegion">3. 시험 희망 지역</label>
                             <select id="userRegion" class="form-select">
                                 <option value="서울">서울</option>
-                                <option value="경기">경기 / 인천</option>
+                                <option value="경기">경기 / 인천 / 수원</option>
                                 <option value="부산">부산 / 울산 / 경남</option>
                                 <option value="대구">대구 / 경북</option>
                                 <option value="대전">대전 / 세종 / 충청</option>
                                 <option value="광주">광주 / 전라</option>
                                 <option value="강원">강원</option>
                                 <option value="제주">제주</option>
+                            </select>
+                        </div>
+
+                        <!-- Preferred Session -->
+                        <div class="form-group">
+                            <label class="form-label" for="userSession">4. 시험 희망 시간대 (교시)</label>
+                            <select id="userSession" class="form-select">
+                                <option value="1">1부 (오전 09:00)</option>
+                                <option value="2">2부 (오전 11:00)</option>
+                                <option value="3">3부 (오후 13:00)</option>
+                                <option value="4">4부 (오후 15:00)</option>
+                                <option value="5">5부 (오후 17:00)</option>
                             </select>
                         </div>
 
@@ -838,7 +822,7 @@
                         <div class="help-icon">💡</div>
                         <div class="help-text">
                             <strong>궁금한 점이 있으신가요?</strong><br>
-                            화면 우측 하단의 <strong>[문의 챗봇]</strong> 버튼을 누르시면 시험 응시료, 준비물, 일정 등을 언제든 확인하실 수 있습니다.
+                            화면 우측 하단의 <strong>[문의 챗봇]</strong> 버튼을 누르시면 3대 자격증 응시료, 준비물, 일정 등을 언제든 확인하실 수 있습니다.
                         </div>
                     </div>
                 </div>
@@ -867,7 +851,7 @@
                     <strong id="receiptQual">-</strong>
                 </div>
                 <div class="receipt-row">
-                    <span style="color: var(--text-sub);">희망 지역:</span>
+                    <span style="color: var(--text-sub);">희망 지역/교시:</span>
                     <strong id="receiptRegion">-</strong>
                 </div>
                 <div class="receipt-row">
@@ -885,7 +869,7 @@
 
     <!-- 6. Footer -->
     <footer>
-        <p><strong>두두자격지원센터 (중장년·시니어 국가자격 원서접수 지원 포털)</strong></p>
+        <p><strong>두두자격지원센터 (시니어 3대 핵심 국가기술자격 원서접수 지원 포털)</strong></p>
         <p>고객센터: 02-1544-2026 | 운영시간: 평일 09:00 ~ 18:00 (주말 및 공휴일 휴무)</p>
         <p style="color: var(--text-muted); margin-top: 6px;">Copyright © 2026 DuDu Qualification Support Center. All rights reserved.</p>
     </footer>
@@ -910,7 +894,6 @@
             org: "두두자격검정원"
         };
 
-        // Real Font Scaling Engine (Saved in LocalStorage)
         let currentScale = parseFloat(localStorage.getItem('dudu_font_scale') || '1.0');
 
         function applyFontScale() {
@@ -928,7 +911,6 @@
             applyFontScale();
         }
 
-        // High Contrast Light Mode Toggle
         let isLightContrast = localStorage.getItem('dudu_contrast') === 'light';
         function applyContrast() {
             if (isLightContrast) {
@@ -946,7 +928,6 @@
             applyContrast();
         }
 
-        // Phone Auto-Hyphen Formatter
         function autoFormatPhone(input) {
             let val = input.value.replace(/[^0-9]/g, '');
             let formatted = '';
@@ -962,7 +943,6 @@
             input.value = formatted;
         }
 
-        // Select Qualification Card
         function selectQualification(name, grade, type, fee, feeInt, org) {
             selectedData = {
                 name: name,
@@ -980,7 +960,7 @@
             const cards = document.querySelectorAll('.qual-card');
             cards.forEach(card => {
                 const title = card.querySelector('.card-name').textContent;
-                if (title === name) {
+                if (title.includes(name)) {
                     card.classList.add('active');
                 } else {
                     card.classList.remove('active');
@@ -988,13 +968,13 @@
             });
         }
 
-        // Handle Registration Submit
         async function handleRegistrationSubmit(e) {
             e.preventDefault();
             const btn = document.getElementById('submitAppBtn');
             const name = document.getElementById('userName').value.trim();
             const phone = document.getElementById('userPhone').value.trim();
             const region = document.getElementById('userRegion').value;
+            const session = document.getElementById('userSession').value;
 
             if (!name || phone.length < 12) {
                 alert('성함과 휴대전화 번호를 정확히 입력해 주세요.');
@@ -1004,23 +984,20 @@
             btn.disabled = true;
             btn.innerHTML = '<span>접수 처리 중...</span>';
 
-            let prefix = 'DN2026';
-            if (selectedData.grade === '전문자격') prefix = 'DP2026';
-            if (selectedData.grade === '보건자격') prefix = 'DH2026';
-
-            const randNo = prefix + Math.floor(100000 + Math.random() * 900000);
+            const randNo = 'DN2026' + Math.floor(100000 + Math.random() * 900000);
             const payload = {
                 receipt_number: randNo,
                 name: name,
                 phone: phone,
                 qualification: selectedData.name,
-                grade: selectedData.grade,
-                exam_type: selectedData.type,
+                grade: '기능사',
+                exam_type: '상시CBT',
                 exam_stage: '필기',
                 exam_region: region,
                 exam_center: region + '시험장',
-                fee_amount: selectedData.feeInt,
-                fee_final: selectedData.feeInt,
+                exam_session: session + '부',
+                fee_amount: 14500,
+                fee_final: 14500,
                 payment_method: '신용카드',
                 payment_status: '완료',
                 status: '접수완료',
@@ -1041,7 +1018,7 @@
                 document.getElementById('receiptNo').textContent = randNo;
                 document.getElementById('receiptName').textContent = name;
                 document.getElementById('receiptQual').textContent = selectedData.name;
-                document.getElementById('receiptRegion').textContent = region;
+                document.getElementById('receiptRegion').textContent = `${region} (${session}부)`;
                 document.getElementById('receiptFee').textContent = selectedData.fee;
 
                 document.getElementById('receiptModal').style.display = 'flex';
