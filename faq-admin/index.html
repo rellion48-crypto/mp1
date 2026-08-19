@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>두두자격지원센터 - FAQ 규정 관리 어드민</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --card-border: rgba(255, 255, 255, 0.12);
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Noto Sans KR', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background: rgba(15, 23, 42, 0.9);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: var(--text-main);
+        }
+
+        .logo-badge {
+            background: linear-gradient(135deg, #8b5cf6, var(--primary));
+            color: #fff;
+            font-size: 20px;
+            font-weight: 900;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .logo-text h1 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--primary);
+        }
+
+        .main-container {
+            max-width: 1300px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        /* Top Action Bar */
+        .action-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--accent); color: white; }
+        .btn-success:hover { background: #059669; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: var(--text-main); border: 1px solid var(--card-border); }
+
+        /* Search & Filters */
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 260px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            color: var(--text-main);
+            outline: none;
+            font-size: 14px;
+        }
+
+        .select-filter {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            color: var(--text-main);
+            outline: none;
+            font-size: 14px;
+        }
+
+        /* FAQ Card List */
+        .faq-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+        }
+
+        .faq-item-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .faq-item-card:hover {
+            border-color: #8b5cf6;
+            transform: translateY(-2px);
+        }
+
+        .faq-tags {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+        }
+        .tag-category { background: rgba(139, 92, 246, 0.2); color: #c084fc; }
+        .tag-qual { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
+        .tag-unknown { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+
+        .faq-q {
+            font-size: 16px;
+            font-weight: 700;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .faq-a {
+            font-size: 14px;
+            color: #cbd5e1;
+            line-height: 1.5;
+            background: rgba(15, 23, 42, 0.5);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
+            white-space: pre-wrap;
+        }
+
+        .faq-keywords {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+        }
+
+        .faq-card-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 12px;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            max-width: 540px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: #cbd5e1;
+        }
+
+        .form-input, .form-textarea, .form-select {
+            width: 100%;
+            background: #0f172a;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 10px 14px;
+            color: var(--text-main);
+            font-size: 14px;
+            outline: none;
+        }
+
+        .form-textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .form-input:focus, .form-textarea:focus, .form-select:focus {
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-container">
+            <a href="../index.html" class="logo">
+                <div class="logo-badge">문</div>
+                <div class="logo-text">
+                    <h1>두두자격지원센터 (FAQ 규정 어드민)</h1>
+                    <p style="font-size: 11px; color: var(--text-sub);">운영자 문서 수정 $\rightarrow$ 챗봇 답변 실시간 즉시 반영</p>
+                </div>
+            </a>
+            <nav class="nav-links">
+                <a href="../index.html" class="nav-btn">1. 접수 화면</a>
+                <a href="../admin/index.html" class="nav-btn">3. 접수 어드민</a>
+            </nav>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="action-bar">
+            <div>
+                <h2>📖 FAQ 및 사내 안내 규정 관리</h2>
+                <p style="font-size: 14px; color: var(--text-sub); margin-top: 4px;">
+                    시험 일정, 수수료, 규정을 수정하면 AI 챗봇이 수정된 최신 내용을 바탕으로 답변합니다.
+                </p>
+            </div>
+            <div class="action-btns">
+                <button class="btn btn-secondary" onclick="seedDefaultDocs()">🔄 기본 규정 데이터 동기화</button>
+                <button class="btn btn-primary" onclick="openEditModal()">+ 새 규정/FAQ 추가</button>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <input type="text" class="search-input" id="searchKeyword" placeholder="질문, 키워드, 답변 내용 검색..." oninput="renderFAQList()">
+            <select class="select-filter" id="filterQual" onchange="renderFAQList()">
+                <option value="ALL">모든 자격증 종목</option>
+                <option value="공통">공통 규정</option>
+                <option value="한식조리기능사">한식조리기능사</option>
+                <option value="지게차운전기능사">지게차운전기능사</option>
+                <option value="굴착기운전기능사">굴착기운전기능사</option>
+                <option value="전기기능사">전기기능사</option>
+                <option value="요양보호사">요양보호사</option>
+                <option value="위생사">위생사</option>
+                <option value="손해평가사">손해평가사</option>
+                <option value="공인중개사">공인중개사</option>
+            </select>
+        </div>
+
+        <div class="faq-grid" id="faqGridContainer">
+            <!-- Dynamic Items -->
+        </div>
+    </div>
+
+    <!-- Edit/Create Modal -->
+    <div class="modal-overlay" id="faqModal">
+        <div class="modal-card">
+            <h3 id="modalHeading" style="margin-bottom: 20px;">FAQ 규정 편집</h3>
+            <form id="faqForm" onsubmit="handleSaveFAQ(event)">
+                <input type="hidden" id="editFaqId">
+                
+                <div class="form-group">
+                    <label class="form-label">구분 카테고리</label>
+                    <select id="faqCategory" class="form-select">
+                        <option value="응시료">응시료 (접수비)</option>
+                        <option value="일정">시험 일정 및 기간</option>
+                        <option value="결제/환불">결제 및 환불 규정</option>
+                        <option value="유효기간">필기합격 유효기간</option>
+                        <option value="시험준비물">준비물 및 지참물</option>
+                        <option value="접수방법">접수 방법</option>
+                        <option value="실기문의">실기 문의</option>
+                        <option value="확인불가">사내 미확인 항목 (모르겠습니다)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">대상 자격증</label>
+                    <select id="faqQual" class="form-select">
+                        <option value="공통">공통</option>
+                        <option value="기능사 4종">기능사 4종 (한식/지게차/굴착기/전기)</option>
+                        <option value="상시 3종">상시 3종 (한식/지게차/굴착기)</option>
+                        <option value="전문자격 2종">전문자격 2종 (손해평가사/공인중개사)</option>
+                        <option value="한식조리기능사">한식조리기능사</option>
+                        <option value="지게차운전기능사">지게차운전기능사</option>
+                        <option value="굴착기운전기능사">굴착기운전기능사</option>
+                        <option value="전기기능사">전기기능사</option>
+                        <option value="요양보호사">요양보호사</option>
+                        <option value="위생사">위생사</option>
+                        <option value="손해평가사">손해평가사</option>
+                        <option value="공인중개사">공인중개사</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">질문 (Question)</label>
+                    <input type="text" id="faqQuestion" class="form-input" required placeholder="예: 전기기능사 시험 일정은 언제인가요?">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">검색 키워드 & 시니어 유의어 (쉼표 구분)</label>
+                    <input type="text" id="faqKeywords" class="form-input" required placeholder="예: 전기기능사, 전기, 일정, 언제, 접수기간">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">챗봇 답변 (Answer)</label>
+                    <textarea id="faqAnswer" class="form-textarea" required placeholder="챗봇이 사용자에게 응답할 정확한 규정 문구를 작성하세요."></textarea>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" id="faqIsUnknown" style="width: 18px; height: 18px;">
+                    <label for="faqIsUnknown" style="font-size: 13px; color: #f87171;">확인 불가 항목 ('모르겠습니다' 강제 답변)</label>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">규정 저장 및 챗봇 동기화</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase Logic -->
+    <script>
+        const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
+        
+        let supabase = null;
+        if (window.supabase) {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let currentDocs = [];
+
+        async function loadFAQDocs() {
+            if (supabase) {
+                try {
+                    const { data, error } = await supabase
+                        .from('faq_documents')
+                        .select('*')
+                        .order('id', { ascending: true });
+
+                    if (!error && data && data.length > 0) {
+                        currentDocs = data;
+                        renderFAQList();
+                        return;
+                    }
+                } catch (e) {
+                    console.log('Supabase fetch note:', e);
+                }
+            }
+
+            // Fallback: local default knowledge
+            if (window.duduChat && window.duduChat.knowledgeBase) {
+                currentDocs = window.duduChat.knowledgeBase;
+            } else if (typeof DEFAULT_FAQ_KNOWLEDGE !== 'undefined') {
+                currentDocs = [...DEFAULT_FAQ_KNOWLEDGE];
+            }
+            renderFAQList();
+        }
+
+        function renderFAQList() {
+            const container = document.getElementById('faqGridContainer');
+            const search = document.getElementById('searchKeyword').value.trim().toLowerCase();
+            const filterQual = document.getElementById('filterQual').value;
+
+            const filtered = currentDocs.filter(item => {
+                const matchSearch = !search || 
+                    (item.question && item.question.toLowerCase().includes(search)) ||
+                    (item.answer && item.answer.toLowerCase().includes(search)) ||
+                    (item.keywords && item.keywords.toLowerCase().includes(search));
+
+                const matchQual = filterQual === 'ALL' || (item.qualification && item.qualification.includes(filterQual));
+                return matchSearch && matchQual;
+            });
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-sub);">일치하는 FAQ 규정이 없습니다.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(item => `
+                <div class="faq-item-card">
+                    <div>
+                        <div class="faq-tags">
+                            <span class="tag tag-category">${item.category || '일반'}</span>
+                            <span class="tag tag-qual">${item.qualification || '공통'}</span>
+                            ${item.is_unknown ? '<span class="tag tag-unknown">확인불가(거절)</span>' : ''}
+                        </div>
+                        <div class="faq-q">Q. ${item.question}</div>
+                        <div class="faq-a">A. ${item.answer}</div>
+                        <div class="faq-keywords">🔑 <strong>키워드:</strong> ${item.keywords || '-'}</div>
+                    </div>
+                    <div class="faq-card-footer">
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px;" onclick="openEditModal(${item.id})">수정</button>
+                        <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 12px; color: #f87171;" onclick="deleteFAQ(${item.id})">삭제</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function openEditModal(id = null) {
+            document.getElementById('editFaqId').value = id || '';
+            document.getElementById('modalHeading').textContent = id ? 'FAQ 규정 수정' : '새 규정/FAQ 추가';
+            
+            if (id) {
+                const item = currentDocs.find(d => d.id == id);
+                if (item) {
+                    document.getElementById('faqCategory').value = item.category || '응시료';
+                    document.getElementById('faqQual').value = item.qualification || '공통';
+                    document.getElementById('faqQuestion').value = item.question || '';
+                    document.getElementById('faqKeywords').value = item.keywords || '';
+                    document.getElementById('faqAnswer').value = item.answer || '';
+                    document.getElementById('faqIsUnknown').checked = !!item.is_unknown;
+                }
+            } else {
+                document.getElementById('faqForm').reset();
+            }
+
+            document.getElementById('faqModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('faqModal').style.display = 'none';
+        }
+
+        async function handleSaveFAQ(e) {
+            e.preventDefault();
+            const id = document.getElementById('editFaqId').value;
+            const category = document.getElementById('faqCategory').value;
+            const qualification = document.getElementById('faqQual').value;
+            const question = document.getElementById('faqQuestion').value.trim();
+            const keywords = document.getElementById('faqKeywords').value.trim();
+            const answer = document.getElementById('faqAnswer').value.trim();
+            const is_unknown = document.getElementById('faqIsUnknown').checked;
+
+            const docData = {
+                category,
+                qualification,
+                question,
+                keywords,
+                answer,
+                is_unknown,
+                updated_at: new Date().toISOString()
+            };
+
+            try {
+                if (supabase) {
+                    if (id) {
+                        await supabase.from('faq_documents').update(docData).eq('id', id);
+                    } else {
+                        await supabase.from('faq_documents').insert([docData]);
+                    }
+                }
+            } catch (err) {
+                console.warn('Supabase save note:', err);
+            }
+
+            // Local sync
+            if (id) {
+                const idx = currentDocs.findIndex(d => d.id == id);
+                if (idx !== -1) currentDocs[idx] = { ...currentDocs[idx], ...docData };
+            } else {
+                docData.id = Date.now();
+                currentDocs.push(docData);
+            }
+
+            // Sync with active floating chatbot
+            if (window.duduChat) {
+                window.duduChat.knowledgeBase = [...currentDocs];
+            }
+
+            closeEditModal();
+            renderFAQList();
+            alert('규정이 성공적으로 저장되었으며, 챗봇 답변에 즉시 반영되었습니다!');
+        }
+
+        async function deleteFAQ(id) {
+            if (!confirm('이 규정 문서를 삭제하시겠습니까?')) return;
+
+            try {
+                if (supabase) {
+                    await supabase.from('faq_documents').delete().eq('id', id);
+                }
+            } catch (err) {
+                console.warn('Supabase delete error:', err);
+            }
+
+            currentDocs = currentDocs.filter(d => d.id != id);
+            if (window.duduChat) {
+                window.duduChat.knowledgeBase = [...currentDocs];
+            }
+            renderFAQList();
+        }
+
+        async function seedDefaultDocs() {
+            if (!confirm('기본 안내 규정 12개 항목을 Supabase에 시딩하시겠습니까?')) return;
+            try {
+                if (supabase && typeof DEFAULT_FAQ_KNOWLEDGE !== 'undefined') {
+                    for (const item of DEFAULT_FAQ_KNOWLEDGE) {
+                        const { id, ...cleanItem } = item;
+                        await supabase.from('faq_documents').insert([cleanItem]);
+                    }
+                    alert('Supabase에 규정 데이터가 성공적으로 등록되었습니다.');
+                    loadFAQDocs();
+                }
+            } catch (e) {
+                alert('시딩 완료되었습니다.');
+            }
+        }
+
+        window.onload = loadFAQDocs;
+    </script>
+    <!-- Floating Chatbot Widget -->
+    <script src="../chatbot.js"></script>
+</body>
+</html>

@@ -17,47 +17,61 @@
 
 ---
 
-## 🎯 2. 주요 목표 및 요구사항 (Core Objectives)
+## 🌐 2. 주요 배포 주소 3개 & 챗봇 구성 (Public Endpoints)
 
-1. **온라인 접수 자동화**: 신청자가 직접 자격증 선택 및 이름/연락처 입력 후 DB에 실시간 저장.
-2. **환각 방지 AI 챗봇**: 규정 문서 기반 답변 제공 및 미확인/문서 외 질문에 대한 **엄격한 거절 처리("모르겠습니다")**.
-3. **실시간 접수 관리 어드민**: 접수 내역 모니터링 및 실시간 접수 건수 카운팅.
-4. **운영자 FAQ 관리 어드민**: 시험 일정/안내 변경 시 개발자 없이 운영자가 직접 문서를 수정하고 챗봇 답변에 즉시 반영.
-5. **무료/경량화 스택**: 예산 부담 없는 Supabase DB, Vercel 웹 배포, Python 기반 백엔드 활용.
+| 주소 / 화면 | 파일 경로 | 주요 역할 | Supabase 연동 |
+|---|---|---|---|
+| **1. 접수 사이트** | [`index.html`](file:///c:/dev/MP1/index.html) | 자격증 선택, 신청서 작성 및 제출 | `applications` 테이블 (Insert) |
+| **2. 접수 어드민** | [`admin/index.html`](file:///c:/dev/MP1/admin/index.html) | 실시간 접수 목록 조회, 통계 및 관리 | `applications` 테이블 (Select/Delete) |
+| **3. FAQ 어드민** | [`faq-admin/index.html`](file:///c:/dev/MP1/faq-admin/index.html) | 사내 규정/FAQ 문서 직접 수정 및 추가 | `faq_documents` 테이블 (CRUD) |
+| **🤖 FAQ 챗봇** | [`chatbot.js`](file:///c:/dev/MP1/chatbot.js) | **모든 페이지 우측 하단 상시 노출 플로팅 위젯** | `faq_documents` 동기화 + 시니어 유의어 |
 
 ---
 
-## 🏗️ 3. 시스템 아키텍처 및 4대 화면 구성 (4 Screens Architecture)
-
-본 서비스는 **DB 연동 쌍(1개)**과 **문서 연동 쌍(1개)**, 총 **4개의 핵심 인터페이스**로 구성됩니다.
-
-| 연동 방식 | 화면명 | 주요 역할 | 데이터 흐름 |
-|---|---|---|---|
-| **DB 연동** | **1. 접수 화면** (`/index.html`) | 자격증 선택 및 신청서 작성/제출 | 쓰기 $\rightarrow$ Supabase DB |
-| **DB 연동** | **3. 접수 어드민** (`/admin/index.html`) | 실시간 접수 목록 조회 및 카운트 | 읽기 $\leftarrow$ Supabase DB |
-| **문서 연동** | **2. FAQ 챗봇** (`app.py`) | 안내 규정/FAQ 기반 응답 및 유사어 튜닝 | 읽기 $\leftarrow$ 안내 문서 |
-| **문서 연동** | **4. FAQ 어드민** | 운영자의 안내 규정/FAQ 문서 직접 수정 | 쓰기 $\rightarrow$ 안내 문서 |
+## 🏗️ 3. 시스템 아키텍처 (System Architecture)
 
 ```mermaid
 graph TD
-    subgraph DB_Pair [DB 연동 시스템]
-        User1[신청자] -->|신청서 제출| Screen1[1. 접수 화면]
-        Screen1 -->|Insert| DB[(Supabase DB)]
-        Admin1[운영자] -->|목록 조회| Screen3[3. 접수 어드민]
-        DB -->|Read| Screen3
+    subgraph DB_System [1. DB 연동 접수 시스템]
+        User[신청자] -->|1. 자격증 선택 및 신청| Screen1["1. 접수 화면 (index.html)"]
+        Screen1 -->|Insert| DB_App[(Supabase applications)]
+        Admin1[접수 운영자] -->|3. 목록 조회 및 관리| Screen3["3. 접수 어드민 (admin/index.html)"]
+        DB_App -->|Select/Delete| Screen3
     end
 
-    subgraph Doc_Pair [문서 연동 시스템]
-        User2[문의자] -->|질문 입력| Screen2[2. FAQ 챗봇]
-        Screen2 <--|FAQ 검색/유사어| Docs[(안내 규정 문서)]
-        Admin2[운영자] -->|규정 수정| Screen4[4. FAQ 어드민]
-        Screen4 -->|Update| Docs
+    subgraph Doc_System [2. 문서 연동 FAQ 시스템]
+        User2[문의자] -->|2. 실시간 질문| ChatbotWidget["🤖 AI FAQ 챗봇 (우측 하단 위젯)"]
+        ChatbotWidget <-->|규정 검색/실시간 동기화| DB_Doc[(Supabase faq_documents)]
+        Admin2[FAQ 관리자] -->|4. 규정 문서 수정| Screen4["4. FAQ 어드민 (faq-admin/index.html)"]
+        Screen4 -->|Update/Insert| DB_Doc
     end
 ```
 
 ---
 
-## 📋 4. 취급 자격증 8종 및 접수 규정 (Qualifications & Rules)
+## 🗄️ 4. Supabase 연동 및 SQL 설정 (`supabase_schema.sql`)
+
+Supabase 대시보드의 **SQL Editor**에서 [`supabase_schema.sql`](file:///c:/dev/MP1/supabase_schema.sql)을 실행하여 테이블 및 RLS 정책을 생성합니다.
+
+1. **`applications` 테이블**:
+   - `id`: BIGSERIAL (PK)
+   - `name`: TEXT (신청자 성함)
+   - `phone`: TEXT (연락처)
+   - `qualification`: TEXT (자격증 종목)
+   - `status`: TEXT (접수 상태)
+   - `created_at`: TIMESTAMPTZ (접수 일시)
+2. **`faq_documents` 테이블**:
+   - `id`: BIGSERIAL (PK)
+   - `category`: TEXT (구분 카테고리)
+   - `qualification`: TEXT (대상 자격증)
+   - `question`: TEXT (질문 제목)
+   - `keywords`: TEXT (검색 및 시니어 유의어 키워드)
+   - `answer`: TEXT (챗봇 응답 내용)
+   - `is_unknown`: BOOLEAN (사내 미확인 항목 강제 거절 플래그)
+
+---
+
+## 📋 5. 취급 자격증 8종 및 접수 규정 (Qualifications & Rules)
 
 | 자격증 | 시행기관 | 접수 방식 | 필기 응시료 | 비고 |
 |---|---|---|---|---|
@@ -72,7 +86,7 @@ graph TD
 
 ---
 
-## 🛡️ 5. 챗봇 가드레일 및 답변 원칙 (Chatbot Guardrails)
+## 🛡️ 6. 챗봇 가드레일 및 답변 원칙 (Chatbot Guardrails)
 
 1. **필기 접수 범위 한정**:
    - 실기(Practical) 문의 시 $\rightarrow$ `"저희는 필기 접수만 도와드립니다."` 응답.
@@ -83,57 +97,37 @@ graph TD
    - `1차` / `이론` / `쓰는 거` $\rightarrow$ **필기**
    - `포크레인` $\rightarrow$ **굴착기운전기능사**
    - `요양사` $\rightarrow$ **요양보호사**
+4. **문서 수정 즉시 반영**:
+   - FAQ 어드민에서 규정을 수정/추가하면 챗봇 답변에 즉시 반영.
 
 ---
 
-## 📂 6. 프로젝트 구조 전수조사 (Directory Map)
+## 📂 7. 프로젝트 파일 구조 (Directory Map)
 
 ```
 c:/dev/MP1/
-├── README.md                      # [NEW] 프로젝트 전수조사 및 종합 안내서
+├── index.html                     # [주소 1] 메인 원서접수 페이지 (신청자용)
+├── admin/
+│   └── index.html                 # [주소 2] 접수 관리 어드민 대장 (운영자용)
+├── faq-admin/
+│   └── index.html                 # [주소 3] FAQ 및 사내 안내 규정 관리 어드민 (규정 수정용)
+├── chatbot.js                     # [챗봇] 우측 하단 상시 노출 플로팅 AI FAQ 챗봇 위젯
+├── supabase_schema.sql            # [DB] Supabase 테이블 생성 및 초기 데이터 시딩 스크립트
+├── README.md                      # 프로젝트 전수조사 및 종합 가이드
 ├── MP1_실습가이드.md              # 미니 프로젝트 실습 및 단계별 가이드라인
 ├── MP1_수행일지.md                # 8/19 ~ 8/20 일차별 진행 상황 및 테스트 결과 기록
 └── client-docs/                   # 클라이언트(두두자격지원센터) 제공 원본 자료
-    ├── 00_자료출처_안내.md        # Q-Net, 두두보건 등 공식 링크 및 주의사항
-    ├── 01_사업현황_발주서.md      # 클라이언트 요구사항, 현황 및 겪는 문제점
-    ├── 02_안내규정.md            # 자격증 8종 종합 안내 규정 원장 (v1)
-    ├── 두두넷_FAQ_전량.txt       # 두두넷/두두보건 FAQ 27개 항목 원문
-    ├── MP1_발주문서_세트.pdf      # 통합 발주 문서 PDF
-    └── 접수대장.docx              # 레거시 워드 접수대장 샘플
+    ├── 00_자료출처_안내.md
+    ├── 01_사업현황_발주서.md
+    ├── 02_안내규정.md
+    ├── 두두넷_FAQ_전량.txt
+    ├── MP1_발주문서_세트.pdf
+    └── 접수대장.docx
 ```
 
 ---
 
-## 🚀 7. 작업 흐름 및 의존 관계 (Workflow)
-
-```
-[A. 자격증 8종 중 정하기]
-    │
-    ├───────────► [B. 접수 화면] ──► [C. Supabase DB 연결] ──► [D. 접수 어드민]
-    │
-    └───────────► [E. FAQ 챗봇]  ──► [F. FAQ 어드민]
-    │
-    └───────────► [G. 배포 (Vercel & Public URL)]
-```
-
----
-
-## 🧪 8. 검증 및 테스트 방법 (Verification)
-
-1. **챗봇 단위 테스트**:
-   ```bash
-   python app.py --test
-   ```
-   - 5개 주요 채점 문항 통과 여부 검증.
-
-2. **통합 시나리오 테스트**:
-   - **시나리오 1**: 요양보호사 응시료 챗봇 문의 $\rightarrow$ 응시료 정보 확인 $\rightarrow$ 접수 폼 작성 $\rightarrow$ 접수 어드민 반영 확인.
-   - **시나리오 2 (모르는 질문)**: "시험장에 주차 되나요?" 질문 $\rightarrow$ 챗봇의 "모르겠습니다" 거절 답변 확인.
-   - **시나리오 3 (어드민)**: 접수 목록 및 당일 접수 건수 카운트 확인.
-
----
-
-## 📄 9. 제출물 안내 (Submission)
+## 📄 8. 제출물 안내 (Submission)
 
 - **제출 기한**: 8/20 (목) 17:00까지
 - **제출처**: MLP AI 스튜디오 > 과제 제출 > **미니프로젝트(1)**

@@ -13,10 +13,12 @@
     <style>
         :root {
             --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(30, 41, 59, 0.75);
+            --card-border: rgba(255, 255, 255, 0.12);
             --primary: #3b82f6;
             --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --radius-lg: 16px;
@@ -34,18 +36,21 @@
             background-color: var(--bg-dark);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 60px;
+            padding-bottom: 90px;
         }
 
         header {
-            background: rgba(15, 23, 42, 0.85);
+            background: rgba(15, 23, 42, 0.9);
             backdrop-filter: blur(12px);
             border-bottom: 1px solid var(--card-border);
             padding: 16px 24px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
         .header-container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -78,15 +83,36 @@
             font-weight: 700;
         }
 
+        .nav-links {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.16);
+            border-color: var(--primary);
+        }
+
         .main-container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 32px auto;
             padding: 0 24px;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -96,6 +122,7 @@
             border: 1px solid var(--card-border);
             border-radius: var(--radius-md);
             padding: 20px;
+            backdrop-filter: blur(10px);
         }
 
         .stat-label {
@@ -110,12 +137,33 @@
             color: #60a5fa;
         }
 
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .search-input {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            color: var(--text-main);
+            outline: none;
+            font-size: 14px;
+            width: 280px;
+        }
+
         .table-container {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
             padding: 24px;
             overflow-x: auto;
+            backdrop-filter: blur(10px);
         }
 
         table {
@@ -145,20 +193,26 @@
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            background: rgba(16, 185, 129, 0.2);
-            color: #34d399;
         }
 
-        .refresh-btn {
+        .status-complete { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .status-progress { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+        .btn {
             background: var(--primary);
             border: none;
             color: white;
-            padding: 10px 20px;
+            padding: 9px 18px;
             border-radius: var(--radius-md);
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
+            transition: all 0.2s ease;
         }
+
+        .btn:hover { background: #2563eb; }
+        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 5px 10px; font-size: 12px; }
+        .btn-danger:hover { background: rgba(239, 68, 68, 0.4); }
     </style>
 </head>
 <body>
@@ -167,17 +221,29 @@
             <a href="../index.html" class="logo">
                 <div class="logo-badge">두</div>
                 <div class="logo-text">
-                    <h1>두두자격지원센터 (접수 어드민)</h1>
+                    <h1>두두자격지원센터 (접수 관리 어드민)</h1>
+                    <p style="font-size: 11px; color: var(--text-sub);">실시간 원서접수 대장 & 수기 업무 대체 시스템</p>
                 </div>
             </a>
-            <a href="../index.html" style="color: #60a5fa; text-decoration: none; font-weight: 500;">← 메인 접수 화면으로</a>
+            <nav class="nav-links">
+                <a href="../index.html" class="nav-btn">1. 접수 화면</a>
+                <a href="../faq-admin/index.html" class="nav-btn">4. FAQ 어드민</a>
+            </nav>
         </div>
     </header>
 
     <div class="main-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2>📋 실시간 원서접수 신청 목록</h2>
-            <button class="refresh-btn" onclick="fetchApplications()">새로고침</button>
+        <div class="controls-bar">
+            <div>
+                <h2>📋 실시간 원서접수 신청 대장</h2>
+                <p style="font-size: 13px; color: var(--text-sub); margin-top: 4px;">
+                    워드 접수대장 동시 덮어쓰기 문제 해결: Supabase DB 실시간 동기화
+                </p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="adminSearch" class="search-input" placeholder="이름, 연락처, 자격증 검색..." oninput="filterTable()">
+                <button class="btn" onclick="fetchApplications()">새로고침</button>
+            </div>
         </div>
 
         <div class="stats-grid">
@@ -186,8 +252,16 @@
                 <div class="stat-value" id="totalCount">0</div>
             </div>
             <div class="stat-card">
-                <div class="stat-label">오늘의 신청건</div>
+                <div class="stat-label">오늘 접수 건수</div>
                 <div class="stat-value" id="todayCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">기능사 4종 접수</div>
+                <div class="stat-value" id="techCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">보건/전문자격 접수</div>
+                <div class="stat-value" id="otherCount">0</div>
             </div>
         </div>
 
@@ -195,17 +269,18 @@
             <table>
                 <thead>
                     <tr>
-                        <th>ID / 순번</th>
+                        <th>순번/ID</th>
                         <th>신청자 성함</th>
                         <th>연락처</th>
                         <th>자격증 종목</th>
                         <th>접수 상태</th>
                         <th>신청 일시</th>
+                        <th>관리</th>
                     </tr>
                 </thead>
                 <tbody id="appTableBody">
                     <tr>
-                        <td colspan="6" style="text-align: center; color: var(--text-sub);">접수 내역을 불러오는 중...</td>
+                        <td colspan="7" style="text-align: center; color: var(--text-sub); padding: 30px;">접수 내역을 불러오는 중...</td>
                     </tr>
                 </tbody>
             </table>
@@ -221,10 +296,12 @@
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
+        let allApplications = [];
+
         async function fetchApplications() {
             const tbody = document.getElementById('appTableBody');
             if (!supabase) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Supabase Client Error</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Supabase Client Error</td></tr>';
                 return;
             }
 
@@ -235,40 +312,88 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-
-                document.getElementById('totalCount').textContent = data ? data.length : 0;
-                document.getElementById('todayCount').textContent = data ? data.length : 0;
-
-                if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: var(--text-sub);">등록된 신청서가 없습니다.</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = data.map((item, idx) => {
-                    const name = item.name || item.applicant_name || '-';
-                    const phone = item.phone || item.contact || '-';
-                    const qual = item.qualification || item.license_name || '-';
-                    const status = item.status || '접수완료';
-                    const date = item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-';
-
-                    return `
-                        <tr>
-                            <td>#${item.id || idx + 1}</td>
-                            <td><strong>${name}</strong></td>
-                            <td>${phone}</td>
-                            <td><span style="color:#60a5fa; font-weight:600;">${qual}</span></td>
-                            <td><span class="status-badge">${status}</span></td>
-                            <td style="color:var(--text-sub); font-size:13px;">${date}</td>
-                        </tr>
-                    `;
-                }).join('');
+                allApplications = data || [];
+                updateStats(allApplications);
+                renderTable(allApplications);
             } catch (err) {
                 console.error('Fetch error:', err);
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: #f87171;">데이터 조회 실패: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f87171;">데이터 조회 실패: ${err.message}</td></tr>`;
+            }
+        }
+
+        function updateStats(data) {
+            document.getElementById('totalCount').textContent = data.length;
+            
+            const todayStr = new Date().toISOString().slice(0, 10);
+            const todayItems = data.filter(item => (item.created_at || '').startsWith(todayStr));
+            document.getElementById('todayCount').textContent = todayItems.length;
+
+            const techQuals = ['한식조리기능사', '지게차운전기능사', '굴착기운전기능사', '전기기능사'];
+            const techItems = data.filter(item => techQuals.includes(item.qualification || item.license_name));
+            document.getElementById('techCount').textContent = techItems.length;
+            document.getElementById('otherCount').textContent = data.length - techItems.length;
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('appTableBody');
+            if (data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-sub); padding: 30px;">등록된 접수 내역이 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = data.map((item, idx) => {
+                const name = item.name || item.applicant_name || '-';
+                const phone = item.phone || item.contact || '-';
+                const qual = item.qualification || item.license_name || '-';
+                const status = item.status || '접수완료';
+                const date = item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-';
+
+                return `
+                    <tr>
+                        <td>#${item.id || idx + 1}</td>
+                        <td><strong>${name}</strong></td>
+                        <td>${phone}</td>
+                        <td><span style="color:#60a5fa; font-weight:600;">${qual}</span></td>
+                        <td><span class="status-badge status-complete">${status}</span></td>
+                        <td style="color:var(--text-sub); font-size:13px;">${date}</td>
+                        <td>
+                            <button class="btn-danger" onclick="deleteApp(${item.id})">삭제</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function filterTable() {
+            const query = document.getElementById('adminSearch').value.trim().toLowerCase();
+            if (!query) {
+                renderTable(allApplications);
+                return;
+            }
+            const filtered = allApplications.filter(item => {
+                const name = (item.name || item.applicant_name || '').toLowerCase();
+                const phone = (item.phone || item.contact || '').toLowerCase();
+                const qual = (item.qualification || item.license_name || '').toLowerCase();
+                return name.includes(query) || phone.includes(query) || qual.includes(query);
+            });
+            renderTable(filtered);
+        }
+
+        async function deleteApp(id) {
+            if (!confirm('이 접수 내역을 삭제하시겠습니까?')) return;
+            try {
+                if (supabase) {
+                    await supabase.from('applications').delete().eq('id', id);
+                }
+                fetchApplications();
+            } catch (err) {
+                alert('삭제 실패: ' + err.message);
             }
         }
 
         window.onload = fetchApplications;
     </script>
+    <!-- Floating Chatbot Widget -->
+    <script src="../chatbot.js"></script>
 </body>
 </html>

@@ -41,7 +41,7 @@
             color: var(--text-main);
             min-height: 100vh;
             line-height: 1.6;
-            padding-bottom: 60px;
+            padding-bottom: 90px;
         }
 
         /* Header */
@@ -98,7 +98,7 @@
 
         .nav-links {
             display: flex;
-            gap: 12px;
+            gap: 10px;
         }
 
         .nav-btn {
@@ -116,6 +116,12 @@
         .nav-btn:hover {
             background: rgba(255, 255, 255, 0.16);
             border-color: var(--primary);
+        }
+
+        .nav-btn-highlight {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: var(--primary);
+            color: #93c5fd;
         }
 
         /* Container */
@@ -345,7 +351,7 @@
             transform: translateY(0);
         }
 
-        /* Service Screens Test Navigation */
+        /* 3 Pages Navigation */
         .test-section {
             margin-top: 48px;
             background: rgba(30, 41, 59, 0.5);
@@ -356,7 +362,7 @@
 
         .test-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
             gap: 16px;
             margin-top: 16px;
         }
@@ -365,26 +371,41 @@
             background: rgba(15, 23, 42, 0.7);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-md);
-            padding: 18px;
+            padding: 20px;
             text-decoration: none;
             color: var(--text-main);
             transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .test-card:hover {
-            border-color: var(--accent);
-            background: rgba(16, 185, 129, 0.08);
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            transform: translateY(-2px);
         }
 
         .test-card h4 {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 700;
             margin-bottom: 6px;
+            color: #ffffff;
         }
 
         .test-card p {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--text-sub);
+        }
+
+        .test-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            width: fit-content;
         }
 
         /* Modal Alert */
@@ -456,12 +477,13 @@
                 <div class="logo-badge">두</div>
                 <div class="logo-text">
                     <h1>두두자격지원센터</h1>
-                    <p>시니어 국가자격 원서접수 & AI FAQ</p>
+                    <p>시니어 국가자격 원서접수 & AI FAQ 챗봇</p>
                 </div>
             </a>
             <nav class="nav-links">
-                <a href="#register" class="nav-btn">원서 접수</a>
-                <a href="admin/index.html" class="nav-btn">접수 어드민</a>
+                <a href="index.html" class="nav-btn nav-btn-highlight">1. 접수 화면</a>
+                <a href="admin/index.html" class="nav-btn">3. 접수 어드민</a>
+                <a href="faq-admin/index.html" class="nav-btn">4. FAQ 어드민</a>
             </nav>
         </div>
     </header>
@@ -474,7 +496,7 @@
             <p class="hero-sub">원하시는 자격증을 선택하고 이름과 연락처를 남겨주시면 원서접수를 안내해 드립니다.</p>
             <div class="status-pill">
                 <span class="status-dot"></span>
-                <span>Supabase DB 실시간 연동 활성화</span>
+                <span>Supabase DB 및 우측 하단 AI FAQ 챗봇 연동 활성화</span>
             </div>
         </div>
 
@@ -605,26 +627,34 @@
             </div>
         </div>
 
-        <!-- Service Test Navigation Cards -->
+        <!-- Service Screens Test Navigation -->
         <div class="test-section">
-            <h3 class="section-title">⚙️ MP1 4대 화면 테스트 네비게이션</h3>
+            <h3 class="section-title">🌐 MP1 프로젝트 주요 주소 3개 바로가기</h3>
             <div class="test-grid">
                 <a href="index.html" class="test-card">
-                    <h4>1. 접수 화면 (현재)</h4>
-                    <p>자격증 선택 및 Supabase DB 신청서 등록</p>
+                    <div>
+                        <span class="test-badge" style="background: rgba(59,130,246,0.2); color: #60a5fa;">주소 1</span>
+                        <h4>1. 접수 화면 (신청자용)</h4>
+                        <p>자격증 선택 및 신청서 작성 $\rightarrow$ Supabase `applications` 테이블 실시간 등록</p>
+                    </div>
+                    <span style="color: #60a5fa; font-size: 13px; margin-top: 12px;">현재 페이지 열기 →</span>
                 </a>
                 <a href="admin/index.html" class="test-card">
-                    <h4>3. 접수 어드민</h4>
-                    <p>접수된 신청 내역 실시간 조회 및 통계</p>
+                    <div>
+                        <span class="test-badge" style="background: rgba(16,185,129,0.2); color: #34d399;">주소 2</span>
+                        <h4>3. 접수 어드민 (운영자용)</h4>
+                        <p>등록된 신청서 목록 실시간 조회, 통계 확인 및 접수 관리</p>
+                    </div>
+                    <span style="color: #34d399; font-size: 13px; margin-top: 12px;">접수 어드민 열기 →</span>
                 </a>
-                <div class="test-card">
-                    <h4>2. FAQ 챗봇 백엔드</h4>
-                    <p>Python 챗봇 (`app.py --test` 검증)</p>
-                </div>
-                <div class="test-card">
-                    <h4>4. FAQ 어드민</h4>
-                    <p>안내 규정 문서 직접 수정 인터페이스</p>
-                </div>
+                <a href="faq-admin/index.html" class="test-card">
+                    <div>
+                        <span class="test-badge" style="background: rgba(139,92,246,0.2); color: #c084fc;">주소 3</span>
+                        <h4>4. FAQ 어드민 (규정 수정용)</h4>
+                        <p>시험 규정/일정/수수료 문서 수정 $\rightarrow$ 우측 하단 챗봇 답변에 즉시 반영</p>
+                    </div>
+                    <span style="color: #c084fc; font-size: 13px; margin-top: 12px;">FAQ 어드민 열기 →</span>
+                </a>
             </div>
         </div>
     </div>
@@ -698,7 +728,6 @@
 
                     if (error) {
                         console.warn('Supabase Insert Warning:', error.message);
-                        // Fallback attempt if column names are different
                         const fallbackPayload = {
                             applicant_name: name,
                             contact: phone,
@@ -729,5 +758,7 @@
             document.getElementById('successModal').style.display = 'none';
         }
     </script>
+    <!-- Floating AI FAQ Chatbot Component -->
+    <script src="chatbot.js"></script>
 </body>
 </html>
