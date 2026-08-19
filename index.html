@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>두두자격지원센터 - 시니어 국가자격 원서접수</title>
+    <title>두두자격지원센터 - 중장년·시니어 국가자격 간편 원서접수 포털</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,17 +12,19 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.7);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --bg-page: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --card-border: rgba(255, 255, 255, 0.12);
             --primary: #3b82f6;
             --primary-hover: #2563eb;
-            --accent: #10b981;
+            --accent-green: #10b981;
             --accent-gold: #f59e0b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
-            --radius-lg: 16px;
-            --radius-md: 12px;
+            --text-muted: #64748b;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --base-font-size: 16px;
         }
 
         * {
@@ -33,21 +35,65 @@
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg-page);
             background-image: 
-                radial-gradient(at 10% 20%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
-                radial-gradient(at 90% 80%, rgba(16, 185, 129, 0.15) 0px, transparent 50%);
+                radial-gradient(at 15% 15%, rgba(59, 130, 246, 0.18) 0px, transparent 55%),
+                radial-gradient(at 85% 85%, rgba(16, 185, 129, 0.14) 0px, transparent 55%);
             background-attachment: fixed;
             color: var(--text-main);
             min-height: 100vh;
             line-height: 1.6;
-            padding-bottom: 90px;
+            font-size: var(--base-font-size);
+            padding-bottom: 80px;
+        }
+
+        /* Top Accessibility & Support Bar */
+        .top-utility-bar {
+            background: #090d16;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 8px 24px;
+            font-size: 13px;
+            color: var(--text-sub);
+        }
+        .top-utility-container {
+            max-width: 1240px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .hotline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: #93c5fd;
+            font-weight: 600;
+        }
+        .font-zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+        .zoom-btn:hover {
+            background: var(--primary);
         }
 
         /* Header */
         header {
-            background: rgba(15, 23, 42, 0.85);
-            backdrop-filter: blur(12px);
+            background: rgba(15, 23, 42, 0.92);
+            backdrop-filter: blur(14px);
             border-bottom: 1px solid var(--card-border);
             position: sticky;
             top: 0;
@@ -56,7 +102,7 @@
         }
 
         .header-container {
-            max-width: 1200px;
+            max-width: 1240px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -66,28 +112,28 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             text-decoration: none;
             color: var(--text-main);
         }
 
         .logo-badge {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background: linear-gradient(135deg, #2563eb, #10b981);
             color: #fff;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: 900;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
         }
 
         .logo-text h1 {
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 21px;
+            font-weight: 800;
             letter-spacing: -0.5px;
         }
 
@@ -102,120 +148,123 @@
         }
 
         .nav-btn {
-            background: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.07);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            padding: 8px 16px;
+            padding: 10px 18px;
             border-radius: var(--radius-md);
             font-size: 14px;
-            font-weight: 500;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.2s ease;
         }
 
         .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.15);
             border-color: var(--primary);
         }
 
-        .nav-btn-highlight {
-            background: rgba(59, 130, 246, 0.2);
-            border-color: var(--primary);
+        .nav-btn-admin {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.4);
             color: #93c5fd;
         }
 
         /* Container */
         .main-container {
-            max-width: 1200px;
-            margin: 32px auto;
+            max-width: 1240px;
+            margin: 28px auto;
             padding: 0 24px;
         }
 
         /* Hero Banner */
         .hero-banner {
-            background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.9));
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 36px;
-            margin-bottom: 36px;
+            padding: 38px 40px;
+            margin-bottom: 32px;
             position: relative;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-
-        .hero-banner::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
-            pointer-events: none;
+            box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
         }
 
         .hero-title {
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 900;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, #ffffff, #93c5fd);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            letter-spacing: -0.5px;
+            color: #ffffff;
+        }
+
+        .hero-title span {
+            color: #60a5fa;
         }
 
         .hero-sub {
-            font-size: 16px;
-            color: var(--text-sub);
-            margin-bottom: 20px;
+            font-size: 17px;
+            color: #cbd5e1;
+            margin-bottom: 22px;
+            word-break: keep-all;
         }
 
-        .status-pill {
+        .features-pill-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .feature-pill {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(16, 185, 129, 0.15);
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            color: #34d399;
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 13px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
             font-weight: 500;
+            color: #e2e8f0;
         }
 
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            background: #34d399;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #34d399;
-        }
-
-        /* Layout Grid */
+        /* Main 2-Column Grid */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 380px;
+            grid-template-columns: 1fr 420px;
             gap: 32px;
         }
 
-        @media (max-width: 960px) {
+        @media (max-width: 980px) {
             .content-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        .section-title {
-            font-size: 20px;
-            font-weight: 700;
+        .section-header {
             margin-bottom: 16px;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #f8fafc;
+        }
+
+        .section-desc {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-top: 4px;
         }
 
         /* Qualifications Cards Grid */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
             gap: 16px;
         }
 
@@ -223,32 +272,40 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-md);
-            padding: 20px;
+            padding: 22px;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .qual-card:hover {
             transform: translateY(-4px);
             border-color: var(--primary);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 10px 25px rgba(59, 130, 246, 0.25);
         }
 
         .qual-card.active {
             border: 2px solid var(--primary);
-            background: rgba(59, 130, 246, 0.15);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.16);
+            box-shadow: 0 0 24px rgba(59, 130, 246, 0.35);
+        }
+
+        .card-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
         }
 
         .card-tag {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
-            padding: 4px 8px;
-            border-radius: 6px;
-            display: inline-block;
-            margin-bottom: 10px;
+            padding: 4px 10px;
+            border-radius: 8px;
         }
 
         .tag-always { background: rgba(16, 185, 129, 0.2); color: #34d399; }
@@ -256,25 +313,31 @@
         .tag-annual { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
 
         .card-name {
-            font-size: 18px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: var(--text-main);
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 8px;
+            color: #ffffff;
         }
 
         .card-desc {
-            font-size: 13px;
-            color: var(--text-sub);
-            margin-bottom: 12px;
+            font-size: 14px;
+            color: #cbd5e1;
+            margin-bottom: 14px;
+            line-height: 1.5;
         }
 
         .card-meta {
-            font-size: 12px;
-            color: #cbd5e1;
+            font-size: 13px;
+            color: #94a3b8;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 10px;
             display: flex;
             justify-content: space-between;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-            padding-top: 8px;
+        }
+
+        .card-fee {
+            font-weight: 700;
+            color: #60a5fa;
         }
 
         /* Application Form Panel */
@@ -282,138 +345,122 @@
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 28px;
-            backdrop-filter: blur(12px);
+            padding: 30px;
+            backdrop-filter: blur(14px);
             position: sticky;
-            top: 90px;
+            top: 100px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .form-panel-header {
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .form-label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 15px;
+            font-weight: 700;
             margin-bottom: 8px;
-            color: #cbd5e1;
+            color: #f1f5f9;
         }
 
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
-            background: rgba(15, 23, 42, 0.6);
+            background: #090d16;
             border: 1px solid var(--card-border);
             border-radius: var(--radius-md);
             padding: 14px 16px;
             color: var(--text-main);
             font-size: 16px;
             outline: none;
-            transition: border-color 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             border-color: var(--primary);
-            box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.35);
         }
 
-        .selected-box {
-            background: rgba(59, 130, 246, 0.1);
-            border: 1px dashed var(--primary);
-            padding: 14px;
+        .selected-summary-box {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.4);
             border-radius: var(--radius-md);
-            font-size: 16px;
-            font-weight: 700;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        .selected-qual-title {
+            font-size: 18px;
+            font-weight: 800;
             color: #93c5fd;
-            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .selected-qual-info {
+            font-size: 13px;
+            color: #cbd5e1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .phone-helper-text {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 6px;
         }
 
         .submit-btn {
             width: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             border: none;
             color: white;
-            padding: 16px;
+            padding: 18px;
             border-radius: var(--radius-md);
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 19px;
+            font-weight: 800;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
-            transition: transform 0.15s ease, box-shadow 0.15s ease;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
+            transition: all 0.2s ease;
+            margin-top: 10px;
         }
 
         .submit-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.65);
         }
 
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        /* 3 Pages Navigation */
-        .test-section {
-            margin-top: 48px;
-            background: rgba(30, 41, 59, 0.5);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg);
-            padding: 28px;
-        }
-
-        .test-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-        .test-card {
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid var(--card-border);
+        /* Help Box */
+        .help-callout {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
             border-radius: var(--radius-md);
-            padding: 20px;
-            text-decoration: none;
-            color: var(--text-main);
-            transition: all 0.2s ease;
+            padding: 14px 18px;
+            margin-top: 20px;
             display: flex;
-            flex-direction: column;
-            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
         }
-
-        .test-card:hover {
-            border-color: var(--primary);
-            background: rgba(59, 130, 246, 0.1);
-            transform: translateY(-2px);
+        .help-icon {
+            font-size: 24px;
         }
-
-        .test-card h4 {
-            font-size: 17px;
-            font-weight: 700;
-            margin-bottom: 6px;
-            color: #ffffff;
-        }
-
-        .test-card p {
+        .help-text {
             font-size: 13px;
-            color: var(--text-sub);
+            color: #fde68a;
+            line-height: 1.4;
         }
 
-        .test-badge {
-            display: inline-block;
-            padding: 3px 8px;
-            font-size: 11px;
-            font-weight: 700;
-            border-radius: 6px;
-            margin-bottom: 8px;
-            width: fit-content;
-        }
-
-        /* Modal Alert */
+        /* Modal Overlay */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.75);
-            backdrop-filter: blur(6px);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
             display: none;
             align-items: center;
             justify-content: center;
@@ -424,51 +471,87 @@
             background: #1e293b;
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 32px;
-            max-width: 440px;
+            padding: 36px;
+            max-width: 480px;
             width: 90%;
             text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.7);
         }
 
-        .modal-icon {
-            width: 60px;
-            height: 60px;
+        .modal-badge-check {
+            width: 64px;
+            height: 64px;
             background: rgba(16, 185, 129, 0.2);
             color: #34d399;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 30px;
+            font-size: 32px;
             margin: 0 auto 16px;
         }
 
-        .modal-title {
-            font-size: 22px;
-            font-weight: 700;
+        .modal-receipt-box {
+            background: #090d16;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 14px;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 8px;
         }
 
-        .modal-desc {
-            font-size: 14px;
-            color: var(--text-sub);
-            margin-bottom: 24px;
+        .receipt-row:last-child {
+            margin-bottom: 0;
         }
 
         .modal-btn {
             background: var(--primary);
             border: none;
             color: white;
-            padding: 12px 28px;
+            padding: 14px 32px;
             border-radius: var(--radius-md);
-            font-size: 15px;
-            font-weight: 600;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
+            width: 100%;
+        }
+
+        /* Footer */
+        footer {
+            max-width: 1240px;
+            margin: 48px auto 0;
+            padding: 24px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 13px;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.8;
         }
     </style>
 </head>
 <body>
+
+    <!-- Top Utility & Font Zoom Bar -->
+    <div class="top-utility-bar">
+        <div class="top-utility-container">
+            <div class="hotline-badge">
+                📞 원서접수 직통 상담 전화: 02-1544-2026 (평일 09:00 ~ 18:00)
+            </div>
+            <div class="font-zoom-controls">
+                <span>글자 크기 조절:</span>
+                <button class="zoom-btn" onclick="adjustFontSize(-1)">가- 작게</button>
+                <button class="zoom-btn" onclick="adjustFontSize(1)">가+ 크게</button>
+                <button class="zoom-btn" onclick="resetFontSize()">기본</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Header -->
     <header>
@@ -477,13 +560,13 @@
                 <div class="logo-badge">두</div>
                 <div class="logo-text">
                     <h1>두두자격지원센터</h1>
-                    <p>시니어 국가자격 원서접수 & AI FAQ 챗봇</p>
+                    <p>중장년·시니어 국가기술 & 전문자격 원서접수 지원 포털</p>
                 </div>
             </a>
             <nav class="nav-links">
-                <a href="index.html" class="nav-btn nav-btn-highlight">1. 접수 화면</a>
-                <a href="admin/index.html" class="nav-btn">3. 접수 어드민</a>
-                <a href="faq-admin/index.html" class="nav-btn">4. FAQ 어드민</a>
+                <a href="#application-section" class="nav-btn">간편 접수 신청</a>
+                <a href="admin/index.html" class="nav-btn nav-btn-admin">접수 관리 대장</a>
+                <a href="faq-admin/index.html" class="nav-btn">안내 규정 관리</a>
             </nav>
         </div>
     </header>
@@ -492,186 +575,266 @@
     <div class="main-container">
         <!-- Hero Banner -->
         <div class="hero-banner">
-            <h2 class="hero-title">중장년·시니어 자격증 간편 원서접수</h2>
-            <p class="hero-sub">원하시는 자격증을 선택하고 이름과 연락처를 남겨주시면 원서접수를 안내해 드립니다.</p>
-            <div class="status-pill">
-                <span class="status-dot"></span>
-                <span>Supabase DB 및 우측 하단 AI FAQ 챗봇 연동 활성화</span>
+            <h2 class="hero-title">어르신의 새로운 도전을 <span>두두자격지원센터</span>가 응원합니다</h2>
+            <p class="hero-sub">
+                복잡한 인터넷 인증 절차 없이, 원하시는 자격증을 선택하고 이름과 연락처만 남겨주시면 원서접수를 신속하게 대행해 드립니다.
+            </p>
+            <div class="features-pill-group">
+                <div class="feature-pill">✓ 8대 핵심 취업 자격증 지원</div>
+                <div class="feature-pill">✓ 시험장 및 시간대 무료 상담</div>
+                <div class="feature-pill">✓ 24시간 인공지능 FAQ 상담 안내</div>
             </div>
         </div>
 
-        <!-- Content Grid -->
-        <div class="content-grid" id="register">
-            <!-- Left: Qualifications Grid -->
+        <!-- 2-Column Application Section -->
+        <div class="content-grid" id="application-section">
+            <!-- Left Column: Qualification Selection Grid -->
             <div>
-                <h3 class="section-title">📌 자격증 8종 선택</h3>
-                <div class="cards-grid" id="qualGrid">
-                    <!-- Card 1 -->
-                    <div class="qual-card active" onclick="selectQual('한식조리기능사', '상시', '14,500원')">
-                        <span class="card-tag tag-always">상시 접수</span>
-                        <div class="card-name">한식조리기능사</div>
-                        <div class="card-desc">식당 취업·창업 대표 자격증</div>
+                <div class="section-header">
+                    <div>
+                        <h3 class="section-title">1단계. 준비하시는 자격증을 선택하세요</h3>
+                        <p class="section-desc">아래 8개 자격증 중 원하시는 종목 카드를 누르시면 접수서에 자동 반영됩니다.</p>
+                    </div>
+                </div>
+
+                <div class="cards-grid" id="qualCardsContainer">
+                    <!-- 1. 한식조리기능사 -->
+                    <div class="qual-card active" onclick="selectQualification('한식조리기능사', '상시CBT', '14,500원', '두두자격검정원')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-always">상시 접수 (CBT)</span>
+                            </div>
+                            <div class="card-name">한식조리기능사</div>
+                            <div class="card-desc">식당 취업 및 조리 관련 창업 대표 자격증 (당일 합격 발표)</div>
+                        </div>
                         <div class="card-meta">
                             <span>시행: 두두자격검정원</span>
-                            <span>필기: 14,500원</span>
+                            <span class="card-fee">14,500원</span>
                         </div>
                     </div>
 
-                    <!-- Card 2 -->
-                    <div class="qual-card" onclick="selectQual('지게차운전기능사', '상시', '14,500원')">
-                        <span class="card-tag tag-always">상시 접수</span>
-                        <div class="card-name">지게차운전기능사</div>
-                        <div class="card-desc">물류창고 및 현장 필수 면허</div>
+                    <!-- 2. 지게차운전기능사 -->
+                    <div class="qual-card" onclick="selectQualification('지게차운전기능사', '상시CBT', '14,500원', '두두자격검정원')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-always">상시 접수 (CBT)</span>
+                            </div>
+                            <div class="card-name">지게차운전기능사</div>
+                            <div class="card-desc">물류센터, 유통 및 제조 현장 취업 필수 면허 자격</div>
+                        </div>
                         <div class="card-meta">
                             <span>시행: 두두자격검정원</span>
-                            <span>필기: 14,500원</span>
+                            <span class="card-fee">14,500원</span>
                         </div>
                     </div>
 
-                    <!-- Card 3 -->
-                    <div class="qual-card" onclick="selectQual('굴착기운전기능사', '상시', '14,500원')">
-                        <span class="card-tag tag-always">상시 접수</span>
-                        <div class="card-name">굴착기운전기능사</div>
-                        <div class="card-desc">건설현장 및 토목 필수 자격</div>
+                    <!-- 3. 굴착기운전기능사 -->
+                    <div class="qual-card" onclick="selectQualification('굴착기운전기능사', '상시CBT', '14,500원', '두두자격검정원')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-always">상시 접수 (CBT)</span>
+                            </div>
+                            <div class="card-name">굴착기운전기능사</div>
+                            <div class="card-desc">토목 공사현장 및 중장비 운전 기술 자격증 (포크레인)</div>
+                        </div>
                         <div class="card-meta">
                             <span>시행: 두두자격검정원</span>
-                            <span>필기: 14,500원</span>
+                            <span class="card-fee">14,500원</span>
                         </div>
                     </div>
 
-                    <!-- Card 4 -->
-                    <div class="qual-card" onclick="selectQual('전기기능사', '정기 (연 4회)', '14,500원')">
-                        <span class="card-tag tag-regular">정기 회차</span>
-                        <div class="card-name">전기기능사</div>
-                        <div class="card-desc">아파트 및 건물 시설관리 선호</div>
+                    <!-- 4. 전기기능사 -->
+                    <div class="qual-card" onclick="selectQualification('전기기능사', '정기 회차', '14,500원', '두두자격검정원')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-regular">정기 (연 4회)</span>
+                            </div>
+                            <div class="card-name">전기기능사</div>
+                            <div class="card-desc">아파트 단지, 빌딩 및 공공시설 관리직 취업 최고 선호 자격</div>
+                        </div>
                         <div class="card-meta">
-                            <span>시행: 두두자격검정원</span>
-                            <span>필기: 14,500원</span>
+                            <span>제4회: 08.24~08.27</span>
+                            <span class="card-fee">14,500원</span>
                         </div>
                     </div>
 
-                    <!-- Card 5 -->
-                    <div class="qual-card" onclick="selectQual('요양보호사', '상시', '별도')">
-                        <span class="card-tag tag-always">상시 접수</span>
-                        <div class="card-name">요양보호사</div>
-                        <div class="card-desc">요양원 및 재가돌봄 전문 서비스</div>
+                    <!-- 5. 요양보호사 -->
+                    <div class="qual-card" onclick="selectQualification('요양보호사', '상시 CBT', '32,000원', '두두보건시험원')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-always">상시 접수</span>
+                            </div>
+                            <div class="card-name">요양보호사</div>
+                            <div class="card-desc">요양원, 주야간보호센터, 재가방문돌봄 전문 자격 (240시간 수료)</div>
+                        </div>
                         <div class="card-meta">
                             <span>시행: 두두보건시험원</span>
-                            <span>필기: 별도 문의</span>
+                            <span class="card-fee">32,000원</span>
                         </div>
                     </div>
 
-                    <!-- Card 6 -->
-                    <div class="qual-card" onclick="selectQual('위생사', '별도', '별도')">
-                        <span class="card-tag tag-regular">별도 시행</span>
-                        <div class="card-name">위생사</div>
-                        <div class="card-desc">급식소 및 식품 위생 관리</div>
+                    <!-- 6. 위생사 -->
+                    <div class="qual-card" onclick="selectQualification('위생사', '별도 시행', '30,000원', '두두보건시험원')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-regular">별도 시행</span>
+                            </div>
+                            <div class="card-name">위생사</div>
+                            <div class="card-desc">단체급식소 및 공중위생 관리 전문 자격증 (보건계열 이수자)</div>
+                        </div>
                         <div class="card-meta">
                             <span>시행: 두두보건시험원</span>
-                            <span>필기: 별도 문의</span>
+                            <span class="card-fee">30,000원</span>
                         </div>
                     </div>
 
-                    <!-- Card 7 -->
-                    <div class="qual-card" onclick="selectQual('손해평가사', '연 1회', '별도')">
-                        <span class="card-tag tag-annual">연 1회</span>
-                        <div class="card-name">손해평가사</div>
-                        <div class="card-desc">농작물 재해 및 손해 조사</div>
+                    <!-- 7. 손해평가사 -->
+                    <div class="qual-card" onclick="selectQualification('손해평가사', '연 1회', '1차 30,000원', '전문자격')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-annual">연 1회 시행</span>
+                            </div>
+                            <div class="card-name">손해평가사</div>
+                            <div class="card-desc">농작물 및 가축 재해 손해 평가 전문직 (2026년 1차 마감)</div>
+                        </div>
                         <div class="card-meta">
                             <span>시행: 전문자격</span>
-                            <span>1차 접수 마감</span>
+                            <span class="card-fee">30,000원</span>
                         </div>
                     </div>
 
-                    <!-- Card 8 -->
-                    <div class="qual-card" onclick="selectQual('공인중개사', '연 1회', '별도')">
-                        <span class="card-tag tag-annual">연 1회</span>
-                        <div class="card-name">공인중개사</div>
-                        <div class="card-desc">부동산 중개 및 자산 관리</div>
+                    <!-- 8. 공인중개사 -->
+                    <div class="qual-card" onclick="selectQualification('공인중개사', '연 1회', '1차 13,400원', '전문자격')">
+                        <div>
+                            <div class="card-top">
+                                <span class="card-tag tag-annual">연 1회 시행</span>
+                            </div>
+                            <div class="card-name">공인중개사</div>
+                            <div class="card-desc">부동산 중개 사무소 개업 및 자산 관리 전문 자격</div>
+                        </div>
                         <div class="card-meta">
                             <span>시행: 전문자격</span>
-                            <span>1차 접수 마감</span>
+                            <span class="card-fee">13,400원</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right: Registration Form Panel -->
+            <!-- Right Column: Registration Form Panel -->
             <div>
-                <h3 class="section-title">📝 접수 신청서 작성</h3>
                 <div class="form-panel">
-                    <form id="appForm" onsubmit="handleFormSubmit(event)">
+                    <div class="form-panel-header">
+                        <h3 style="font-size: 20px; font-weight: 800; color: #ffffff;">2단계. 신청 정보를 입력하세요</h3>
+                        <p style="font-size: 13px; color: var(--text-sub); margin-top: 4px;">접수 완료 후 담당자가 전화로 시험 일정과 장소를 확정해 드립니다.</p>
+                    </div>
+
+                    <form id="seniorRegistrationForm" onsubmit="handleRegistrationSubmit(event)">
+                        <!-- Selected Summary -->
+                        <div class="selected-summary-box">
+                            <div class="selected-qual-title" id="displayQualName">한식조리기능사</div>
+                            <div class="selected-qual-info">
+                                <span id="displayExamType">상시CBT 시험 (필기)</span>
+                                <span id="displayFeeAmount" style="font-weight: 700; color: #60a5fa;">수수료: 14,500원</span>
+                            </div>
+                        </div>
+
+                        <!-- Name -->
                         <div class="form-group">
-                            <label class="form-label">선택한 자격증</label>
-                            <div class="selected-box" id="selectedDisplay">한식조리기능사</div>
+                            <label class="form-label" for="userName">신청자 성함</label>
+                            <input type="text" id="userName" class="form-input" placeholder="성함을 정확히 입력하세요 (예: 홍길동)" required>
                         </div>
 
+                        <!-- Phone with Auto-Hyphen -->
                         <div class="form-group">
-                            <label class="form-label" for="applicantName">신청자 성함</label>
-                            <input type="text" id="applicantName" class="form-input" placeholder="예: 홍길동" required>
+                            <label class="form-label" for="userPhone">휴대전화 번호</label>
+                            <input type="tel" id="userPhone" class="form-input" placeholder="010-0000-0000" maxlength="13" required oninput="autoFormatPhone(this)">
+                            <div class="phone-helper-text">※ 숫자만 입력하시면 하이픈(-)이 자동으로 추가됩니다.</div>
                         </div>
 
+                        <!-- Region -->
                         <div class="form-group">
-                            <label class="form-label" for="applicantPhone">연락처 (전화번호)</label>
-                            <input type="tel" id="applicantPhone" class="form-input" placeholder="예: 010-1234-5678" required>
+                            <label class="form-label" for="userRegion">시험 희망 지역</label>
+                            <select id="userRegion" class="form-select">
+                                <option value="서울">서울</option>
+                                <option value="경기">경기 / 인천</option>
+                                <option value="부산">부산 / 울산 / 경남</option>
+                                <option value="대구">대구 / 경북</option>
+                                <option value="대전">대전 / 세종 / 충청</option>
+                                <option value="광주">광주 / 전라</option>
+                                <option value="강원">강원</option>
+                                <option value="제주">제주</option>
+                            </select>
                         </div>
 
-                        <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
-                            <input type="checkbox" id="privacyAgree" required style="width: 18px; height: 18px; accent-color: var(--primary);">
-                            <label for="privacyAgree" style="font-size: 13px; color: var(--text-sub);">원서접수 대행 개인정보 수집에 동의합니다.</label>
+                        <!-- Privacy Consent -->
+                        <div class="form-group" style="display: flex; align-items: flex-start; gap: 10px; margin-top: 18px;">
+                            <input type="checkbox" id="privacyConsent" required style="width: 20px; height: 20px; margin-top: 2px; accent-color: var(--primary); cursor: pointer;">
+                            <label for="privacyConsent" style="font-size: 13px; color: #cbd5e1; cursor: pointer; line-height: 1.4;">
+                                <strong>[필수]</strong> 국가자격 원서접수 대행을 위한 개인정보 수집 및 안내 문자 발송에 동의합니다.
+                            </label>
                         </div>
 
-                        <button type="submit" class="submit-btn" id="submitBtn">원서 접수 제출하기</button>
+                        <button type="submit" class="submit-btn" id="submitAppBtn">원서접수 신청 완료하기</button>
                     </form>
+
+                    <div class="help-callout">
+                        <div class="help-icon">💡</div>
+                        <div class="help-text">
+                            <strong>궁금한 점이 있으신가요?</strong><br>
+                            화면 우측 하단의 <strong>[문의 챗봇]</strong>을 누르시면 시험 응시료, 준비물, 일정 등을 바로 확인하실 수 있습니다.
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Service Screens Test Navigation -->
-        <div class="test-section">
-            <h3 class="section-title">🌐 MP1 프로젝트 주요 주소 3개 바로가기</h3>
-            <div class="test-grid">
-                <a href="index.html" class="test-card">
-                    <div>
-                        <span class="test-badge" style="background: rgba(59,130,246,0.2); color: #60a5fa;">주소 1</span>
-                        <h4>1. 접수 화면 (신청자용)</h4>
-                        <p>자격증 선택 및 신청서 작성 $\rightarrow$ Supabase `applications` 테이블 실시간 등록</p>
-                    </div>
-                    <span style="color: #60a5fa; font-size: 13px; margin-top: 12px;">현재 페이지 열기 →</span>
-                </a>
-                <a href="admin/index.html" class="test-card">
-                    <div>
-                        <span class="test-badge" style="background: rgba(16,185,129,0.2); color: #34d399;">주소 2</span>
-                        <h4>3. 접수 어드민 (운영자용)</h4>
-                        <p>등록된 신청서 목록 실시간 조회, 통계 확인 및 접수 관리</p>
-                    </div>
-                    <span style="color: #34d399; font-size: 13px; margin-top: 12px;">접수 어드민 열기 →</span>
-                </a>
-                <a href="faq-admin/index.html" class="test-card">
-                    <div>
-                        <span class="test-badge" style="background: rgba(139,92,246,0.2); color: #c084fc;">주소 3</span>
-                        <h4>4. FAQ 어드민 (규정 수정용)</h4>
-                        <p>시험 규정/일정/수수료 문서 수정 $\rightarrow$ 우측 하단 챗봇 답변에 즉시 반영</p>
-                    </div>
-                    <span style="color: #c084fc; font-size: 13px; margin-top: 12px;">FAQ 어드민 열기 →</span>
-                </a>
-            </div>
-        </div>
     </div>
 
-    <!-- Success Modal -->
-    <div class="modal-overlay" id="successModal">
+    <!-- Success Receipt Modal -->
+    <div class="modal-overlay" id="receiptModal">
         <div class="modal-card">
-            <div class="modal-icon">✓</div>
-            <h3 class="modal-title">접수 완료!</h3>
-            <p class="modal-desc" id="modalDesc">신청서가 성공적으로 전달되었습니다.</p>
-            <button class="modal-btn" onclick="closeModal()">확인</button>
+            <div class="modal-badge-check">✓</div>
+            <h3 style="font-size: 22px; font-weight: 800; margin-bottom: 6px; color: #ffffff;">원서접수 신청이 완료되었습니다!</h3>
+            <p style="font-size: 14px; color: var(--text-sub);">두두자격지원센터 접수 대장에 정상 등록되었습니다.</p>
+
+            <div class="modal-receipt-box">
+                <div class="receipt-row">
+                    <span style="color: var(--text-sub);">접수 접수번호:</span>
+                    <strong style="color: #60a5fa;" id="receiptNo">-</strong>
+                </div>
+                <div class="receipt-row">
+                    <span style="color: var(--text-sub);">신청자 성함:</span>
+                    <strong id="receiptName">-</strong>
+                </div>
+                <div class="receipt-row">
+                    <span style="color: var(--text-sub);">신청 자격증:</span>
+                    <strong id="receiptQual">-</strong>
+                </div>
+                <div class="receipt-row">
+                    <span style="color: var(--text-sub);">희망 지역:</span>
+                    <strong id="receiptRegion">-</strong>
+                </div>
+                <div class="receipt-row">
+                    <span style="color: var(--text-sub);">응시 수수료:</span>
+                    <strong id="receiptFee">-</strong>
+                </div>
+            </div>
+
+            <p style="font-size: 13px; color: #94a3b8; margin-bottom: 20px; line-height: 1.5;">
+                입력하신 연락처로 접수 확인 안내 문자가 발송되며, 담당 직원이 시험장 배정을 위해 연락드리겠습니다.
+            </p>
+            <button class="modal-btn" onclick="closeReceiptModal()">확인 및 닫기</button>
         </div>
     </div>
 
-    <!-- Script Logic -->
+    <!-- Footer -->
+    <footer>
+        <p><strong>두두자격지원센터 (중장년·시니어 국가자격 원서접수 지원 포털)</strong></p>
+        <p>고객센터: 02-1544-2026 | 운영시간: 평일 09:00 ~ 18:00 (주말 및 공휴일 휴무)</p>
+        <p style="color: #475569; margin-top: 6px;">Copyright © 2026 DuDu Qualification Support Center. All rights reserved.</p>
+    </footer>
+
+    <!-- Logic Script -->
     <script>
-        // Supabase Initialization
         const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
         
@@ -680,13 +843,57 @@
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        let selectedQualification = "한식조리기능사";
+        let selectedData = {
+            name: "한식조리기능사",
+            type: "상시CBT",
+            fee: "14,500원",
+            feeInt: 14500,
+            org: "두두자격검정원"
+        };
 
-        function selectQual(name, tag, fee) {
-            selectedQualification = name;
-            document.getElementById('selectedDisplay').textContent = name;
-            
-            // Highlight active card
+        let currentZoomLevel = 0;
+
+        function adjustFontSize(delta) {
+            currentZoomLevel = Math.max(-2, Math.min(4, currentZoomLevel + delta));
+            const newSize = 16 + (currentZoomLevel * 2);
+            document.documentElement.style.setProperty('--base-font-size', `${newSize}px`);
+        }
+
+        function resetFontSize() {
+            currentZoomLevel = 0;
+            document.documentElement.style.setProperty('--base-font-size', '16px');
+        }
+
+        // Auto-hyphen for phone number
+        function autoFormatPhone(input) {
+            let val = input.value.replace(/[^0-9]/g, '');
+            let formatted = '';
+            if (val.length < 4) {
+                formatted = val;
+            } else if (val.length < 7) {
+                formatted = val.substr(0, 3) + '-' + val.substr(3);
+            } else if (val.length < 11) {
+                formatted = val.substr(0, 3) + '-' + val.substr(3, 3) + '-' + val.substr(6);
+            } else {
+                formatted = val.substr(0, 3) + '-' + val.substr(3, 4) + '-' + val.substr(7, 4);
+            }
+            input.value = formatted;
+        }
+
+        function selectQualification(name, type, fee, org) {
+            selectedData = {
+                name: name,
+                type: type,
+                fee: fee,
+                feeInt: parseInt(fee.replace(/[^0-9]/g, '')) || 14500,
+                org: org
+            };
+
+            document.getElementById('displayQualName').textContent = name;
+            document.getElementById('displayExamType').textContent = `${type} (필기 접수)`;
+            document.getElementById('displayFeeAmount').textContent = `수수료: ${fee}`;
+
+            // Highlight cards
             const cards = document.querySelectorAll('.qual-card');
             cards.forEach(card => {
                 const title = card.querySelector('.card-name').textContent;
@@ -698,67 +905,67 @@
             });
         }
 
-        async function handleFormSubmit(e) {
+        async function handleRegistrationSubmit(e) {
             e.preventDefault();
-            const submitBtn = document.getElementById('submitBtn');
-            const name = document.getElementById('applicantName').value.trim();
-            const phone = document.getElementById('applicantPhone').value.trim();
+            const btn = document.getElementById('submitAppBtn');
+            const name = document.getElementById('userName').value.trim();
+            const phone = document.getElementById('userPhone').value.trim();
+            const region = document.getElementById('userRegion').value;
 
-            if (!name || !phone) {
-                alert('성함과 연락처를 입력해 주세요.');
+            if (!name || phone.length < 12) {
+                alert('성함과 휴대전화 번호를 올바르게 입력해 주세요.');
                 return;
             }
 
-            submitBtn.disabled = true;
-            submitBtn.textContent = '제출 중...';
+            btn.disabled = true;
+            btn.textContent = '접수 처리 중...';
 
+            const randNo = 'DN2026' + Math.floor(100000 + Math.random() * 900000);
             const payload = {
+                receipt_number: randNo,
                 name: name,
                 phone: phone,
-                qualification: selectedQualification,
+                qualification: selectedData.name,
+                exam_type: selectedData.type,
+                exam_stage: '필기',
+                exam_region: region,
+                fee_amount: selectedData.feeInt,
+                fee_final: selectedData.feeInt,
+                payment_method: '신용카드',
+                payment_status: '완료',
                 status: '접수완료',
+                usage_context: '본인단독',
                 created_at: new Date().toISOString()
             };
 
             try {
                 if (supabase) {
-                    const { data, error } = await supabase
-                        .from('applications')
-                        .insert([payload]);
-
-                    if (error) {
-                        console.warn('Supabase Insert Warning:', error.message);
-                        const fallbackPayload = {
-                            applicant_name: name,
-                            contact: phone,
-                            license_name: selectedQualification
-                        };
-                        await supabase.from('applications').insert([fallbackPayload]);
-                    }
+                    await supabase.from('applications').insert([payload]);
                 }
             } catch (err) {
-                console.log('Supabase submit note:', err);
+                console.log('Insert note:', err);
             } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '원서 접수 제출하기';
-                
-                // Show modal
-                document.getElementById('modalDesc').innerHTML = `
-                    <strong>${name}</strong>님, <strong>${selectedQualification}</strong> 원서접수 신청이 정상적으로 등록되었습니다.
-                `;
-                document.getElementById('successModal').style.display = 'flex';
-                
-                // Reset form
-                document.getElementById('applicantName').value = '';
-                document.getElementById('applicantPhone').value = '';
+                btn.disabled = false;
+                btn.textContent = '원서접수 신청 완료하기';
+
+                document.getElementById('receiptNo').textContent = randNo;
+                document.getElementById('receiptName').textContent = name;
+                document.getElementById('receiptQual').textContent = selectedData.name;
+                document.getElementById('receiptRegion').textContent = region;
+                document.getElementById('receiptFee').textContent = selectedData.fee;
+
+                document.getElementById('receiptModal').style.display = 'flex';
+
+                document.getElementById('userName').value = '';
+                document.getElementById('userPhone').value = '';
             }
         }
 
-        function closeModal() {
-            document.getElementById('successModal').style.display = 'none';
+        function closeReceiptModal() {
+            document.getElementById('receiptModal').style.display = 'none';
         }
     </script>
-    <!-- Floating AI FAQ Chatbot Component -->
+    <!-- Floating AI FAQ Chatbot Widget -->
     <script src="chatbot.js"></script>
 </body>
 </html>

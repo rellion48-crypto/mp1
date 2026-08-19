@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>두두자격지원센터 - 접수 관리 어드민</title>
+    <title>두두자격지원센터 - 원서접수 통합 관리 대장 (ADMIN)</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <!-- Supabase JS Client CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.75);
-            --card-border: rgba(255, 255, 255, 0.12);
+            --bg-page: #0b1120;
+            --card-bg: #1e293b;
+            --card-border: rgba(255, 255, 255, 0.1);
             --primary: #3b82f6;
-            --accent: #10b981;
+            --primary-hover: #2563eb;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-gold: #f59e0b;
             --danger: #ef4444;
-            --warning: #f59e0b;
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
             --radius-lg: 16px;
-            --radius-md: 12px;
+            --radius-md: 10px;
         }
 
         * {
@@ -33,24 +35,25 @@
         }
 
         body {
-            background-color: var(--bg-dark);
+            background-color: var(--bg-page);
             color: var(--text-main);
             min-height: 100vh;
-            padding-bottom: 90px;
+            padding-bottom: 80px;
+            font-size: 14px;
         }
 
+        /* Header */
         header {
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(12px);
+            background: #0f172a;
             border-bottom: 1px solid var(--card-border);
-            padding: 16px 24px;
+            padding: 14px 24px;
             position: sticky;
             top: 0;
             z-index: 100;
         }
 
         .header-container {
-            max-width: 1300px;
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -66,227 +69,420 @@
         }
 
         .logo-badge {
-            background: linear-gradient(135deg, var(--primary), var(--accent));
+            background: linear-gradient(135deg, var(--primary), var(--accent-green));
             color: #fff;
-            font-size: 20px;
+            font-size: 18px;
             font-weight: 900;
-            width: 44px;
-            height: 44px;
-            border-radius: 12px;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .logo-text h1 {
-            font-size: 20px;
-            font-weight: 700;
+            font-size: 18px;
+            font-weight: 800;
         }
 
         .nav-links {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .nav-btn {
             background: rgba(255, 255, 255, 0.08);
             border: 1px solid var(--card-border);
             color: var(--text-main);
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: var(--radius-md);
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.2s;
         }
 
         .nav-btn:hover {
-            background: rgba(255, 255, 255, 0.16);
+            background: rgba(255, 255, 255, 0.15);
             border-color: var(--primary);
         }
 
         .main-container {
-            max-width: 1300px;
-            margin: 32px auto;
+            max-width: 1400px;
+            margin: 24px auto;
             padding: 0 24px;
         }
 
-        .stats-grid {
+        /* Metric Cards Grid */
+        .metrics-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 16px;
             margin-bottom: 24px;
         }
 
-        .stat-card {
+        .metric-card {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
-            border-radius: var(--radius-md);
+            border-radius: var(--radius-lg);
             padding: 20px;
-            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
-        .stat-label {
+        .metric-label {
             font-size: 13px;
             color: var(--text-sub);
+            font-weight: 600;
             margin-bottom: 6px;
         }
 
-        .stat-value {
+        .metric-value {
             font-size: 28px;
             font-weight: 900;
-            color: #60a5fa;
+            color: #ffffff;
         }
 
-        .controls-bar {
+        .metric-sub {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 6px;
+        }
+
+        /* Filter Controls */
+        .filter-section {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+            margin-bottom: 20px;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
             flex-wrap: wrap;
             gap: 12px;
-            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
         }
 
-        .search-input {
-            background: rgba(15, 23, 42, 0.8);
+        .filter-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            flex: 1;
+        }
+
+        .form-input, .form-select {
+            background: #090d16;
             border: 1px solid var(--card-border);
             border-radius: var(--radius-md);
-            padding: 10px 16px;
+            padding: 9px 14px;
             color: var(--text-main);
+            font-size: 13px;
             outline: none;
-            font-size: 14px;
-            width: 280px;
         }
 
+        .form-input:focus, .form-select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            background: var(--primary);
+            border: none;
+            color: white;
+            padding: 9px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn:hover { background: var(--primary-hover); }
+        .btn-success { background: var(--accent-green); }
+        .btn-success:hover { background: #059669; }
+        .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text-main); border: 1px solid var(--card-border); }
+
+        /* Table Container */
         .table-container {
             background: var(--card-bg);
             border: 1px solid var(--card-border);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-responsive {
             overflow-x: auto;
-            backdrop-filter: blur(10px);
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
-        }
-
-        th, td {
-            padding: 14px 16px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 13px;
         }
 
         th {
-            font-size: 13px;
+            background: #0f172a;
             color: var(--text-sub);
-            text-transform: uppercase;
+            padding: 14px 16px;
+            font-weight: 700;
+            border-bottom: 1px solid var(--card-border);
+            white-space: nowrap;
         }
 
         td {
-            font-size: 15px;
+            padding: 13px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
         }
 
         .status-badge {
             display: inline-block;
-            padding: 4px 10px;
+            padding: 3px 8px;
             border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .status-completed { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+
+        /* Pagination Bar */
+        .pagination-bar {
+            padding: 14px 20px;
+            background: #0f172a;
+            border-top: 1px solid var(--card-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .page-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .page-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--card-border);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 6px;
             font-size: 12px;
             font-weight: 600;
-        }
-
-        .status-complete { background: rgba(16, 185, 129, 0.2); color: #34d399; }
-        .status-progress { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
-
-        .btn {
-            background: var(--primary);
-            border: none;
-            color: white;
-            padding: 9px 18px;
-            border-radius: var(--radius-md);
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.2s ease;
         }
 
-        .btn:hover { background: #2563eb; }
-        .btn-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); padding: 5px 10px; font-size: 12px; }
-        .btn-danger:hover { background: rgba(239, 68, 68, 0.4); }
+        .page-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .page-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Detail Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            max-width: 580px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin: 20px 0;
+            font-size: 13px;
+        }
+
+        .detail-item {
+            background: #090d16;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-sub);
+            margin-bottom: 2px;
+        }
+
+        .detail-val {
+            font-weight: 700;
+            color: #ffffff;
+        }
     </style>
 </head>
 <body>
+    <!-- Header -->
     <header>
         <div class="header-container">
             <a href="../index.html" class="logo">
-                <div class="logo-badge">두</div>
+                <div class="logo-badge">대장</div>
                 <div class="logo-text">
-                    <h1>두두자격지원센터 (접수 관리 어드민)</h1>
-                    <p style="font-size: 11px; color: var(--text-sub);">실시간 원서접수 대장 & 수기 업무 대체 시스템</p>
+                    <h1>두두자격지원센터 (통합 접수 관리 대장)</h1>
                 </div>
             </a>
             <nav class="nav-links">
-                <a href="../index.html" class="nav-btn">1. 접수 화면</a>
-                <a href="../faq-admin/index.html" class="nav-btn">4. FAQ 어드민</a>
+                <a href="../index.html" class="nav-btn">← 원서접수 메인 포털</a>
+                <a href="../faq-admin/index.html" class="nav-btn">안내 규정 관리</a>
             </nav>
         </div>
     </header>
 
     <div class="main-container">
-        <div class="controls-bar">
-            <div>
-                <h2>📋 실시간 원서접수 신청 대장</h2>
-                <p style="font-size: 13px; color: var(--text-sub); margin-top: 4px;">
-                    워드 접수대장 동시 덮어쓰기 문제 해결: Supabase DB 실시간 동기화
-                </p>
+        <!-- Top Statistics Cards -->
+        <div class="metrics-grid">
+            <div class="metric-card">
+                <div class="metric-label">총 접수 건수</div>
+                <div class="metric-value" id="statTotal">0</div>
+                <div class="metric-sub">전체 누적 원서접수</div>
             </div>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="adminSearch" class="search-input" placeholder="이름, 연락처, 자격증 검색..." oninput="filterTable()">
-                <button class="btn" onclick="fetchApplications()">새로고침</button>
+            <div class="metric-card">
+                <div class="metric-label">국가기술자격 (4종)</div>
+                <div class="metric-value" style="color: #60a5fa;" id="statNational">0</div>
+                <div class="metric-sub">한식 / 지게차 / 굴착기 / 전기</div>
             </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">총 접수 건수</div>
-                <div class="stat-value" id="totalCount">0</div>
+            <div class="metric-card">
+                <div class="metric-label">두두보건 (2종)</div>
+                <div class="metric-value" style="color: #34d399;" id="statHealth">0</div>
+                <div class="metric-sub">요양보호사 / 위생사</div>
             </div>
-            <div class="stat-card">
-                <div class="stat-label">오늘 접수 건수</div>
-                <div class="stat-value" id="todayCount">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">기능사 4종 접수</div>
-                <div class="stat-value" id="techCount">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">보건/전문자격 접수</div>
-                <div class="stat-value" id="otherCount">0</div>
+            <div class="metric-card">
+                <div class="metric-label">전문자격 (2종)</div>
+                <div class="metric-value" style="color: #c084fc;" id="statProf">0</div>
+                <div class="metric-sub">손해평가사 / 공인중개사</div>
             </div>
         </div>
 
+        <!-- Filter & Search Controls -->
+        <div class="filter-section">
+            <div class="filter-inputs">
+                <input type="text" id="searchInput" class="form-input" placeholder="성함, 연락처, 접수번호 검색..." style="width: 220px;" oninput="debounceFilter()">
+                <select id="qualFilter" class="form-select" onchange="applyFilters()">
+                    <option value="ALL">전체 자격종목 (8종)</option>
+                    <option value="한식조리기능사">한식조리기능사</option>
+                    <option value="지게차운전기능사">지게차운전기능사</option>
+                    <option value="굴착기운전기능사">굴착기운전기능사</option>
+                    <option value="전기기능사">전기기능사</option>
+                    <option value="요양보호사">요양보호사</option>
+                    <option value="위생사">위생사</option>
+                    <option value="손해평가사">손해평가사</option>
+                    <option value="공인중개사">공인중개사</option>
+                </select>
+                <select id="regionFilter" class="form-select" onchange="applyFilters()">
+                    <option value="ALL">전체 지역</option>
+                    <option value="서울">서울</option>
+                    <option value="부산">부산</option>
+                    <option value="대구">대구</option>
+                    <option value="인천">인천</option>
+                    <option value="광주">광주</option>
+                    <option value="대전">대전</option>
+                    <option value="경기">경기/수원</option>
+                    <option value="강원">강원</option>
+                    <option value="충북">충북/청주</option>
+                    <option value="전북">전북/전주</option>
+                    <option value="경남">경남/울산</option>
+                    <option value="제주">제주</option>
+                </select>
+                <select id="statusFilter" class="form-select" onchange="applyFilters()">
+                    <option value="ALL">전체 접수상태</option>
+                    <option value="접수완료">접수완료</option>
+                    <option value="접수대기">접수대기</option>
+                    <option value="취소">취소</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <button class="btn btn-secondary" onclick="fetchData()">🔄 새로고침</button>
+                <button class="btn btn-success" onclick="exportToCSV()">📥 엑셀(CSV) 다운로드</button>
+            </div>
+        </div>
+
+        <!-- Table Container -->
         <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th>순번/ID</th>
-                        <th>신청자 성함</th>
-                        <th>연락처</th>
-                        <th>자격증 종목</th>
-                        <th>접수 상태</th>
-                        <th>신청 일시</th>
-                        <th>관리</th>
-                    </tr>
-                </thead>
-                <tbody id="appTableBody">
-                    <tr>
-                        <td colspan="7" style="text-align: center; color: var(--text-sub); padding: 30px;">접수 내역을 불러오는 중...</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>접수번호</th>
+                            <th>신청자 성함</th>
+                            <th>생년월일/성별</th>
+                            <th>연락처</th>
+                            <th>신청 자격증</th>
+                            <th>시험지역 / 센터</th>
+                            <th>시험일자</th>
+                            <th>결제금액</th>
+                            <th>상태</th>
+                            <th>상세 / 관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="applicationTableBody">
+                        <tr>
+                            <td colspan="10" style="text-align: center; padding: 40px; color: var(--text-sub);">
+                                접수 대장 데이터를 실시간으로 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination Bar -->
+            <div class="pagination-bar">
+                <div style="color: var(--text-sub); font-size: 13px;" id="paginationInfo">
+                    총 0건 중 0 - 0건 표시
+                </div>
+                <div class="page-btns" id="pageBtnContainer">
+                    <!-- Dynamic Page Buttons -->
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Application Detail Modal -->
+    <div class="modal-overlay" id="detailModal">
+        <div class="modal-card">
+            <h3 style="font-size: 20px; font-weight: 800; margin-bottom: 4px; color: #ffffff;">원서접수 상세 정보</h3>
+            <p style="font-size: 13px; color: var(--text-sub);">신청서 세부 내역 및 시험장 배정 정보</p>
+
+            <div class="detail-grid" id="detailContent">
+                <!-- Injected via JS -->
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closeDetailModal()">닫기</button>
+                <button class="btn btn-success" id="btnConfirmStatus">접수 확정 처리</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script Logic -->
     <script>
         const SUPABASE_URL = "https://amlznptemtbkhyuzdkmu.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFtbHpucHRlbXRia2h5dXpka211Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNzcxMTQsImV4cCI6MjEwMjY1MzExNH0.DY_P3C5G136AuhSYAn7RvMKQfEOPxKmN-wI__f3fjfg";
@@ -296,14 +492,17 @@
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        let allApplications = [];
+        let allRecords = [];
+        let filteredRecords = [];
+        let currentPage = 1;
+        const pageSize = 20;
+        let debounceTimer = null;
 
-        async function fetchApplications() {
-            const tbody = document.getElementById('appTableBody');
-            if (!supabase) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">Supabase Client Error</td></tr>';
-                return;
-            }
+        async function fetchData() {
+            const tbody = document.getElementById('applicationTableBody');
+            tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-sub);">데이터를 불러오는 중...</td></tr>';
+
+            if (!supabase) return;
 
             try {
                 const { data, error } = await supabase
@@ -312,88 +511,225 @@
                     .order('created_at', { ascending: false });
 
                 if (error) throw error;
-                allApplications = data || [];
-                updateStats(allApplications);
-                renderTable(allApplications);
+                allRecords = data || [];
+                updateMetrics(allRecords);
+                applyFilters();
             } catch (err) {
                 console.error('Fetch error:', err);
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: #f87171;">데이터 조회 실패: ${err.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: #ef4444; padding: 40px;">데이터 조회 실패: ${err.message}</td></tr>`;
             }
         }
 
-        function updateStats(data) {
-            document.getElementById('totalCount').textContent = data.length;
-            
-            const todayStr = new Date().toISOString().slice(0, 10);
-            const todayItems = data.filter(item => (item.created_at || '').startsWith(todayStr));
-            document.getElementById('todayCount').textContent = todayItems.length;
+        function updateMetrics(records) {
+            document.getElementById('statTotal').textContent = records.length.toLocaleString() + '건';
 
-            const techQuals = ['한식조리기능사', '지게차운전기능사', '굴착기운전기능사', '전기기능사'];
-            const techItems = data.filter(item => techQuals.includes(item.qualification || item.license_name));
-            document.getElementById('techCount').textContent = techItems.length;
-            document.getElementById('otherCount').textContent = data.length - techItems.length;
+            const nationalQuals = ['한식조리기능사', '지게차운전기능사', '굴착기운전기능사', '전기기능사'];
+            const healthQuals = ['요양보호사', '위생사'];
+            const profQuals = ['손해평가사', '공인중개사'];
+
+            const natCount = records.filter(r => nationalQuals.includes(r.qualification)).length;
+            const healthCount = records.filter(r => healthQuals.includes(r.qualification)).length;
+            const profCount = records.filter(r => profQuals.includes(r.qualification)).length;
+
+            document.getElementById('statNational').textContent = natCount.toLocaleString() + '건';
+            document.getElementById('statHealth').textContent = healthCount.toLocaleString() + '건';
+            document.getElementById('statProf').textContent = profCount.toLocaleString() + '건';
         }
 
-        function renderTable(data) {
-            const tbody = document.getElementById('appTableBody');
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; color: var(--text-sub); padding: 30px;">등록된 접수 내역이 없습니다.</td></tr>';
+        function debounceFilter() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(applyFilters, 250);
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.trim().toLowerCase();
+            const qual = document.getElementById('qualFilter').value;
+            const region = document.getElementById('regionFilter').value;
+            const status = document.getElementById('statusFilter').value;
+
+            filteredRecords = allRecords.filter(r => {
+                const name = (r.name || '').toLowerCase();
+                const phone = (r.phone || '').toLowerCase();
+                const receipt = (r.receipt_number || '').toLowerCase();
+
+                const matchQuery = !query || name.includes(query) || phone.includes(query) || receipt.includes(query);
+                const matchQual = qual === 'ALL' || (r.qualification && r.qualification.includes(qual));
+                const matchRegion = region === 'ALL' || (r.exam_region && r.exam_region.includes(region));
+                const matchStatus = status === 'ALL' || r.status === status;
+
+                return matchQuery && matchQual && matchRegion && matchStatus;
+            });
+
+            currentPage = 1;
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('applicationTableBody');
+            const total = filteredRecords.length;
+
+            if (total === 0) {
+                tbody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 40px; color: var(--text-sub);">검색 조건과 일치하는 접수 내역이 없습니다.</td></tr>';
+                document.getElementById('paginationInfo').textContent = '총 0건';
+                document.getElementById('pageBtnContainer').innerHTML = '';
                 return;
             }
 
-            tbody.innerHTML = data.map((item, idx) => {
-                const name = item.name || item.applicant_name || '-';
-                const phone = item.phone || item.contact || '-';
-                const qual = item.qualification || item.license_name || '-';
-                const status = item.status || '접수완료';
-                const date = item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-';
+            const totalPages = Math.ceil(total / pageSize);
+            currentPage = Math.min(currentPage, totalPages);
+
+            const startIdx = (currentPage - 1) * pageSize;
+            const endIdx = Math.min(startIdx + pageSize, total);
+            const pageData = filteredRecords.slice(startIdx, endIdx);
+
+            tbody.innerHTML = pageData.map((item, idx) => {
+                const receiptNo = item.receipt_number || ('#DN2026' + String(item.id).padStart(5, '0'));
+                const bday = item.birth_date ? `${item.birth_date} (${item.gender || '-'})` : (item.gender || '-');
+                const fee = (item.fee_final || item.fee_amount || 0).toLocaleString() + '원';
+                const statusBadge = item.status === '접수완료' 
+                    ? `<span class="status-badge status-completed">접수완료</span>`
+                    : `<span class="status-badge status-pending">${item.status || '대기'}</span>`;
 
                 return `
                     <tr>
-                        <td>#${item.id || idx + 1}</td>
-                        <td><strong>${name}</strong></td>
-                        <td>${phone}</td>
-                        <td><span style="color:#60a5fa; font-weight:600;">${qual}</span></td>
-                        <td><span class="status-badge status-complete">${status}</span></td>
-                        <td style="color:var(--text-sub); font-size:13px;">${date}</td>
+                        <td style="font-family: monospace; color: #93c5fd; font-weight: 700;">${receiptNo}</td>
+                        <td><strong>${item.name}</strong></td>
+                        <td style="color: var(--text-sub);">${bday}</td>
+                        <td>${item.phone}</td>
+                        <td><strong style="color: #60a5fa;">${item.qualification}</strong></td>
+                        <td>${item.exam_region || '-'} ${item.exam_center ? '· ' + item.exam_center : ''}</td>
+                        <td style="color: var(--text-sub);">${item.exam_date || '-'}</td>
+                        <td style="font-weight: 700;">${fee}</td>
+                        <td>${statusBadge}</td>
                         <td>
-                            <button class="btn-danger" onclick="deleteApp(${item.id})">삭제</button>
+                            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 12px;" onclick="openDetail(${item.id})">상세보기</button>
                         </td>
                     </tr>
                 `;
             }).join('');
+
+            // Pagination info
+            document.getElementById('paginationInfo').textContent = `총 ${total.toLocaleString()}건 중 ${startIdx + 1} - ${endIdx}건 표시 (페이지 ${currentPage}/${totalPages})`;
+
+            // Pagination buttons
+            let btnsHtml = `
+                <button class="page-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>이전</button>
+            `;
+
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                btnsHtml += `<button class="page-btn ${p === currentPage ? 'active' : ''}" onclick="goToPage(${p})">${p}</button>`;
+            }
+
+            btnsHtml += `
+                <button class="page-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>다음</button>
+            `;
+            document.getElementById('pageBtnContainer').innerHTML = btnsHtml;
         }
 
-        function filterTable() {
-            const query = document.getElementById('adminSearch').value.trim().toLowerCase();
-            if (!query) {
-                renderTable(allApplications);
+        function goToPage(p) {
+            currentPage = p;
+            renderTable();
+        }
+
+        function openDetail(id) {
+            const item = allRecords.find(r => r.id === id);
+            if (!item) return;
+
+            const container = document.getElementById('detailContent');
+            container.innerHTML = `
+                <div class="detail-item">
+                    <div class="detail-label">접수번호</div>
+                    <div class="detail-val" style="color: #60a5fa;">${item.receipt_number || '#ID-' + item.id}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">신청자 성함</div>
+                    <div class="detail-val">${item.name}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">휴대전화 번호</div>
+                    <div class="detail-val">${item.phone}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">생년월일 / 성별</div>
+                    <div class="detail-val">${item.birth_date || '-'} / ${item.gender || '-'}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">신청 자격종목</div>
+                    <div class="detail-val">${item.qualification} (${item.exam_type || '필기'})</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">시험지역 및 장소</div>
+                    <div class="detail-val">${item.exam_region || '-'} ${item.exam_center || ''}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">시험일자 및 교시</div>
+                    <div class="detail-val">${item.exam_date || '-'} (${item.exam_session || '1교시'})</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">최종 결제금액</div>
+                    <div class="detail-val">${(item.fee_final || item.fee_amount || 0).toLocaleString()}원 (${item.payment_method || '신용카드'})</div>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="detail-label">교육기관 및 이수시간 (보건자격)</div>
+                    <div class="detail-val">${item.training_institution || '해당없음'} ${item.training_hours ? `(${item.training_hours}시간 이수)` : ''}</div>
+                </div>
+                <div class="detail-item" style="grid-column: 1 / -1;">
+                    <div class="detail-label">접수 신청 일시</div>
+                    <div class="detail-val">${item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-'} (접수맥락: ${item.usage_context || '본인단독'})</div>
+                </div>
+            `;
+
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        function closeDetailModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        function exportToCSV() {
+            if (filteredRecords.length === 0) {
+                alert('내보낼 데이터가 없습니다.');
                 return;
             }
-            const filtered = allApplications.filter(item => {
-                const name = (item.name || item.applicant_name || '').toLowerCase();
-                const phone = (item.phone || item.contact || '').toLowerCase();
-                const qual = (item.qualification || item.license_name || '').toLowerCase();
-                return name.includes(query) || phone.includes(query) || qual.includes(query);
+
+            let csvContent = "\uFEFF접수번호,성명,생년월일,성별,연락처,자격종목,시험지역,시험장,시험일자,결제금액,접수상태,접수일시\n";
+            filteredRecords.forEach(r => {
+                const row = [
+                    r.receipt_number || '',
+                    r.name || '',
+                    r.birth_date || '',
+                    r.gender || '',
+                    r.phone || '',
+                    r.qualification || '',
+                    r.exam_region || '',
+                    r.exam_center || '',
+                    r.exam_date || '',
+                    r.fee_final || r.fee_amount || 0,
+                    r.status || '접수완료',
+                    r.created_at || ''
+                ].map(val => `"${String(val).replace(/"/g, '""')}"`).join(',');
+                csvContent += row + "\n";
             });
-            renderTable(filtered);
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `두두자격지원센터_접수대장_${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        async function deleteApp(id) {
-            if (!confirm('이 접수 내역을 삭제하시겠습니까?')) return;
-            try {
-                if (supabase) {
-                    await supabase.from('applications').delete().eq('id', id);
-                }
-                fetchApplications();
-            } catch (err) {
-                alert('삭제 실패: ' + err.message);
-            }
-        }
-
-        window.onload = fetchApplications;
+        window.onload = fetchData;
     </script>
-    <!-- Floating Chatbot Widget -->
+    <!-- Floating AI FAQ Chatbot Widget -->
     <script src="../chatbot.js"></script>
 </body>
 </html>
