@@ -150,13 +150,12 @@ class DuduChatbot {
     constructor() {
         this.knowledgeBase = [...DEFAULT_FAQ_KNOWLEDGE];
         this.isOpen = false;
-        this.fontSize = 15;
-        if (typeof document !== 'undefined') {
-            this.init();
-        }
+        this.fontSize = 16;
+        this.init();
     }
 
     async init() {
+        if (typeof document === 'undefined' || !document.body) return;
         this.injectStyles();
         this.injectHTML();
         this.bindEvents();
@@ -188,227 +187,242 @@ class DuduChatbot {
 
     injectStyles() {
         if (typeof document === 'undefined') return;
+        if (document.getElementById('duduChatbotStyles')) return;
+
         const style = document.createElement('style');
+        style.id = 'duduChatbotStyles';
         style.textContent = `
             .dudu-chat-fab {
-                position: fixed;
-                bottom: 24px;
-                right: 24px;
-                background: linear-gradient(135deg, #2563eb, #1d4ed8);
-                color: #ffffff;
-                border: 2px solid rgba(255, 255, 255, 0.25);
-                border-radius: 36px;
-                padding: 14px 22px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                box-shadow: 0 10px 30px rgba(37, 99, 235, 0.5);
-                cursor: pointer;
-                z-index: 9999;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                font-family: 'Noto Sans KR', sans-serif;
+                position: fixed !important;
+                bottom: 28px !important;
+                right: 28px !important;
+                background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+                color: #ffffff !important;
+                border: 3px solid #ffffff !important;
+                border-radius: 50px !important;
+                padding: 16px 24px !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 10px !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6) !important;
+                cursor: pointer !important;
+                z-index: 999999 !important;
+                transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                font-family: 'Noto Sans KR', sans-serif !important;
+                user-select: none !important;
             }
             .dudu-chat-fab:hover {
-                transform: translateY(-3px) scale(1.03);
-                box-shadow: 0 14px 35px rgba(37, 99, 235, 0.7);
+                transform: translateY(-4px) scale(1.04) !important;
+                box-shadow: 0 14px 40px rgba(37, 99, 235, 0.7) !important;
+                background: linear-gradient(135deg, #1d4ed8, #1e40af) !important;
             }
             .dudu-chat-fab .fab-icon {
-                font-size: 24px;
-                display: flex;
-                align-items: center;
+                font-size: 26px !important;
+                display: flex !important;
+                align-items: center !important;
             }
             .dudu-chat-fab .fab-text {
-                font-size: 16px;
-                font-weight: 800;
-                letter-spacing: -0.3px;
+                font-size: 18px !important;
+                font-weight: 900 !important;
+                letter-spacing: -0.3px !important;
+                color: #ffffff !important;
             }
             .dudu-chat-fab .fab-pulse {
-                width: 10px;
-                height: 10px;
-                background: #34d399;
-                border-radius: 50%;
-                box-shadow: 0 0 10px #34d399;
-                animation: pulse 2s infinite;
+                width: 12px !important;
+                height: 12px !important;
+                background: #34d399 !important;
+                border-radius: 50% !important;
+                box-shadow: 0 0 12px #34d399 !important;
+                animation: duduPulse 1.8s infinite !important;
             }
 
-            @keyframes pulse {
-                0% { transform: scale(0.95); opacity: 0.8; }
-                50% { transform: scale(1.3); opacity: 1; }
-                100% { transform: scale(0.95); opacity: 0.8; }
+            @keyframes duduPulse {
+                0% { transform: scale(0.9); opacity: 0.8; }
+                50% { transform: scale(1.4); opacity: 1; }
+                100% { transform: scale(0.9); opacity: 0.8; }
             }
 
             .dudu-chat-window {
-                position: fixed;
-                bottom: 88px;
-                right: 24px;
-                width: 390px;
-                max-width: calc(100vw - 32px);
-                height: 580px;
-                max-height: calc(100vh - 120px);
-                background: #0f172a;
-                border: 1px solid rgba(255, 255, 255, 0.18);
-                border-radius: 24px;
-                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
+                position: fixed !important;
+                bottom: 96px !important;
+                right: 28px !important;
+                width: 420px !important;
+                max-width: calc(100vw - 36px) !important;
+                height: 620px !important;
+                max-height: calc(100vh - 120px) !important;
+                background: #0f172a !important;
+                border: 2px solid #3b82f6 !important;
+                border-radius: 24px !important;
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85) !important;
                 display: none;
-                flex-direction: column;
-                z-index: 9999;
-                overflow: hidden;
-                backdrop-filter: blur(18px);
-                font-family: 'Noto Sans KR', sans-serif;
+                flex-direction: column !important;
+                z-index: 999999 !important;
+                overflow: hidden !important;
+                font-family: 'Noto Sans KR', sans-serif !important;
             }
             .dudu-chat-window.open {
-                display: flex;
-                animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                display: flex !important;
+                animation: duduSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             }
 
-            @keyframes slideUp {
+            @keyframes duduSlideUp {
                 from { opacity: 0; transform: translateY(20px); }
                 to { opacity: 1; transform: translateY(0); }
             }
 
             .dudu-chat-header {
-                background: linear-gradient(135deg, #1e293b, #0f172a);
-                border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-                padding: 16px 18px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
+                background: #1e293b !important;
+                border-bottom: 2px solid #334155 !important;
+                padding: 16px 20px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
             }
             .chat-header-info {
-                display: flex;
-                align-items: center;
-                gap: 10px;
+                display: flex !important;
+                align-items: center !important;
+                gap: 12px !important;
             }
             .chat-header-badge {
-                width: 38px;
-                height: 38px;
-                background: #2563eb;
-                border-radius: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 20px;
+                width: 42px !important;
+                height: 42px !important;
+                background: #2563eb !important;
+                border-radius: 12px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                font-size: 22px !important;
+                font-weight: 900 !important;
+                color: #ffffff !important;
             }
             .chat-header-title h4 {
-                color: #f8fafc;
-                font-size: 16px;
-                font-weight: 800;
-                margin: 0;
+                color: #ffffff !important;
+                font-size: 17px !important;
+                font-weight: 900 !important;
+                margin: 0 !important;
             }
             .chat-header-title p {
-                color: #94a3b8;
-                font-size: 11px;
-                margin: 0;
+                color: #94a3b8 !important;
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                margin: 0 !important;
             }
             .chat-header-tools {
-                display: flex;
-                align-items: center;
-                gap: 6px;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
             }
             .tool-btn {
-                background: rgba(255, 255, 255, 0.1);
-                border: none;
-                color: #cbd5e1;
-                border-radius: 6px;
-                padding: 4px 8px;
-                font-size: 12px;
-                cursor: pointer;
+                background: #334155 !important;
+                border: 1px solid #475569 !important;
+                color: #ffffff !important;
+                border-radius: 6px !important;
+                padding: 5px 10px !important;
+                font-size: 13px !important;
+                font-weight: 800 !important;
+                cursor: pointer !important;
             }
             .tool-btn:hover {
-                background: rgba(255, 255, 255, 0.2);
+                background: #2563eb !important;
             }
 
             .dudu-chat-messages {
-                flex: 1;
-                padding: 18px;
-                overflow-y: auto;
-                display: flex;
-                flex-direction: column;
-                gap: 14px;
+                flex: 1 !important;
+                padding: 18px !important;
+                overflow-y: auto !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 16px !important;
+                background: #090d16 !important;
             }
             .chat-msg {
-                max-width: 86%;
-                padding: 13px 16px;
-                border-radius: 16px;
-                line-height: 1.55;
-                font-size: 15px;
-                word-break: keep-all;
+                max-width: 88% !important;
+                padding: 14px 18px !important;
+                border-radius: 18px !important;
+                line-height: 1.55 !important;
+                font-size: 16px !important;
+                word-break: keep-all !important;
+                font-weight: 500 !important;
             }
             .chat-msg.bot {
-                align-self: flex-start;
-                background: #1e293b;
-                color: #f1f5f9;
-                border: 1px solid rgba(255, 255, 255, 0.1);
-                border-bottom-left-radius: 4px;
+                align-self: flex-start !important;
+                background: #1e293b !important;
+                color: #ffffff !important;
+                border: 2px solid #334155 !important;
+                border-bottom-left-radius: 4px !important;
             }
             .chat-msg.user {
-                align-self: flex-end;
-                background: #2563eb;
-                color: #ffffff;
-                border-bottom-right-radius: 4px;
+                align-self: flex-end !important;
+                background: #2563eb !important;
+                color: #ffffff !important;
+                border-bottom-right-radius: 4px !important;
+                font-weight: 700 !important;
             }
 
             .quick-chips {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 6px;
-                margin-top: 10px;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+                margin-top: 14px !important;
             }
             .quick-chip {
-                background: rgba(59, 130, 246, 0.15);
-                border: 1px solid rgba(59, 130, 246, 0.4);
-                color: #93c5fd;
-                border-radius: 12px;
-                padding: 6px 10px;
-                font-size: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
+                background: rgba(37, 99, 235, 0.25) !important;
+                border: 1.5px solid #3b82f6 !important;
+                color: #93c5fd !important;
+                border-radius: 14px !important;
+                padding: 8px 12px !important;
+                font-size: 13px !important;
+                font-weight: 800 !important;
+                cursor: pointer !important;
+                transition: all 0.15s !important;
             }
             .quick-chip:hover {
-                background: rgba(59, 130, 246, 0.3);
-                border-color: #60a5fa;
+                background: #2563eb !important;
+                color: #ffffff !important;
             }
 
             .dudu-chat-input-box {
-                padding: 14px;
-                background: #1e293b;
-                border-top: 1px solid rgba(255, 255, 255, 0.1);
-                display: flex;
-                gap: 8px;
+                padding: 16px !important;
+                background: #1e293b !important;
+                border-top: 2px solid #334155 !important;
+                display: flex !important;
+                gap: 10px !important;
             }
             .dudu-chat-input {
-                flex: 1;
-                background: #090d16;
-                border: 1px solid rgba(255, 255, 255, 0.15);
-                border-radius: 12px;
-                padding: 12px 14px;
-                color: #f8fafc;
-                font-size: 15px;
-                outline: none;
+                flex: 1 !important;
+                background: #020617 !important;
+                border: 2px solid #475569 !important;
+                border-radius: 12px !important;
+                padding: 14px 16px !important;
+                color: #ffffff !important;
+                font-size: 16px !important;
+                font-weight: 600 !important;
+                outline: none !important;
             }
             .dudu-chat-input:focus {
-                border-color: #3b82f6;
+                border-color: #3b82f6 !important;
             }
             .dudu-chat-send-btn {
-                background: #2563eb;
-                border: none;
-                color: white;
-                border-radius: 12px;
-                padding: 0 18px;
-                font-weight: 700;
-                font-size: 15px;
-                cursor: pointer;
+                background: #2563eb !important;
+                border: none !important;
+                color: white !important;
+                border-radius: 12px !important;
+                padding: 0 22px !important;
+                font-weight: 900 !important;
+                font-size: 16px !important;
+                cursor: pointer !important;
             }
             .dudu-chat-send-btn:hover {
-                background: #1d4ed8;
+                background: #1d4ed8 !important;
             }
         `;
         document.head.appendChild(style);
     }
 
     injectHTML() {
-        if (typeof document === 'undefined') return;
+        if (typeof document === 'undefined' || !document.body) return;
+        if (document.getElementById('duduChatFab')) return;
+
         const fab = document.createElement('div');
         fab.className = 'dudu-chat-fab';
         fab.id = 'duduChatFab';
@@ -468,25 +482,25 @@ class DuduChatbot {
         const fontUp = document.getElementById('chatFontUp');
         const fontDown = document.getElementById('chatFontDown');
 
-        if (fab) fab.addEventListener('click', () => this.toggleChat());
-        if (closeBtn) closeBtn.addEventListener('click', () => this.toggleChat(false));
-        if (sendBtn) sendBtn.addEventListener('click', () => this.handleSend());
+        if (fab) fab.onclick = () => this.toggleChat();
+        if (closeBtn) closeBtn.onclick = () => this.toggleChat(false);
+        if (sendBtn) sendBtn.onclick = () => this.handleSend();
         if (input) {
-            input.addEventListener('keypress', (e) => {
+            input.onkeypress = (e) => {
                 if (e.key === 'Enter') this.handleSend();
-            });
+            };
         }
         if (fontUp) {
-            fontUp.addEventListener('click', () => {
-                this.fontSize = Math.min(20, this.fontSize + 2);
+            fontUp.onclick = () => {
+                this.fontSize = Math.min(22, this.fontSize + 2);
                 document.querySelectorAll('.chat-msg').forEach(el => el.style.fontSize = `${this.fontSize}px`);
-            });
+            };
         }
         if (fontDown) {
-            fontDown.addEventListener('click', () => {
+            fontDown.onclick = () => {
                 this.fontSize = Math.max(13, this.fontSize - 2);
                 document.querySelectorAll('.chat-msg').forEach(el => el.style.fontSize = `${this.fontSize}px`);
-            });
+            };
         }
     }
 
@@ -524,7 +538,7 @@ class DuduChatbot {
         setTimeout(() => {
             const answer = this.generateResponse(query);
             this.appendMessage(answer, 'bot');
-        }, 200);
+        }, 150);
     }
 
     appendMessage(text, sender) {
@@ -565,7 +579,7 @@ class DuduChatbot {
             }
         }
 
-        // 질문 의도 감지 (일정/마감 vs 수수료/응시료 vs 환불 vs 준비물)
+        // 질문 의도 감지
         const isScheduleIntent = normalizedQuery.includes('일정') || normalizedQuery.includes('언제') || normalizedQuery.includes('마감') || normalizedQuery.includes('기간') || normalizedQuery.includes('날짜');
         const isFeeIntent = normalizedQuery.includes('응시료') || normalizedQuery.includes('수수료') || normalizedQuery.includes('접수비') || normalizedQuery.includes('비용') || normalizedQuery.includes('얼마') || normalizedQuery.includes('돈');
 
@@ -630,11 +644,24 @@ class DuduChatbot {
     }
 }
 
-// 전역 등록
-if (typeof document !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
+// 안전한 부트스트랩 초기화
+function bootDuduChatbot() {
+    if (typeof document === 'undefined') return;
+    if (!document.body) {
+        window.addEventListener('DOMContentLoaded', bootDuduChatbot);
+        return;
+    }
+    if (!window.duduChat) {
         window.duduChat = new DuduChatbot();
-    });
+    }
+}
+
+if (typeof document !== 'undefined') {
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootDuduChatbot);
+    } else {
+        bootDuduChatbot();
+    }
 }
 
 if (typeof module !== 'undefined' && module.exports) {
