@@ -554,9 +554,122 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 22px;">
-                <button class="btn btn-danger" onclick="deleteCurrentRecord()">접수 삭제</button>
-                <button class="btn btn-secondary" onclick="closeDetailModal()">닫기</button>
+                <button class="btn btn-primary" onclick="openEditModal(currentRecordId)">✏️ 전체 정보 수정</button>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-danger" onclick="deleteCurrentRecord()">접수 삭제</button>
+                    <button class="btn btn-secondary" onclick="closeDetailModal()">닫기</button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Application Edit Modal (접수 정보 수정) -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card" style="max-width: 680px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 2px solid #334155; padding-bottom: 12px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div style="font-size: 24px;">✏️</div>
+                    <h3 style="font-size: calc(20px * var(--font-scale)); font-weight: 900; color: #ffffff; margin: 0;">원서접수 정보 수정</h3>
+                </div>
+                <button onclick="closeEditModal()" style="background: none; border: none; color: #94a3b8; font-size: 24px; font-weight: 900; cursor: pointer; padding: 4px 8px;">✕</button>
+            </div>
+            
+            <form id="editRecordForm" onsubmit="saveRecordEdit(event)">
+                <input type="hidden" id="editRecordId">
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                    <div class="form-group">
+                        <label class="form-label">신청자 성명 *</label>
+                        <input type="text" id="editName" class="form-input" required style="width: 100%;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">연락처 *</label>
+                        <input type="text" id="editPhone" class="form-input" required style="width: 100%;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">생년월일 (YYYY-MM-DD)</label>
+                        <input type="text" id="editBirthDate" class="form-input" placeholder="예: 1965-08-15" style="width: 100%;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">성별</label>
+                        <select id="editGender" class="form-select" style="width: 100%;">
+                            <option value="남">남성</option>
+                            <option value="여">여성</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">신청 자격종목 *</label>
+                        <select id="editQualification" class="form-select" style="width: 100%;">
+                            <option value="한식조리기능사">한식조리기능사</option>
+                            <option value="지게차운전기능사">지게차운전기능사</option>
+                            <option value="굴착기운전기능사">굴착기운전기능사(포크레인)</option>
+                            <option value="전기기능사">전기기능사</option>
+                            <option value="요양보호사">요양보호사</option>
+                            <option value="공인중개사">공인중개사</option>
+                            <option value="손해평가사">손해평가사</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">시험 지역</label>
+                        <select id="editRegion" class="form-select" style="width: 100%;">
+                            <option value="서울">서울</option>
+                            <option value="경기">경기 / 인천</option>
+                            <option value="부산">부산 / 울산 / 경남</option>
+                            <option value="대구">대구 / 경북</option>
+                            <option value="대전">대전 / 세종 / 충청</option>
+                            <option value="광주">광주 / 전라</option>
+                            <option value="강원">강원</option>
+                            <option value="제주">제주</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">시험센터 / 시험장명</label>
+                        <input type="text" id="editCenter" class="form-input" placeholder="예: 서울국가자격시험장" style="width: 100%;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">시험 시간대 (교시)</label>
+                        <select id="editSession" class="form-select" style="width: 100%;">
+                            <option value="1부">1부 (09:00)</option>
+                            <option value="2부">2부 (11:00)</option>
+                            <option value="3부">3부 (13:00)</option>
+                            <option value="4부">4부 (15:00)</option>
+                            <option value="5부">5부 (17:00)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">결제 금액 (원)</label>
+                        <input type="number" id="editFeeFinal" class="form-input" style="width: 100%;">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">접수 상태</label>
+                        <select id="editStatus" class="form-select" style="width: 100%;">
+                            <option value="접수완료">접수완료</option>
+                            <option value="접수대기">접수대기 (확인중)</option>
+                            <option value="취소">취소</option>
+                            <option value="환불완료">환불완료</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label class="form-label">관리자 메모</label>
+                        <textarea id="editMemo" class="form-input" style="width: 100%; min-height: 70px;" placeholder="어르신 유선 통화 내용, 특별 요청사항 등"></textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; border-top: 1px solid #334155; padding-top: 16px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">취소</button>
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">💾 수정 사항 저장하기</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -788,8 +901,9 @@
                         <td style="color: var(--text-sub);">${item.exam_date || '-'}</td>
                         <td style="font-weight: 800;">${fee}</td>
                         <td>${statusBadge}</td>
-                        <td>
-                            <button class="btn btn-secondary" style="padding: 6px 12px; font-size: calc(13px * var(--font-scale));" onclick="openDetail(${item.id})">상세보기</button>
+                        <td style="white-space: nowrap;">
+                            <button class="btn btn-secondary" style="padding: 5px 10px; font-size: calc(12px * var(--font-scale));" onclick="openDetail(${item.id})">상세</button>
+                            <button class="btn btn-primary" style="padding: 5px 10px; font-size: calc(12px * var(--font-scale)); margin-left: 4px;" onclick="openEditModal(${item.id})">✏️ 수정</button>
                         </td>
                     </tr>
                 `;
@@ -864,8 +978,8 @@
                     <div class="detail-val">${(item.fee_final || item.fee_amount || 0).toLocaleString()}원 (${item.payment_method || '신용카드'})</div>
                 </div>
                 <div class="detail-item" style="grid-column: 1 / -1;">
-                    <div class="detail-label">접수 신청 일시</div>
-                    <div class="detail-val">${item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-'} (접수맥락: ${item.usage_context || '본인단독'})</div>
+                    <div class="detail-label">접수 신청 일시 / 관리자 메모</div>
+                    <div class="detail-val">${item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-'} ${item.memo ? ' | 📝 메모: ' + item.memo : ''}</div>
                 </div>
             `;
 
@@ -875,6 +989,74 @@
 
         function closeDetailModal() {
             document.getElementById('detailModal').style.display = 'none';
+        }
+
+        function openEditModal(id) {
+            closeDetailModal();
+            currentRecordId = id;
+            const item = allRecords.find(r => r.id === id);
+            if (!item) return;
+
+            document.getElementById('editRecordId').value = item.id;
+            document.getElementById('editName').value = item.name || '';
+            document.getElementById('editPhone').value = item.phone || '';
+            document.getElementById('editBirthDate').value = item.birth_date || '';
+            document.getElementById('editGender').value = item.gender || '남';
+            document.getElementById('editQualification').value = item.qualification || '한식조리기능사';
+            document.getElementById('editRegion').value = item.exam_region || '서울';
+            document.getElementById('editCenter').value = item.exam_center || '';
+            document.getElementById('editSession').value = (item.exam_session || '1부').includes('부') ? item.exam_session : item.exam_session + '부';
+            document.getElementById('editFeeFinal').value = item.fee_final || item.fee_amount || 14500;
+            document.getElementById('editStatus').value = item.status || '접수완료';
+            document.getElementById('editMemo').value = item.memo || '';
+
+            document.getElementById('editModal').style.display = 'flex';
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        async function saveRecordEdit(e) {
+            e.preventDefault();
+            const id = parseInt(document.getElementById('editRecordId').value, 10);
+            if (!id) return;
+
+            const updatedData = {
+                name: document.getElementById('editName').value.trim(),
+                phone: document.getElementById('editPhone').value.trim(),
+                birth_date: document.getElementById('editBirthDate').value.trim() || null,
+                gender: document.getElementById('editGender').value,
+                qualification: document.getElementById('editQualification').value,
+                exam_region: document.getElementById('editRegion').value,
+                exam_center: document.getElementById('editCenter').value.trim(),
+                exam_session: document.getElementById('editSession').value,
+                fee_final: parseInt(document.getElementById('editFeeFinal').value, 10) || 14500,
+                status: document.getElementById('editStatus').value,
+                memo: document.getElementById('editMemo').value.trim()
+            };
+
+            try {
+                if (window.supabaseClient) {
+                    const { error } = await window.supabaseClient
+                        .from('applications')
+                        .update(updatedData)
+                        .eq('id', id);
+                    if (error) throw error;
+                }
+
+                const idx = allRecords.findIndex(r => r.id === id);
+                if (idx !== -1) {
+                    allRecords[idx] = { ...allRecords[idx], ...updatedData };
+                }
+
+                alert('원서접수 정보가 성공적으로 수정되었습니다.');
+                closeEditModal();
+                updateMetrics(allRecords);
+                applyFilters();
+            } catch (err) {
+                alert('수정 저장 실패: ' + err.message);
+            }
         }
 
         async function updateCurrentStatus() {
