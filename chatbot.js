@@ -2,8 +2,11 @@
  * 두두자격지원센터 - 시니어 3대 핵심 국가기술자격 AI 챗봇 (두두봇)
  * - AI 모드 ON / OFF 전환 토글 (Gemini 3.5 Flash /api/chat)
  * - 4초 타임아웃 및 무중단 룰베이스 폴백 엔진
- * - 모든 버튼(전송, 닫기, 폰트조절, 모드전환, 추천질문) 인라인 및 이벤트 리스너 이중 바인딩
+ * - IIFE로 감싸서 인라인 스크립트와 const 충돌 방지
  */
+(function() {
+'use strict';
+
 
 const SUPABASE_CONFIG = {
     URL: "https://amlznptemtbkhyuzdkmu.supabase.co",
@@ -521,6 +524,9 @@ function bootDuduChatbot() {
     }
 }
 
+// Expose class globally for inline onclick handlers
+window.DuduChatbot = DuduChatbot;
+
 if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', bootDuduChatbot);
@@ -530,6 +536,4 @@ if (typeof document !== 'undefined') {
     setTimeout(bootDuduChatbot, 100);
 }
 
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { DuduChatbot, DEFAULT_FAQ_KNOWLEDGE, SENIOR_SYNONYMS };
-}
+})(); // End IIFE
