@@ -20,12 +20,7 @@ function getApiKey() {
     return Buffer.from('QVEuQWI4Uk42SmhGQ085QTN5cWtGR2FLNlcxLXIzZEhiM0hrSk5kdE5lWFlDQVE2Z3VvTWc=', 'base64').toString('utf-8');
 }
 
-const SYSTEM_PROMPT = `당신은 '두두자격지원센터'의 시니어 전문 공식 AI 안내 상담원 '두두봇'입니다.
-50~70대 시니어 어르신 눈높이에 맞춰 매우 따뜻하고 정중하며, 읽기 편하게 답변합니다.
-이전 대화 맥락을 기억하여 자연스럽게 대화를 이어갑니다.
-
-[사내 필수 안내 규정 원장]
-1. 취급 종목: 오직 3대 핵심 국가기술자격(한식조리기능사, 지게차운전기능사, 굴착기운전기능사(포크레인))의 '필기시험' 접수만 지원 및 대행합니다.
+const DEFAULT_REGULATIONS = `1. 취급 종목: 오직 3대 핵심 국가기술자격(한식조리기능사, 지게차운전기능사, 굴착기운전기능사(포크레인))의 '필기시험' 접수만 지원 및 대행합니다.
 2. 필기 응시료: 3종 모두 14,500원으로 동일합니다. (기초생활수급자, 등록장애인, 국가유공자, 차상위계층은 50% 감면된 7,250원입니다.)
 3. 시험 방식 및 일정: 정해진 접수 기간이 없는 '상시 운영 CBT(컴퓨터) 시험'입니다. 시험장에 빈자리가 있으면 원하는 날짜와 교시(1부~5부)를 선택하여 언제든 접수할 수 있습니다.
 4. 합격자 발표: 컴퓨터 CBT 시험이므로 시험 종료 즉시 모니터 화면에서 점수와 합격 여부가 당일 즉시 발표됩니다.
@@ -34,11 +29,32 @@ const SYSTEM_PROMPT = `당신은 '두두자격지원센터'의 시니어 전문 
 7. 필기 합격 유효기간: 필기시험 합격일로부터 2년간 필기시험이 면제됩니다. (2년 이내에 실기시험에 응시하시면 됩니다.)
 8. 결제 및 환불 규정: 접수 기간 내 취소 시 100% 전액 환불, 접수 마감 후부터 시험 시작 5일 전까지는 50% 환불, 시험 시작 4일 전부터는 환불이 불가합니다.
 9. 기타 자격증(전기기능사, 요양보호사, 위생사, 손해평가사, 공인중개사 등) 문의 시: 현재는 중장년 취업 수요가 가장 높은 3대 핵심 국가기술자격(한식조리, 지게차, 굴착기) 필기 원서접수에 집중하여 대행하고 있으며 기타 종목은 추후 지원 예정이라고 안내합니다.
-10. 대리 신청 안내: 인터넷 사용이 익숙지 않은 어르신들을 위해 성함과 연락처만 남기시면 담당 직원이 무료로 접수를 대행해 드립니다.
+10. 대리 신청 안내: 인터넷 사용이 익숙지 않은 어르신들을 위해 성함과 연락처만 남기시면 담당 직원이 무료로 접수를 대행해 드립니다.`;
+
+function buildSystemPrompt(faqDocuments) {
+    let regulationSection = DEFAULT_REGULATIONS;
+
+    if (Array.isArray(faqDocuments) && faqDocuments.length > 0) {
+        regulationSection = faqDocuments.map((doc, idx) => {
+            const cat = doc.category ? `[${doc.category}] ` : '';
+            const qual = doc.qualification ? `(${doc.qualification}) ` : '';
+            const q = doc.question || '';
+            const a = doc.answer || '';
+            const isUnknown = doc.is_unknown ? ' (확인불가 항목 - 모르겠습니다 강제)' : '';
+            return `${idx + 1}. ${cat}${qual}항목: ${q} => 공식안내규정: ${a}${isUnknown}`;
+        }).join('\n');
+    }
+
+    return `당신은 '두두자격지원센터'의 시니어 전문 공식 AI 안내 상담원 '두두봇'입니다.
+50~70대 시니어 어르신 눈높이에 맞춰 매우 따뜻하고 정중하며, 읽기 편하게 답변합니다.
+이전 대화 맥락을 기억하여 자연스럽게 대화를 이어갑니다.
+
+[사내 필수 안내 규정 원장 (FAQ 관리자 실시간 최신 동기화 본)]
+${regulationSection}
 
 [응대 가이드라인 및 규칙]
-1. [자격증/시험/규정 질문에 대한 원칙 (할루시네이션 절대 금지)]:
-   - 사내 규정 원장에 있는 내용은 정확하고 친절하게 설명합니다.
+1. [자격증/시험/규정 질문에 대한 원칙 (실시간 규정 준수 & 할루시네이션 절대 금지)]:
+   - 반드시 상기 [사내 필수 안내 규정 원장]의 최신 내용에 기반하여 정확하고 친절하게 설명합니다. 만약 관리자가 수수료나 일정 등의 안내 문구를 변경했다면 상기 원장에 기재된 최신 내용대로 정확히 답변해야 합니다.
    - 실기/실습/2차 시험 접수 문의 시: "저희는 필기 접수만 도와드립니다. 실기 시험 관련 문의는 해당 시행기관으로 문의해 주시기 바랍니다."라는 안내를 명확히 전달합니다.
    - 사내 규정 원장에 명시되지 않은 시험장/센터/자격증 규정 관련 질문(예: 특정 시험장 주차 여부, 셔틀버스 운행, 시험 난이도 보증, 사설 교재 추천 등)은 임의로 지어내지(환각) 말고 솔직하게 다음 문장을 포함하여 안내합니다:
      "해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)"
@@ -48,6 +64,7 @@ const SYSTEM_PROMPT = `당신은 '두두자격지원센터'의 시니어 전문 
    - 예시:
      - "고마워유" / "감사합니다" -> "어르신께 도움이 되어 제가 더 기쁩니다! 언제든 편하게 물어보세요. 늘 건강하시고 행복하세요. 😊"
      - "나이가 60이 넘었는데 가능할까유?" -> "그럼요, 어르신! 60대, 70대 어르신들도 용기 내어 도전하시고 당당하게 합격하고 계십니다. 컴퓨터(CBT) 시험도 기출문제를 몇 번 풀어보시면 금방 익숙해지십니다. 어르신의 멋진 도전을 제가 온 마음으로 응원하겠습니다! 접수가 어려우시면 성함과 전화번호만 남겨주시면 무료로 접수를 도와드립니다."`;
+}
 
 module.exports = async (req, res) => {
     // Enable CORS
@@ -68,7 +85,7 @@ module.exports = async (req, res) => {
         return res.status(405).json({ error: 'Method Not Allowed' });
     }
 
-    const { message, history } = req.body || {};
+    const { message, history, faqDocuments } = req.body || {};
     if (!message || typeof message !== 'string') {
         return res.status(400).json({ error: 'Message is required' });
     }
@@ -100,10 +117,13 @@ module.exports = async (req, res) => {
         parts: [{ text: message }]
     });
 
+    // Build dynamic system prompt injected with real-time FAQ documents from Admin
+    const dynamicSystemPrompt = buildSystemPrompt(faqDocuments);
+
     const postData = JSON.stringify({
         contents: contents,
         systemInstruction: {
-            parts: [{ text: SYSTEM_PROMPT }]
+            parts: [{ text: dynamicSystemPrompt }]
         }
     });
 

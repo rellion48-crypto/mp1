@@ -342,6 +342,8 @@ class DuduChatbot {
         if (this.isOpen) {
             win.style.display = 'flex';
             win.classList.add('open');
+            // FAQ 관리자에서 수정된 최신 규정 실시간 백그라운드 동기화
+            this.syncWithSupabase();
             const inp = document.getElementById('chatInput');
             if (inp) {
                 setTimeout(() => inp.focus(), 100);
@@ -382,7 +384,8 @@ class DuduChatbot {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: query,
-                        history: this.conversationHistory.slice(-10) // 최대 5개 턴 (10개 메시지)
+                        history: this.conversationHistory.slice(-10), // 최대 5개 턴 (10개 메시지)
+                        faqDocuments: this.knowledgeBase // FAQ 관리자 수정 내용 실시간 주입
                     }),
                     signal: controller.signal
                 });
