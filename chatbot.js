@@ -1,8 +1,8 @@
 /**
  * 두두자격지원센터 - 시니어 3대 핵심 국가기술자격 AI 챗봇 (두두봇)
- * - AI 모드 ON / OFF 전환 토글 지원 (Gemini 3.5 Flash Vercel API /api/chat)
- * - 정적 DOM 및 동적 주입 완벽 연동
- * - 사내 안내 규정 기반 완벽한 할루시네이션 및 실기 거절 가드레일
+ * - AI 모드 ON / OFF 전환 토글 (Gemini 3.5 Flash /api/chat)
+ * - 4초 타임아웃 및 무중단 룰베이스 폴백 엔진
+ * - 모든 버튼(전송, 닫기, 폰트조절, 모드전환, 추천질문) 인라인 및 이벤트 리스너 이중 바인딩
  */
 
 const SUPABASE_CONFIG = {
@@ -137,7 +137,6 @@ class DuduChatbot {
     async init() {
         if (typeof document === 'undefined' || !document.body) return;
         this.injectStyles();
-        this.ensureDOM();
         this.bindEvents();
         await this.syncWithSupabase();
     }
@@ -196,32 +195,6 @@ class DuduChatbot {
                 box-shadow: 0 16px 45px rgba(37, 99, 235, 0.85) !important;
                 background: linear-gradient(135deg, #2563eb, #1e40af) !important;
             }
-            #duduChatFab .fab-icon {
-                font-size: 28px !important;
-                display: flex !important;
-                align-items: center !important;
-            }
-            #duduChatFab .fab-text {
-                font-size: 19px !important;
-                font-weight: 900 !important;
-                letter-spacing: -0.3px !important;
-                color: #ffffff !important;
-            }
-            #duduChatFab .fab-pulse {
-                width: 13px !important;
-                height: 13px !important;
-                background: #34d399 !important;
-                border-radius: 50% !important;
-                box-shadow: 0 0 14px #34d399 !important;
-                animation: duduPulse 1.8s infinite !important;
-            }
-
-            @keyframes duduPulse {
-                0% { transform: scale(0.9); opacity: 0.8; }
-                50% { transform: scale(1.4); opacity: 1; }
-                100% { transform: scale(0.9); opacity: 0.8; }
-            }
-
             #duduChatWindow {
                 position: fixed !important;
                 bottom: 105px !important;
@@ -244,80 +217,56 @@ class DuduChatbot {
                 display: flex !important;
                 animation: duduSlideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
             }
-
             @keyframes duduSlideUp {
                 from { opacity: 0; transform: translateY(25px); }
                 to { opacity: 1; transform: translateY(0); }
             }
+            .chat-msg {
+                max-width: 88% !important;
+                padding: 14px 18px !important;
+                border-radius: 18px !important;
+                line-height: 1.55 !important;
+                font-size: 16px !important;
+                word-break: keep-all !important;
+                font-weight: 500 !important;
+            }
+            .chat-msg.bot {
+                align-self: flex-start !important;
+                background: #1e293b !important;
+                color: #ffffff !important;
+                border: 2px solid #334155 !important;
+                border-bottom-left-radius: 4px !important;
+            }
+            .chat-msg.user {
+                align-self: flex-end !important;
+                background: #2563eb !important;
+                color: #ffffff !important;
+                border-bottom-right-radius: 4px !important;
+                font-weight: 700 !important;
+            }
+            .quick-chips {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 8px !important;
+                margin-top: 14px !important;
+            }
+            .quick-chip {
+                background: rgba(37, 99, 235, 0.25) !important;
+                border: 1.5px solid #3b82f6 !important;
+                color: #93c5fd !important;
+                border-radius: 14px !important;
+                padding: 8px 12px !important;
+                font-size: 13px !important;
+                font-weight: 800 !important;
+                cursor: pointer !important;
+                transition: all 0.15s !important;
+            }
+            .quick-chip:hover {
+                background: #2563eb !important;
+                color: #ffffff !important;
+            }
         `;
         document.head.appendChild(style);
-    }
-
-    ensureDOM() {
-        if (typeof document === 'undefined' || !document.body) return;
-        if (document.getElementById('duduChatFab')) {
-            this.updateModeUI();
-            return;
-        }
-
-        const fab = document.createElement('div');
-        fab.id = 'duduChatFab';
-        fab.setAttribute('style', 'position: fixed !important; bottom: 30px !important; right: 30px !important; z-index: 2147483647 !important; cursor: pointer !important;');
-        fab.innerHTML = `
-            <div class="fab-pulse"></div>
-            <div class="fab-icon">🤖</div>
-            <div class="fab-text">문의 챗봇</div>
-        `;
-
-        const chatWindow = document.createElement('div');
-        chatWindow.id = 'duduChatWindow';
-        chatWindow.setAttribute('style', 'position: fixed !important; z-index: 2147483647 !important;');
-        chatWindow.innerHTML = `
-            <div style="background: #1e293b; border-bottom: 2px solid #334155; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <div style="width: 42px; height: 42px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #ffffff;">두</div>
-                    <div>
-                        <h4 style="color: #ffffff; font-size: 17px; font-weight: 900; margin: 0;">3대 자격증 AI 안내 상담원</h4>
-                        <p style="color: #94a3b8; font-size: 12px; font-weight: 600; margin: 0;">한식·지게차·굴착기 상시 CBT 정밀 안내</p>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center; gap: 6px;">
-                    <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontDown">가-</button>
-                    <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontUp">가+</button>
-                    <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn">✕</button>
-                </div>
-            </div>
-            <div style="background: #090d16; border-bottom: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;">
-                <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
-                    ✨ AI 정밀상담 모드 ON
-                </div>
-                <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer;">
-                    규정 모드로 전환
-                </button>
-            </div>
-            <div id="chatMessages" style="flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #090d16;">
-                <div class="chat-msg bot" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #334155; border-bottom-left-radius: 4px; padding: 14px 18px; border-radius: 18px; line-height: 1.55; font-size: 16px; word-break: keep-all; font-weight: 500;">
-                    안녕하세요, 어르신! <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
-                    <strong>한식조리, 지게차운전, 굴착기운전기능사</strong>의 응시료(14,500원), 상시 접수 일정, 당일 합격 발표 등에 대해 편하게 물어보세요.
-                    <div class="quick-chips" style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px;">
-                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('한식조리 접수비 얼마예요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">💡 한식조리 응시료</div>
-                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('포크레인 필기 수수료')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">🚜 굴착기(포크레인) 수수료</div>
-                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('지게차 접수 언제 하나요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">📅 지게차 상시 접수 일정</div>
-                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('합격 발표는 언제 나와요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">⏱️ 당일 합격자 발표</div>
-                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('실기 시험 접수도 되나요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">🔍 실기 접수 문의</div>
-                        <div class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('시험장에 주차 되나요?')" style="background: rgba(37,99,235,0.25); border: 1.5px solid #3b82f6; color: #93c5fd; border-radius: 14px; padding: 8px 12px; font-size: 13px; font-weight: 800; cursor: pointer;">🚗 주차 가능 여부</div>
-                    </div>
-                </div>
-            </div>
-            <div style="padding: 16px; background: #1e293b; border-top: 2px solid #334155; display: flex; gap: 10px;">
-                <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
-                <button id="chatSendBtn" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
-            </div>
-        `;
-
-        document.body.appendChild(fab);
-        document.body.appendChild(chatWindow);
-        this.updateModeUI();
     }
 
     bindEvents() {
@@ -328,27 +277,36 @@ class DuduChatbot {
         const input = document.getElementById('chatInput');
         const fontUp = document.getElementById('chatFontUp');
         const fontDown = document.getElementById('chatFontDown');
+        const modeBtn = document.getElementById('chatModeToggleBtn');
 
         if (fab) fab.onclick = () => this.toggleChat();
         if (closeBtn) closeBtn.onclick = () => this.toggleChat(false);
         if (sendBtn) sendBtn.onclick = () => this.handleSend();
+        if (modeBtn) modeBtn.onclick = () => this.toggleAIMode();
+
         if (input) {
-            input.onkeypress = (e) => {
-                if (e.key === 'Enter') this.handleSend();
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleSend();
+                }
             };
         }
         if (fontUp) {
-            fontUp.onclick = () => {
-                this.fontSize = Math.min(22, this.fontSize + 2);
-                document.querySelectorAll('.chat-msg').forEach(el => el.style.fontSize = `${this.fontSize}px`);
-            };
+            fontUp.onclick = () => this.adjustChatFontSize(2);
         }
         if (fontDown) {
-            fontDown.onclick = () => {
-                this.fontSize = Math.max(13, this.fontSize - 2);
-                document.querySelectorAll('.chat-msg').forEach(el => el.style.fontSize = `${this.fontSize}px`);
-            };
+            fontDown.onclick = () => this.adjustChatFontSize(-2);
         }
+
+        this.updateModeUI();
+    }
+
+    adjustChatFontSize(delta) {
+        this.fontSize = Math.max(13, Math.min(24, this.fontSize + delta));
+        document.querySelectorAll('.chat-msg').forEach(el => {
+            el.style.fontSize = `${this.fontSize}px`;
+        });
     }
 
     toggleAIMode() {
@@ -386,7 +344,9 @@ class DuduChatbot {
             win.style.display = 'flex';
             win.classList.add('open');
             const inp = document.getElementById('chatInput');
-            if (inp) inp.focus();
+            if (inp) {
+                setTimeout(() => inp.focus(), 100);
+            }
         } else {
             win.style.display = 'none';
             win.classList.remove('open');
@@ -412,29 +372,42 @@ class DuduChatbot {
 
         if (this.isAIMode) {
             const loadingMsg = this.appendLoadingMessage();
+            let aiSuccess = false;
             try {
+                // 4.5초 타임아웃 컨트롤러 (지연 발생 시 즉시 룰베이스 폴백)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 4500);
+
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: query })
+                    body: JSON.stringify({ message: query }),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
 
                 if (response.ok) {
                     const data = await response.json();
-                    this.removeLoadingMessage(loadingMsg);
-                    this.appendMessage(data.answer, 'bot');
-                    return;
+                    if (data && data.answer) {
+                        this.removeLoadingMessage(loadingMsg);
+                        this.appendMessage(data.answer, 'bot');
+                        aiSuccess = true;
+                        return;
+                    }
                 }
             } catch (err) {
-                console.log('AI API fetch note:', err);
+                console.log('AI fetch timeout/fallback:', err);
             }
-            this.removeLoadingMessage(loadingMsg);
+
+            if (!aiSuccess) {
+                this.removeLoadingMessage(loadingMsg);
+            }
         }
 
         setTimeout(() => {
             const answer = this.generateResponse(query);
             this.appendMessage(answer, 'bot');
-        }, 150);
+        }, 100);
     }
 
     appendLoadingMessage() {
@@ -443,7 +416,7 @@ class DuduChatbot {
         const msg = document.createElement('div');
         msg.className = 'chat-msg bot loading-msg';
         msg.style.fontSize = `${this.fontSize}px`;
-        msg.innerHTML = '🤖 <em>답변을 작성하고 있습니다...</em>';
+        msg.innerHTML = '🤖 <em>답변을 확인하고 있습니다...</em>';
         container.appendChild(msg);
         container.scrollTop = container.scrollHeight;
         return msg;

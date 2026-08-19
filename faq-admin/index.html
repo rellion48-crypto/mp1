@@ -625,7 +625,7 @@
         });
     </script>
     <!-- Guaranteed Static Chatbot DOM Elements -->
-    <div id="duduChatFab" onclick="window.duduChat ? window.duduChat.toggleChat() : (document.getElementById('duduChatWindow').style.display = document.getElementById('duduChatWindow').style.display === 'flex' ? 'none' : 'flex')" style="position: fixed !important; bottom: 30px !important; right: 30px !important; background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; color: #ffffff !important; border: 3px solid #ffffff !important; border-radius: 50px !important; padding: 16px 26px !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important; cursor: pointer !important; z-index: 2147483647 !important; font-family: 'Noto Sans KR', sans-serif !important; user-select: none !important;">
+    <div id="duduChatFab" onclick="window.duduChat ? window.duduChat.toggleChat() : (document.getElementById('duduChatWindow').style.display = document.getElementById('duduChatWindow').style.display === 'flex' ? 'none' : 'flex')" onkeydown="if(event.key==='Enter') this.click()" tabindex="0" role="button" style="position: fixed !important; bottom: 30px !important; right: 30px !important; background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; color: #ffffff !important; border: 3px solid #ffffff !important; border-radius: 50px !important; padding: 16px 26px !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important; cursor: pointer !important; z-index: 2147483647 !important; font-family: 'Noto Sans KR', sans-serif !important; user-select: none !important;">
         <div style="width: 13px; height: 13px; background: #34d399; border-radius: 50%; box-shadow: 0 0 14px #34d399;"></div>
         <div style="font-size: 28px; display: flex; align-items: center;">🤖</div>
         <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.3px; color: #ffffff;">문의 챗봇</div>
@@ -641,16 +641,16 @@
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 6px;">
-                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontDown">가-</button>
-                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontUp">가+</button>
-                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn" onclick="document.getElementById('duduChatWindow').style.display='none'">✕</button>
+                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontDown" onclick="window.duduChat && window.duduChat.adjustChatFontSize(-2)" onkeydown="if(event.key==='Enter') this.click()">가-</button>
+                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontUp" onclick="window.duduChat && window.duduChat.adjustChatFontSize(2)" onkeydown="if(event.key==='Enter') this.click()">가+</button>
+                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn" onclick="window.duduChat ? window.duduChat.toggleChat(false) : (document.getElementById('duduChatWindow').style.display='none')" onkeydown="if(event.key==='Enter') this.click()">✕</button>
             </div>
         </div>
         <div style="background: #090d16; border-bottom: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;">
             <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
                 ✨ AI 정밀상담 모드 ON
             </div>
-            <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer;">
+            <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" onkeydown="if(event.key==='Enter') this.click()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer;">
                 규정 모드로 전환
             </button>
         </div>
@@ -661,8 +661,8 @@
             </div>
         </div>
         <div style="padding: 16px; background: #1e293b; border-top: 2px solid #334155; display: flex; gap: 10px;">
-            <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
-            <button id="chatSendBtn" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
+            <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" onkeydown="if(event.key==='Enter'){event.preventDefault(); if(window.duduChat) window.duduChat.handleSend();}" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
+            <button id="chatSendBtn" onclick="window.duduChat && window.duduChat.handleSend()" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
         </div>
     </div>
 

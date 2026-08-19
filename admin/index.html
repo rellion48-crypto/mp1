@@ -904,6 +904,48 @@
             fetchData();
         });
     </script>
+    <!-- Guaranteed Static Chatbot DOM Elements -->
+    <div id="duduChatFab" onclick="window.duduChat ? window.duduChat.toggleChat() : (document.getElementById('duduChatWindow').style.display = document.getElementById('duduChatWindow').style.display === 'flex' ? 'none' : 'flex')" onkeydown="if(event.key==='Enter') this.click()" tabindex="0" role="button" style="position: fixed !important; bottom: 30px !important; right: 30px !important; background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; color: #ffffff !important; border: 3px solid #ffffff !important; border-radius: 50px !important; padding: 16px 26px !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important; cursor: pointer !important; z-index: 2147483647 !important; font-family: 'Noto Sans KR', sans-serif !important; user-select: none !important;">
+        <div style="width: 13px; height: 13px; background: #34d399; border-radius: 50%; box-shadow: 0 0 14px #34d399;"></div>
+        <div style="font-size: 28px; display: flex; align-items: center;">🤖</div>
+        <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.3px; color: #ffffff;">문의 챗봇</div>
+    </div>
+
+    <div id="duduChatWindow" style="position: fixed !important; bottom: 105px !important; right: 30px !important; width: 440px !important; max-width: calc(100vw - 36px) !important; height: 640px !important; max-height: calc(100vh - 130px) !important; background: #0f172a !important; border: 3px solid #3b82f6 !important; border-radius: 24px !important; box-shadow: 0 30px 70px rgba(0,0,0,0.9) !important; display: none; flex-direction: column !important; z-index: 2147483647 !important; overflow: hidden !important; font-family: 'Noto Sans KR', sans-serif !important;">
+        <div style="background: #1e293b; border-bottom: 2px solid #334155; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 42px; height: 42px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #ffffff;">두</div>
+                <div>
+                    <h4 style="color: #ffffff; font-size: 17px; font-weight: 900; margin: 0;">3대 자격증 AI 안내 상담원</h4>
+                    <p style="color: #94a3b8; font-size: 12px; font-weight: 600; margin: 0;">한식·지게차·굴착기 상시 CBT 정밀 안내</p>
+                </div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 6px;">
+                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontDown" onclick="window.duduChat && window.duduChat.adjustChatFontSize(-2)" onkeydown="if(event.key==='Enter') this.click()">가-</button>
+                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontUp" onclick="window.duduChat && window.duduChat.adjustChatFontSize(2)" onkeydown="if(event.key==='Enter') this.click()">가+</button>
+                <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn" onclick="window.duduChat ? window.duduChat.toggleChat(false) : (document.getElementById('duduChatWindow').style.display='none')" onkeydown="if(event.key==='Enter') this.click()">✕</button>
+            </div>
+        </div>
+        <div style="background: #090d16; border-bottom: 1px solid #1e293b; padding: 8px 16px; display: flex; justify-content: space-between; align-items: center;">
+            <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
+                ✨ AI 정밀상담 모드 ON
+            </div>
+            <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" onkeydown="if(event.key==='Enter') this.click()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #ffffff; border-radius: 20px; padding: 4px 12px; font-size: 12px; font-weight: 800; cursor: pointer;">
+                규정 모드로 전환
+            </button>
+        </div>
+        <div id="chatMessages" style="flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #090d16;">
+            <div class="chat-msg bot" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #334155; border-bottom-left-radius: 4px; padding: 14px 18px; border-radius: 18px; line-height: 1.55; font-size: 16px; word-break: keep-all; font-weight: 500;">
+                안녕하세요, 어르신! <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
+                <strong>한식조리, 지게차운전, 굴착기운전기능사</strong>의 응시료(14,500원), 상시 접수 일정, 당일 합격 발표 등에 대해 편하게 물어보세요.
+            </div>
+        </div>
+        <div style="padding: 16px; background: #1e293b; border-top: 2px solid #334155; display: flex; gap: 10px;">
+            <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" onkeydown="if(event.key==='Enter'){event.preventDefault(); if(window.duduChat) window.duduChat.handleSend();}" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
+            <button id="chatSendBtn" onclick="window.duduChat && window.duduChat.handleSend()" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
+        </div>
+    </div>
+
     <!-- Floating AI FAQ Chatbot Widget -->
     <script src="../chatbot.js?v=20260819_ai"></script>
 </body>
