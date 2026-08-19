@@ -252,6 +252,26 @@ class DuduChatbot {
                 background: #2563eb !important;
                 color: #ffffff !important;
             }
+            @media (max-width: 640px) {
+                #duduChatWindow {
+                    width: calc(100vw - 20px) !important;
+                    right: 10px !important;
+                    bottom: 75px !important;
+                    height: calc(100vh - 90px) !important;
+                    max-height: calc(100vh - 90px) !important;
+                    border-radius: 18px !important;
+                }
+                #duduChatFab {
+                    bottom: 18px !important;
+                    right: 14px !important;
+                    padding: 12px 18px !important;
+                    font-size: 14px !important;
+                }
+                .chat-msg {
+                    max-width: 92% !important;
+                    padding: 12px 14px !important;
+                }
+            }
         `;
         document.head.appendChild(style);
     }

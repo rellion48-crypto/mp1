@@ -231,6 +231,23 @@
         body.light-contrast #privacyAgreeWrapper label {
             color: #1e3a8a !important;
         }
+        body.light-contrast #feeDiscountWrapper {
+            background: #eff6ff !important;
+            border: 2px solid #93c5fd !important;
+        }
+        body.light-contrast #feeDiscountLabel {
+            color: #1e3a8a !important;
+        }
+        body.light-contrast #feeDiscountHelper {
+            color: #2563eb !important;
+        }
+        body.light-contrast #formPrivacyConsentWrapper {
+            background: #f8fafc !important;
+            border: 1.5px solid #cbd5e1 !important;
+        }
+        body.light-contrast #formPrivacyConsentLabel {
+            color: #1e293b !important;
+        }
         body.light-contrast #lookupModal .form-input {
             background: #ffffff !important;
             color: #0f172a !important;
@@ -797,6 +814,148 @@
             line-height: 1.8;
             font-weight: 500;
         }
+
+        /* 9. Mobile Responsive Enhancements */
+        @media (max-width: 768px) {
+            body {
+                padding-bottom: 110px;
+            }
+            .top-utility-bar {
+                padding: 10px 14px;
+            }
+            .top-utility-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            .hotline-badge {
+                font-size: calc(13px * var(--font-scale));
+                word-break: keep-all;
+            }
+            .accessibility-controls {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            .zoom-btn, .theme-toggle-btn {
+                padding: 6px 10px;
+                font-size: calc(12px * var(--font-scale));
+                min-height: 36px;
+            }
+            header {
+                padding: 14px 16px;
+            }
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .logo-badge {
+                width: 44px;
+                height: 44px;
+                font-size: calc(20px * var(--font-scale));
+            }
+            .logo-text h1 {
+                font-size: calc(19px * var(--font-scale));
+            }
+            .logo-text p {
+                font-size: calc(12px * var(--font-scale));
+            }
+            .nav-links {
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .nav-btn {
+                flex: 1 1 calc(50% - 6px);
+                justify-content: center;
+                text-align: center;
+                padding: 8px 10px;
+                font-size: calc(13px * var(--font-scale));
+                min-height: 40px;
+            }
+            .main-container {
+                margin: 16px auto;
+                padding: 0 14px;
+            }
+            .hero-banner {
+                padding: 22px 18px;
+                margin-bottom: 20px;
+            }
+            .hero-title {
+                font-size: calc(22px * var(--font-scale));
+            }
+            .hero-sub {
+                font-size: calc(15px * var(--font-scale));
+            }
+            .features-pill-group {
+                gap: 8px;
+            }
+            .feature-pill {
+                padding: 6px 12px;
+                font-size: calc(13px * var(--font-scale));
+                width: 100%;
+            }
+            .qual-card {
+                padding: 20px 16px;
+            }
+            .card-name {
+                font-size: calc(20px * var(--font-scale));
+            }
+            .card-details-grid {
+                grid-template-columns: 1fr;
+                gap: 6px;
+                padding: 10px 12px;
+            }
+            .card-meta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 6px;
+            }
+            .form-panel {
+                padding: 22px 16px;
+                position: static;
+                top: auto;
+            }
+            .form-input, .form-select {
+                padding: 14px 14px;
+                font-size: calc(16px * var(--font-scale));
+                min-height: 52px;
+            }
+            .submit-btn {
+                padding: 16px;
+                font-size: calc(18px * var(--font-scale));
+                min-height: 56px;
+            }
+            .modal-card {
+                padding: 24px 16px;
+                max-width: 95vw;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+            .modal-badge-check {
+                width: 54px;
+                height: 54px;
+                font-size: calc(26px * var(--font-scale));
+            }
+            .modal-receipt-box {
+                padding: 14px;
+                font-size: calc(14px * var(--font-scale));
+            }
+            #duduChatFab {
+                bottom: 20px !important;
+                right: 14px !important;
+                padding: 12px 18px !important;
+                font-size: 14px !important;
+            }
+            #duduChatWindow {
+                width: calc(100vw - 20px) !important;
+                right: 10px !important;
+                bottom: 80px !important;
+                height: calc(100vh - 100px) !important;
+                max-height: calc(100vh - 100px) !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1042,22 +1201,22 @@
                         </div>
 
                         <!-- 50% Fee Discount Checkbox for Seniors -->
-                        <div class="form-group" style="background: rgba(37, 99, 235, 0.12); border: 2px solid #3b82f6; padding: 14px 16px; border-radius: 12px; margin-top: 14px;">
+                        <div class="form-group" id="feeDiscountWrapper" style="background: rgba(37, 99, 235, 0.12); border: 2px solid #3b82f6; padding: 14px 16px; border-radius: 12px; margin-top: 14px;">
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <input type="checkbox" id="feeDiscountCheck" onchange="toggleFeeDiscount(this.checked)" style="width: 24px; height: 24px; accent-color: var(--primary); cursor: pointer;">
-                                <label for="feeDiscountCheck" style="font-size: calc(16px * var(--font-scale)); color: #ffffff; cursor: pointer; font-weight: 800;">
+                                <input type="checkbox" id="feeDiscountCheck" onchange="toggleFeeDiscount(this.checked)" style="width: 24px; height: 24px; accent-color: #2563eb; cursor: pointer;">
+                                <label for="feeDiscountCheck" id="feeDiscountLabel" style="font-size: calc(16px * var(--font-scale)); color: #ffffff; cursor: pointer; font-weight: 800;">
                                     🎁 응시료 50% 감면 대상자 (7,250원)
                                 </label>
                             </div>
-                            <div style="font-size: calc(13px * var(--font-scale)); color: #93c5fd; margin-top: 6px; margin-left: 36px; line-height: 1.4; font-weight: 600;">
+                            <div id="feeDiscountHelper" style="font-size: calc(13px * var(--font-scale)); color: #93c5fd; margin-top: 6px; margin-left: 36px; line-height: 1.4; font-weight: 600;">
                                 ※ 기초생활수급자 / 등록장애인 / 국가유공자 / 차상위계층 해당 시 체크
                             </div>
                         </div>
 
                         <!-- Privacy Consent -->
-                        <div class="form-group" style="display: flex; align-items: flex-start; gap: 12px; margin-top: 20px; background: rgba(0,0,0,0.25); padding: 12px; border-radius: 10px;">
-                            <input type="checkbox" id="privacyConsent" required style="width: 24px; height: 24px; margin-top: 2px; accent-color: var(--primary); cursor: pointer;">
-                            <label for="privacyConsent" style="font-size: calc(14px * var(--font-scale)); color: #cbd5e1; cursor: pointer; line-height: 1.45; font-weight: 600;">
+                        <div class="form-group" id="formPrivacyConsentWrapper" style="display: flex; align-items: flex-start; gap: 12px; margin-top: 20px; background: rgba(0,0,0,0.25); padding: 14px 16px; border-radius: 12px; border: 1.5px solid rgba(255,255,255,0.1);">
+                            <input type="checkbox" id="privacyConsent" required style="width: 24px; height: 24px; margin-top: 2px; accent-color: #2563eb; cursor: pointer;">
+                            <label for="privacyConsent" id="formPrivacyConsentLabel" style="font-size: calc(14px * var(--font-scale)); color: #cbd5e1; cursor: pointer; line-height: 1.45; font-weight: 600;">
                                 <strong>[필수]</strong> 원서접수 대행 및 시험 일정 안내 전화/문자 발송에 동의합니다.
                             </label>
                         </div>
@@ -1329,6 +1488,7 @@
                 if (btn) btn.textContent = '☀️ 밝은 화면';
             }
             localStorage.setItem('dudu_contrast', isLightContrast ? 'light' : 'dark');
+            updateGenderStyle();
         }
 
         function toggleContrast() {
@@ -1482,17 +1642,42 @@
             const isMale = document.querySelector('input[name="userGender"][value="남"]').checked;
             const maleLabel = document.getElementById('genderMaleLabel');
             const femaleLabel = document.getElementById('genderFemaleLabel');
+            const isLight = document.body.classList.contains('light-contrast');
 
-            if (isMale) {
-                maleLabel.style.borderColor = '#3b82f6';
-                maleLabel.style.color = '#ffffff';
-                femaleLabel.style.borderColor = '#475569';
-                femaleLabel.style.color = '#cbd5e1';
+            if (!maleLabel || !femaleLabel) return;
+
+            if (isLight) {
+                if (isMale) {
+                    maleLabel.style.borderColor = '#2563eb';
+                    maleLabel.style.backgroundColor = '#eff6ff';
+                    maleLabel.style.color = '#1e3a8a';
+                    femaleLabel.style.borderColor = '#cbd5e1';
+                    femaleLabel.style.backgroundColor = '#ffffff';
+                    femaleLabel.style.color = '#64748b';
+                } else {
+                    maleLabel.style.borderColor = '#cbd5e1';
+                    maleLabel.style.backgroundColor = '#ffffff';
+                    maleLabel.style.color = '#64748b';
+                    femaleLabel.style.borderColor = '#ec4899';
+                    femaleLabel.style.backgroundColor = '#fdf2f8';
+                    femaleLabel.style.color = '#9d174d';
+                }
             } else {
-                maleLabel.style.borderColor = '#475569';
-                maleLabel.style.color = '#cbd5e1';
-                femaleLabel.style.borderColor = '#ec4899';
-                femaleLabel.style.color = '#ffffff';
+                if (isMale) {
+                    maleLabel.style.borderColor = '#3b82f6';
+                    maleLabel.style.backgroundColor = '#020617';
+                    maleLabel.style.color = '#ffffff';
+                    femaleLabel.style.borderColor = '#475569';
+                    femaleLabel.style.backgroundColor = '#020617';
+                    femaleLabel.style.color = '#cbd5e1';
+                } else {
+                    maleLabel.style.borderColor = '#475569';
+                    maleLabel.style.backgroundColor = '#020617';
+                    maleLabel.style.color = '#cbd5e1';
+                    femaleLabel.style.borderColor = '#ec4899';
+                    femaleLabel.style.backgroundColor = '#020617';
+                    femaleLabel.style.color = '#ffffff';
+                }
             }
         }
 
