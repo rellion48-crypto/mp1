@@ -8,6 +8,10 @@
       "dest": "/api/chat.js"
     },
     {
+      "src": "/api/feedback",
+      "dest": "/api/feedback.js"
+    },
+    {
       "src": "/admin/(.*)",
       "dest": "/admin/$1"
     },
