@@ -1,12 +1,12 @@
 /**
  * 두두자격지원센터 - 시니어 3대 핵심 국가기술자격 AI 챗봇 (두두봇)
- * - AI 모드 ON / OFF 전환 토글 (Gemini 3.5 Flash /api/chat)
- * - 4초 타임아웃 및 무중단 룰베이스 폴백 엔진
- * - IIFE로 감싸서 인라인 스크립트와 const 충돌 방지
+ * - AI 정밀상담 모드 (Gemini 3.5 Flash /api/chat RAG 연동)
+ * - 사내규정 빠른검색 모드 (무결성 4단계 계층형 룰베이스 엔진)
+ * - 4.5초 타임아웃 및 무중단 자동 폴백
+ * - IIFE로 감싸서 인라인 스크립트와 충돌 방지
  */
 (function() {
 'use strict';
-
 
 const SUPABASE_CONFIG = {
     URL: "https://amlznptemtbkhyuzdkmu.supabase.co",
@@ -17,123 +17,254 @@ if (typeof window !== 'undefined' && window.supabase && typeof window.supabase.c
     window.supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
 }
 
-const DEFAULT_FAQ_KNOWLEDGE = [
+/**
+ * 사내 23종 공식 안내 규정 원장 (Master Source of Truth - 불변 1순위)
+ */
+const MASTER_OFFICIAL_REGULATIONS = [
     {
         id: 1,
         category: '응시료',
         qualification: '3대 기능사 공통 (한식, 지게차, 굴착기)',
         question: '한식조리, 지게차, 굴착기운전기능사 필기 응시료는 얼마인가요?',
-        keywords: '응시료,접수비,시험비,비용,얼마,한식,한식조리,지게차,굴착기,포크레인,수수료,돈,기능사,금액,얼마예요',
-        answer: '어르신, 한식조리기능사, 지게차운전기능사, 굴착기운전기능사 3종 모두 필기 응시료는 14,500원으로 동일합니다. (기초수급자/장애인/국가유공자/차상위는 50% 감면된 7,250원입니다.)',
+        keywords: '응시료,접수비,시험비,비용,얼마,한식,한식조리,지게차,굴착기,포크레인,수수료,돈,기능사,금액,얼마예요,필기응시료,필기비용',
+        answer: '어르신, 한식조리기능사, 지게차운전기능사, 굴착기운전기능사 3종 모두 필기 응시료는 14,500원으로 동일합니다. (기초생활수급자, 등록장애인, 국가유공자, 차상위계층 대상자는 50% 감면된 7,250원입니다.)',
         is_unknown: false
     },
     {
         id: 2,
-        category: '일정/방식',
-        qualification: '3대 기능사 공통 (상시 CBT)',
-        question: '접수 기간과 시험 방식은 어떻게 되나요?',
-        keywords: '일정,접수기간,언제,시험일,상시,cbt,컴퓨터,시험방식,기간,접수날짜',
-        answer: '한식조리, 지게차, 굴착기 3개 자격증은 정해진 기간 없이 상시로 운영됩니다. 컴퓨터(CBT)로 시험을 치르며 시험장에 자리가 있으면 원하시는 날짜와 교시(1부~5부)를 선택하여 언제든 접수하실 수 있습니다.',
+        category: '응시료',
+        qualification: '국가기술자격 실기 수수료',
+        question: '기능사 실기시험 응시료(수수료)는 얼마인가요?',
+        keywords: '실기,실기비용,실기응시료,실기수수료,2차비용,실습비,전기기능사실기,한식실기,지게차실기,굴착기실기,실기시험비',
+        answer: '국가기술자격 실기시험 수수료는 종목마다 다릅니다. 한식조리기능사는 26,900원, 지게차운전기능사는 25,200원, 굴착기운전기능사는 27,800원이며, 전기기능사 실기는 재료비 등으로 인해 106,200원입니다.',
         is_unknown: false
     },
     {
         id: 3,
-        category: '합격발표',
-        qualification: '3대 기능사 공통',
-        question: '합격자 발표는 언제 나오나요?',
-        keywords: '합격,발표,합격자,합격발표,당일,언제나와,결과,점수',
-        answer: '컴퓨터 CBT 시험이므로 시험 종료 버튼을 누르시는 즉시 모니터 화면에서 본인의 점수와 합격 여부를 그 자리에서 바로 확인하실 수 있습니다.',
+        category: '응시료',
+        qualification: '사회적 배려계층 감면',
+        question: '응시료 50% 감면 대상자는 누구이고 얼마를 내나요?',
+        keywords: '감면,50%,50프로,할인,기초수급자,차상위,국가유공자,장애인,면제,혜택,감면대상,감면기준,감면혜택,반값',
+        answer: '기초생활수급자, 등록장애인, 국가유공자, 차상위계층에 해당하시는 어르신께서는 정규 필기 응시료(14,500원)의 50%가 감면되어 7,250원만 결제하시면 됩니다.',
         is_unknown: false
     },
     {
         id: 4,
-        category: '시험시간',
-        qualification: '3대 기능사 공통',
-        question: '하루에 몇 부(교시)까지 시험이 있나요?',
-        keywords: '시간,시간대,교시,부,몇부,1부,2부,3부,4부,5부,몇시',
-        answer: '상시 CBT 시험은 하루 총 5부(1부 09:00, 2부 11:00, 3부 13:00, 4부 15:00, 5부 17:00)로 나누어 진행됩니다. 원서접수 시 편하신 시간대로 선택하실 수 있습니다.',
+        category: '일정/방식',
+        qualification: '3대 기능사 공통 (상시 CBT)',
+        question: '한식, 지게차, 굴착기 시험 접수 기간과 시험 방식은 어떻게 되나요?',
+        keywords: '접수기간,언제접수,상시,cbt,컴퓨터시험,시험방식,신청기간,날짜,시험일정,언제,일정,접수날짜',
+        answer: '한식조리, 지게차, 굴착기 3대 종목은 별도의 정기 접수 기간 없이 상시 CBT(컴퓨터 시험)로 운영됩니다. 시험장에 빈자리가 있으면 원하시는 날짜와 교시를 선택해 언제든 접수하실 수 있습니다.',
         is_unknown: false
     },
     {
         id: 5,
-        category: '시험준비물',
-        qualification: '공통',
-        question: '시험 당일 준비물 및 지참물은 무엇인가요?',
-        keywords: '준비물,신분증,수험표,필기구,시계,계산기,스마트폰,휴대폰,지참물,가져갈것,안가져가면,신분증안가져가면,신분증없으면,신분증필요',
-        answer: '시험 당일 반드시 실물 신분증(주민등록증, 운전면허증, 여권 등), 수험표, 흑색 필기구를 지참하셔야 합니다. 휴대폰, 스마트워치 등 전자기기는 시험실 반입 금지이며 소지 시 시험이 무효 처리됩니다.',
+        category: '일정/방식',
+        qualification: '전기기능사 (정기 회차)',
+        question: '전기기능사 시험 일정과 접수 기간은 어떻게 되나요?',
+        keywords: '전기기능사,전기,정기시험,정기회차,4회,전기일정,전기접수,전기시험',
+        answer: '전기기능사는 연 4회 정기 시험으로 진행됩니다. 2026년 기준 가장 가까운 제4회 필기 원서접수는 8월 24일부터 8월 27일까지이며, 필기시험은 9월 16일부터 9월 21일까지 치러집니다. (빈자리 추가접수는 9월 10일~11일)',
         is_unknown: false
     },
     {
         id: 6,
-        category: '유효기간',
-        qualification: '3대 기능사 공통',
-        question: '필기시험 합격 후 유효기간은 얼마나 되나요?',
-        keywords: '유효기간,필기합격,면제,기간,몇년,유효,필기합격후,실기언제',
-        answer: '필기시험 합격일로부터 2년간 필기시험이 면제됩니다. 2년 이내에 실기시험에 응시하여 합격하시면 최종 자격증이 발급됩니다.',
+        category: '일정/방식',
+        qualification: '요양보호사 (국시원 상시)',
+        question: '요양보호사 시험 접수는 언제까지 해야 하나요?',
+        keywords: '요양보호사,요양사,국시원,요양접수,요양일정,요양보호사접수',
+        answer: '요양보호사 시험은 국시원 상시시험 사이트에서 접수하며, 원하시는 시험일 기준 7일 전까지 접수를 마치셔야 합니다. 합격자 발표는 시험 다음 날 오전 10시 이후(주말·공휴일 제외)에 공지됩니다.',
         is_unknown: false
     },
     {
         id: 7,
-        category: '결제/환불',
-        qualification: '공통',
-        question: '환불 규정 및 취소 기간은 어떻게 되나요?',
-        keywords: '환불,취소,돈돌려,환불금,취소기간,100%,50%,환불규정',
-        answer: '원서접수 기간 내 취소 시 100% 전액 환불되며, 접수 마감 후부터 시험 시작 5일 전까지는 50% 환불됩니다. 시험 시작 4일 전부터는 환불이 불가합니다.',
+        category: '일정/방식',
+        qualification: '손해평가사 / 공인중개사 (연 1회)',
+        question: '손해평가사, 공인중개사 올해 1차 시험 접수할 수 있나요?',
+        keywords: '손해평가사,공인중개사,부동산,1차,올해접수,전문자격,손평사,공개사',
+        answer: '손해평가사(제12회 1차, 4월 마감)와 공인중개사(제37회 1차, 8월 마감)는 모두 연 1회 시행되는 시험으로 올해 1차 원서접수가 이미 마감되었습니다. 따라서 올해는 접수가 불가능하며 내년 시험에 응시하셔야 합니다.',
         is_unknown: false
     },
     {
         id: 8,
-        category: '접수방법',
-        qualification: '공통',
-        question: '인터넷 접수가 어려운데 어떻게 접수하나요? (동사무소 방문 등)',
-        keywords: '접수방법,신청방법,인터넷접수어려워,대리접수,대리신청,도와줘요,전화접수신청,원서접수대행,동사무소,주민센터,우체국,현장접수',
-        answer: '국가기술자격은 동사무소나 우체국 방문 접수가 불가능하며 큐넷 온라인 접수만 가능합니다. 인터넷 사용이 어려우신 어르신들을 위해 저희 두두자격지원센터에서 성함과 연락처만 남겨주시면 무료로 접수를 대행해 드립니다.',
+        category: '일정/방식',
+        qualification: '접수 시작 시간',
+        question: '원서접수 시작 시각은 몇 시인가요?',
+        keywords: '접수시간,몇시,시작시간,오전9시,오전10시,오픈시간,몇시에시작',
+        answer: '국가기술자격 기능사(한식, 지게차, 굴착기, 전기)는 첫날 오전 10:00에 접수가 시작되며, 전문자격(손해평가사, 공인중개사)은 전용 사이트에서 오전 09:00에 시작됩니다. 선착순 마감이므로 시간을 잘 확인하셔야 합니다.',
         is_unknown: false
     },
     {
         id: 9,
-        category: '수험표',
-        qualification: '공통',
-        question: '수험표를 스마트폰으로 보여줘도 되나요?',
-        keywords: '수험표스마트폰,수험표핸드폰,수험표모바일,수험표출력,수험표인쇄,수험표어디서,입장표',
-        answer: '수험표는 큐넷 홈페이지에서 미리 종이로 출력해서 지참하시는 것을 권장드립니다. 시험장 본부나 수험자 마이페이지에서 출력이 가능합니다.',
+        category: '합격발표',
+        qualification: '3대 기능사 공통 (상시 CBT)',
+        question: '합격자 발표는 언제 나오나요?',
+        keywords: '합격,발표,언제나와,결과,점수,당일,합격자,합격여부,몇점합격,합격점수',
+        answer: '한식조리, 지게차, 굴착기운전기능사 상시 CBT 시험은 컴퓨터로 치러지므로, 시험 종료 버튼을 누르면 그 자리에서 즉시 점수와 합격 여부를 확인하실 수 있습니다.',
         is_unknown: false
     },
     {
         id: 10,
-        category: '소형면허차이',
-        qualification: '지게차/굴착기',
-        question: '소형건설기계 조종면허와 국가기술자격 기능사의 차이는 무엇인가요?',
-        keywords: '소형면허,소형지게차,소형굴착기,작은거면허,차이,소형면허차이,3톤미만',
-        answer: '3톤 미만 소형건설기계 조종교육 이수증(면허)과 한국산업인력공단의 국가기술자격 기능사는 별개의 자격입니다. 소형 면허가 있더라도 기능사 자격 취득을 위해서는 필기시험부터 응시하셔야 합니다.',
+        category: '유효기간',
+        qualification: '국가기술자격 기능사 공통',
+        question: '필기시험에 합격하면 유효기간이 얼마나 되나요?',
+        keywords: '유효기간,필기면제,면제기간,2년,필기합격,실기언제까지,면제',
+        answer: '국가기술자격(기능사)은 필기시험 합격일로부터 2년간 필기시험이 면제됩니다. 2년 이내에 원하시는 실기시험에 접수하여 응시하시면 됩니다.',
         is_unknown: false
     },
     {
         id: 11,
-        category: '사진등록',
-        qualification: '공통',
-        question: '원서접수 사진 규격과 등록 오류 해결법은 무엇인가요?',
-        keywords: '사진등록,사진규격,증명사진,사진오류,사진실패,셀카,사진크기',
-        answer: '최근 6개월 이내 촬영한 3.5cm x 4.5cm 컬러 증명사진 파일(JPG)이어야 등록이 가능합니다. 배경이 깔끔하고 정면을 응시한 사진이어야 하며 셀카나 흐린 사진은 등록 오류가 발생할 수 있습니다.',
+        category: '시험시간',
+        qualification: '상시 CBT 교시 안내',
+        question: '하루에 몇 부(교시)까지 시험이 있고 시간은 얼마나 걸리나요?',
+        keywords: '교시,몇부,시간,시험시간,1부,2부,3부,4부,5부,60분,소요시간,몇교시',
+        answer: '상시 CBT 시험은 기능사 기준 시험시간이 60분이며, 하루에 1부(09:00), 2부(11:00), 3부(13:00), 4부(15:00), 5부(17:00) 총 5개 교시로 나뉘어 진행됩니다.',
         is_unknown: false
     },
     {
         id: 12,
-        category: '기타자격증',
-        qualification: '기타 종목 문의 (전기/요양/공인중개사 등)',
-        question: '전기기능사, 요양보호사, 공인중개사 등 다른 자격증도 접수되나요?',
-        keywords: '전기,전기기능사,요양보호사,요양사,위생사,손해평가사,공인중개사,부동산,다른자격증,기타',
-        answer: '저희 센터는 현재 중장년 어르신 취업에 가장 수요가 높은 3대 핵심 국가기술자격(한식조리, 지게차운전, 굴착기운전기능사) 필기 원서접수에 집중하여 전문 지원해 드리고 있습니다. (기타 종목은 추후 지원 예정입니다.)',
+        category: '시험준비물',
+        qualification: '시험장 지참물 및 반입 규정',
+        question: '시험 당일 준비물과 시험실에 가지고 들어갈 수 있는 물품은 무엇인가요?',
+        keywords: '준비물,신분증,수험표,필기도구,스마트폰,휴대폰,스마트워치,시계,계산기,지참물,가져갈것,신분증없으면,신분증안가져가면',
+        answer: '시험 당일에는 실물 신분증(주민등록증·운전면허증 등), 수험표, 흑색 필기구를 반드시 지참하셔야 합니다. 시험실에는 신분증, 수험표, 필기구, 수정테이프, 일반시계, 계산기, 간식 등 8가지만 허용되며, 스마트폰·스마트워치 등 전자기기는 소지 시 즉시 시험이 무효 처리됩니다.',
         is_unknown: false
     },
     {
         id: 13,
+        category: '결제/환불',
+        qualification: '정규 환불 규정',
+        question: '접수 후 취소하면 환불을 얼마나 받을 수 있나요?',
+        keywords: '환불,취소,환불금액,전액환불,50%환불,환불기간,토스페이먼츠,돈돌려,취소환불',
+        answer: '원서접수 기간 내 취소 시에는 100% 전액 환불되며, 접수 마감 후부터 해당 시험 시작 5일 전까지는 50%가 환불됩니다. (시험 시작 4일 전부터는 환불 불가). 환불금은 최대 7일 이내 \'토스페이먼츠\' 명의로 입금됩니다.',
+        is_unknown: false
+    },
+    {
+        id: 14,
+        category: '결제/환불',
+        qualification: '사후 특별 환불 (100%)',
+        question: '시험을 못 보게 되었는데 사후 환불(100%)을 받을 수 있는 사유가 있나요?',
+        keywords: '사후환불,입원,사망,상,전염병,격리,천재지변,교통두절,특별환불,병원,다쳐서',
+        answer: '접수기간 이후라도 직계가족(부모·배우자·자녀 등) 사망, 본인의 질병·사고 입원, 국가 전염병 격리, 천재지변으로 인한 교통 두절 등의 불가피한 사유가 있을 경우 증빙서류를 제출하시면 100% 전액 환불받으실 수 있습니다.',
+        is_unknown: false
+    },
+    {
+        id: 15,
+        category: '결제/환불',
+        qualification: '가상계좌 입금 기한',
+        question: '가상계좌로 결제할 때 언제까지 입금해야 하나요?',
+        keywords: '가상계좌,무통장,입금기한,언제까지입금,자동취소,입금시간,계좌이체',
+        answer: '가상계좌는 접수 시점에 따라 기한이 다릅니다. 마감일 전날 13시 이전 접수는 당일 14시까지, 13시 이후 접수는 익일 14시까지 입금하셔야 합니다. 마감일 당일 13시 이후에는 가상계좌 채번이 불가하므로 카드나 실시간 계좌이체를 이용하셔야 합니다.',
+        is_unknown: false
+    },
+    {
+        id: 16,
+        category: '접수방법',
+        qualification: '공통 (시니어 무료 대행)',
+        question: '컴퓨터나 스마트폰 사용이 어려운데 전화나 방문으로도 접수가 가능한가요? (동사무소 방문 등)',
+        keywords: '전화접수,방문접수,접수대행,도와줘,신청해줘,어려워,인터넷못해,동사무소,주민센터,우체국,현장접수',
+        answer: '국가기술자격은 동사무소나 우체국 방문 접수가 불가능하며 큐넷 온라인 접수만 가능합니다. 인터넷 사용이 어려우신 어르신들을 위해 저희 두두자격지원센터에서 성함과 연락처만 남겨주시면 무료로 원서접수를 대행해 드립니다.',
+        is_unknown: false
+    },
+    {
+        id: 17,
         category: '확인불가',
-        qualification: '공통',
-        question: '시험장에 주차 되나요?',
-        keywords: '주차,주차장,차량,주차가능,차,주차되나요',
-        answer: '시험장별 주차 가능 여부는 사내 규정 원장에서 확인되지 않아 정확한 안내가 어렵습니다. (모르겠습니다)',
+        qualification: '요양보호사',
+        question: '요양보호사 자격증 응시료는 얼마인가요?',
+        keywords: '요양보호사응시료,요양보호사비용,요양사수수료,요양보호사돈',
+        answer: '죄송합니다. 요양보호사 응시료 금액은 사내 안내 규정 문서에 명시되어 있지 않아 정확한 안내가 어렵습니다. (국시원 홈페이지를 통해 확인해 주시기 바랍니다.)',
         is_unknown: true
+    },
+    {
+        id: 18,
+        category: '확인불가',
+        qualification: '위생사',
+        question: '위생사 자격증 시험 일정과 응시료는 어떻게 되나요?',
+        keywords: '위생사,위생사일정,위생사응시료,위생사비용,위생사수수료',
+        answer: '죄송합니다. 위생사 시험 일정 및 응시료는 사내 안내 규정에 기재되어 있지 않아 답변드릴 수 없습니다. (국시원 대표 홈페이지에서 확인 부탁드립니다.)',
+        is_unknown: true
+    },
+    {
+        id: 19,
+        category: '확인불가',
+        qualification: '손해평가사 / 공인중개사',
+        question: '손해평가사 또는 공인중개사 1차 시험 응시료는 얼마인가요?',
+        keywords: '손해평가사응시료,공인중개사응시료,손해평가사비용,공인중개사비용,손해평가사수수료,공인중개사수수료',
+        answer: '죄송합니다. 손해평가사 및 공인중개사 1차 응시료 금액은 사내 규정 원장에 등록되어 있지 않아 안내가 불가합니다. (큐넷 전문자격 홈페이지를 참조해 주십시오.)',
+        is_unknown: true
+    },
+    {
+        id: 20,
+        category: '확인불가',
+        qualification: '요양보호사 교육 이수',
+        question: '요양보호사 응시자격 교육 이수 시간은 몇 시간인가요?',
+        keywords: '요양보호사이수시간,요양보호사교육시간,요양보호사자격조건,요양보호사이수',
+        answer: '죄송합니다. 요양보호사 교육 이수 시간 및 상세 응시자격 요건은 사내 규정 문서에 확인되지 않아 안내가 어렵습니다.',
+        is_unknown: true
+    },
+    {
+        id: 21,
+        category: '확인불가',
+        qualification: '공인중개사 1차 면제',
+        question: '공인중개사 1차 시험에 합격하면 2차 면제 기간이 정말 1년인가요?',
+        keywords: '공인중개사면제,공인중개사1년,공인중개사유효기간',
+        answer: '죄송합니다. 공인중개사 1차 합격에 따른 면제 기간은 사내 규정 원장에서 공식 확인되지 않았으므로 정확한 답변을 드릴 수 없습니다.',
+        is_unknown: true
+    },
+    {
+        id: 22,
+        category: '확인불가',
+        qualification: '시험장 시설/주차',
+        question: '시험장에 주차장이 있나요? 주차나 셔틀버스가 지원되나요?',
+        keywords: '주차,주차장,차댈곳,셔틀버스,대중교통,주차비',
+        answer: '죄송합니다. 시험장별 주차 가능 여부나 셔틀버스 운행 정보는 사내 안내 규정에 나와 있지 않아 안내가 어렵습니다. 시험장 본부로 직접 문의해 주시기 바랍니다.',
+        is_unknown: true
+    },
+    {
+        id: 23,
+        category: '확인불가',
+        qualification: '개인 상담',
+        question: '제가 이번 시험에 합격할 수 있을까요? 교재나 강의를 추천해 주세요.',
+        keywords: '합격할까요,붙을수있나요,교재추천,학원추천,강의추천,난이도',
+        answer: '죄송합니다. 개인의 시험 합격 가능성이나 사설 교재/강의 추천은 사내 규정 안내 범위를 벗어나 답변드릴 수 없습니다. 어르신의 도전을 진심으로 응원합니다!',
+        is_unknown: true
+    }
+];
+
+/**
+ * 보조 상담 지식 (Tier 2 보강)
+ */
+const AUXILIARY_KNOWLEDGE = [
+    {
+        id: 101,
+        category: '수험표',
+        qualification: '공통',
+        question: '수험표를 스마트폰으로 보여줘도 되나요?',
+        keywords: '수험표스마트폰,수험표핸드폰,수험표모바일,수험표출력,수험표인쇄,수험표어디서,입장표',
+        answer: '수험표는 큐넷 홈페이지에서 미리 종이로 출력해서 지참하시는 것을 권장드립니다. 시험장 본부나 수험자 마이페이지에서 출력이 가능합니다.'
+    },
+    {
+        id: 102,
+        category: '소형면허차이',
+        qualification: '지게차/굴착기',
+        question: '소형건설기계 조종면허와 국가기술자격 기능사의 차이는 무엇인가요?',
+        keywords: '소형면허,소형지게차,소형굴착기,작은거면허,차이,소형면허차이,3톤미만',
+        answer: '3톤 미만 소형건설기계 조종교육 이수증(면허)과 한국산업인력공단의 국가기술자격 기능사는 별개의 자격입니다. 소형 면허가 있더라도 기능사 자격 취득을 위해서는 필기시험부터 응시하셔야 합니다.'
+    },
+    {
+        id: 103,
+        category: '사진등록',
+        qualification: '공통',
+        question: '원서접수 사진 규격과 등록 오류 해결법은 무엇인가요?',
+        keywords: '사진등록,사진규격,증명사진,사진오류,사진실패,셀카,사진크기',
+        answer: '최근 6개월 이내 촬영한 3.5cm x 4.5cm 컬러 증명사진 파일(JPG)이어야 등록이 가능합니다. 배경이 깔끔하고 정면을 응시한 사진이어야 하며 셀카나 흐린 사진은 등록 오류가 발생할 수 있습니다.'
+    },
+    {
+        id: 104,
+        category: '기타자격증',
+        qualification: '기타 종목 안내',
+        question: '전기기능사, 요양보호사, 공인중개사 등 다른 자격증도 접수되나요?',
+        keywords: '다른자격증,기타자격증,위생사접수,손해평가사접수,공인중개사접수',
+        answer: '저희 센터는 현재 중장년 어르신 취업에 가장 수요가 높은 3대 핵심 국가기술자격(한식조리, 지게차운전, 굴착기운전기능사) 필기 원서접수에 집중하여 전문 지원해 드리고 있습니다. (기타 종목은 추후 지원 예정입니다.)'
     }
 ];
 
@@ -166,14 +297,14 @@ const SENIOR_SYNONYMS = {
     '우체국': '접수방법',
     '고마워유': '고마워',
     '감사유': '감사',
-    '고맙구먼': '고마워',
-    '가능할까유': '가능할까',
-    '될까유': '가능할까'
+    '고맙구먼': '고마워'
 };
 
 class DuduChatbot {
     constructor() {
-        this.knowledgeBase = [...DEFAULT_FAQ_KNOWLEDGE];
+        this.masterRegulations = [...MASTER_OFFICIAL_REGULATIONS];
+        this.auxiliaryKnowledge = [...AUXILIARY_KNOWLEDGE];
+        this.knowledgeBase = [...MASTER_OFFICIAL_REGULATIONS];
         this.isOpen = false;
         const storedSize = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_chat_font_size') : null;
         const storedMode = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_ai_mode') : null;
@@ -206,6 +337,11 @@ class DuduChatbot {
                     .range(0, 4999);
 
                 if (!error && data && data.length > 0) {
+                    // ID 1~23번은 사내 공식 규정으로 마스터 업데이트
+                    const masters = data.filter(d => d.id <= 23);
+                    if (masters.length > 0) {
+                        this.masterRegulations = masters;
+                    }
                     this.knowledgeBase = data;
                 }
             }
@@ -352,7 +488,9 @@ class DuduChatbot {
 
     adjustChatFontSize(delta) {
         this.fontSize = Math.max(13, Math.min(26, this.fontSize + delta));
-        localStorage.setItem('dudu_chat_font_size', this.fontSize);
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('dudu_chat_font_size', this.fontSize);
+        }
 
         const win = document.getElementById('duduChatWindow');
         if (win) {
@@ -371,7 +509,9 @@ class DuduChatbot {
 
     toggleAIMode() {
         this.isAIMode = !this.isAIMode;
-        localStorage.setItem('dudu_ai_mode', this.isAIMode);
+        if (typeof localStorage !== 'undefined') {
+            localStorage.setItem('dudu_ai_mode', this.isAIMode);
+        }
         this.updateModeUI();
         const notice = this.isAIMode 
             ? '🤖 <strong>[AI 정밀상담 모드]</strong>로 전환되었습니다.<br><span style="font-size: 13px; color: #93c5fd;">※ 어르신 눈높이에 맞춰 더욱 풍부하고 친절하게 안내하며 대화 맥락을 기억합니다.</span>'
@@ -453,7 +593,6 @@ class DuduChatbot {
         if (this.isOpen) {
             win.style.display = 'flex';
             win.classList.add('open');
-            // FAQ 관리자에서 수정된 최신 규정 실시간 백그라운드 동기화
             this.syncWithSupabase();
             const inp = document.getElementById('chatInput');
             if (inp) {
@@ -486,7 +625,6 @@ class DuduChatbot {
             const loadingMsg = this.appendLoadingMessage();
             let aiSuccess = false;
             try {
-                // 4.5초 타임아웃 컨트롤러 (지연 발생 시 즉시 룰베이스 폴백)
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 4500);
 
@@ -495,8 +633,8 @@ class DuduChatbot {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         message: query,
-                        history: this.conversationHistory.slice(-10), // 최대 5개 턴 (10개 메시지)
-                        faqDocuments: this.knowledgeBase // FAQ 관리자 수정 내용 실시간 주입
+                        history: this.conversationHistory.slice(-10),
+                        faqDocuments: this.masterRegulations
                     }),
                     signal: controller.signal
                 });
@@ -508,16 +646,13 @@ class DuduChatbot {
                         this.removeLoadingMessage(loadingMsg);
                         this.appendMessage(data.answer, 'bot');
 
-                        // 대화 기록 저장 (최대 5개 턴 = 10개 항목 유지)
                         this.conversationHistory.push({ role: 'user', text: query });
                         this.conversationHistory.push({ role: 'model', text: data.answer });
                         if (this.conversationHistory.length > 10) {
                             this.conversationHistory = this.conversationHistory.slice(-10);
                         }
 
-                        // 관리자용 문의 히스토리 로깅
                         this.recordInquiryLog(query, data.answer, 'AI');
-
                         aiSuccess = true;
                         return;
                     }
@@ -535,23 +670,24 @@ class DuduChatbot {
             const answer = this.generateResponse(query);
             this.appendMessage(answer, 'bot');
 
-            // 룰베이스 모드에서도 대화 기록 저장
             this.conversationHistory.push({ role: 'user', text: query });
             this.conversationHistory.push({ role: 'model', text: answer });
             if (this.conversationHistory.length > 10) {
                 this.conversationHistory = this.conversationHistory.slice(-10);
             }
 
-            // 관리자용 문의 히스토리 로깅
             this.recordInquiryLog(query, answer, 'RULE');
-        }, 100);
+        }, 80);
     }
 
     recordInquiryLog(query, answer, mode) {
         try {
+            if (typeof localStorage === 'undefined') return;
             let category = '기타/일반';
             const q = query.toLowerCase();
-            if (q.includes('응시료') || q.includes('접수비') || q.includes('시험비') || q.includes('비용') || q.includes('수수료') || q.includes('얼마') || q.includes('돈')) {
+            if (q.includes('감면') || q.includes('50%') || q.includes('50프로') || q.includes('기초수급') || q.includes('차상위') || q.includes('장애인') || q.includes('유공자')) {
+                category = '응시료/감면';
+            } else if (q.includes('응시료') || q.includes('접수비') || q.includes('시험비') || q.includes('비용') || q.includes('수수료') || q.includes('얼마') || q.includes('돈')) {
                 category = '응시료/수수료';
             } else if (q.includes('일정') || q.includes('언제') || q.includes('기간') || q.includes('상시') || q.includes('시간') || q.includes('교시')) {
                 category = '시험일정/교시';
@@ -561,7 +697,7 @@ class DuduChatbot {
                 category = '실기문의(거절)';
             } else if (q.includes('환불') || q.includes('취소')) {
                 category = '결제/환불';
-            } else if (q.includes('고마워') || q.includes('감사') || q.includes('안녕') || q.includes('나이') || q.includes('60') || q.includes('70') || q.includes('가능할까')) {
+            } else if (q.includes('고마워') || q.includes('감사') || q.includes('안녕') || q.includes('가능할까')) {
                 category = '일상대화/시니어공감';
             } else if (q.includes('주차') || q.includes('식당') || q.includes('버스') || q.includes('교재')) {
                 category = '사내미확인(무환각)';
@@ -615,13 +751,17 @@ class DuduChatbot {
         container.scrollTop = container.scrollHeight;
     }
 
+    /**
+     * 무결성 4단계 계층형 룰베이스 응답 생성기
+     */
     generateResponse(rawQuery) {
-        const query = rawQuery.toLowerCase().replace(/\s+/g, ' ');
-
-        if (query.includes('실기') || query.includes('2차') || query.includes('실습') || query.includes('직접 하는')) {
-            return '저희는 필기 접수만 도와드립니다. 실기 시험 관련 문의는 해당 시행기관으로 문의해 주시기 바랍니다.';
+        if (!rawQuery || typeof rawQuery !== 'string') {
+            return '궁금하신 자격증 시험 관련 내용을 말씀해 주세요.';
         }
 
+        const query = rawQuery.toLowerCase().replace(/\s+/g, ' ').trim();
+
+        // 1. 시니어 유의어 사전 치환 및 정규화
         let normalizedQuery = query;
         for (const [slang, standard] of Object.entries(SENIOR_SYNONYMS)) {
             if (normalizedQuery.includes(slang.toLowerCase())) {
@@ -629,81 +769,174 @@ class DuduChatbot {
             }
         }
 
-        if (normalizedQuery.includes('전기') || normalizedQuery.includes('요양') || normalizedQuery.includes('위생사') || normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) {
-            return '저희 센터는 현재 중장년 어르신 취업에 가장 수요가 높은 3대 핵심 국가기술자격(한식조리, 지게차운전, 굴착기운전기능사) 필기 원서접수에 집중하여 전문 지원해 드리고 있습니다. (기타 종목은 추후 지원 예정입니다.)';
+        const getMaster = (id) => this.masterRegulations.find(m => m.id === id) || MASTER_OFFICIAL_REGULATIONS.find(m => m.id === id);
+
+        // 2. 의도(Intent) 플래그 정밀 분석
+        const hasDiscountIntent = normalizedQuery.includes('감면') || 
+                                  normalizedQuery.includes('50%') || 
+                                  normalizedQuery.includes('50프로') || 
+                                  normalizedQuery.includes('반값') || 
+                                  normalizedQuery.includes('할인') || 
+                                  normalizedQuery.includes('기초수급') || 
+                                  normalizedQuery.includes('차상위') || 
+                                  normalizedQuery.includes('유공자') || 
+                                  normalizedQuery.includes('장애인');
+
+        const isRecommendIntent = normalizedQuery.includes('교재') || normalizedQuery.includes('학원') || normalizedQuery.includes('강의') || normalizedQuery.includes('책 추천') || normalizedQuery.includes('난이도');
+        const isDurationIntent = normalizedQuery.includes('유효기간') || normalizedQuery.includes('면제기간') || (normalizedQuery.includes('필기합격') && normalizedQuery.includes('면제')) || normalizedQuery.includes('몇년');
+        const isPracticalIntent = normalizedQuery.includes('실기') || normalizedQuery.includes('2차') || normalizedQuery.includes('실습') || normalizedQuery.includes('직접 하는');
+        const isFeeWord = normalizedQuery.includes('응시료') || normalizedQuery.includes('접수비') || normalizedQuery.includes('시험비') || normalizedQuery.includes('비용') || normalizedQuery.includes('수수료') || normalizedQuery.includes('얼마') || normalizedQuery.includes('돈') || normalizedQuery.includes('등록금');
+        const isScheduleWord = normalizedQuery.includes('일정') || normalizedQuery.includes('언제') || normalizedQuery.includes('기간') || normalizedQuery.includes('상시') || normalizedQuery.includes('cbt') || normalizedQuery.includes('날짜');
+        const isPassWord = (normalizedQuery.includes('합격') || normalizedQuery.includes('점수') || normalizedQuery.includes('결과')) && (normalizedQuery.includes('발표') || normalizedQuery.includes('당일') || normalizedQuery.includes('언제나와') || normalizedQuery.includes('몇점') || normalizedQuery.includes('합격여부'));
+        const isTimeWord = normalizedQuery.includes('교시') || /몇\s*부|1부|2부|3부|4부|5부|시험\s*시간|소요시간/.test(normalizedQuery);
+        const isPrepWord = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구') || normalizedQuery.includes('가져갈');
+        const isRefundWord = normalizedQuery.includes('환불') || normalizedQuery.includes('취소') || normalizedQuery.includes('돈돌려');
+
+        // 3. 확인불가(거절) 항목 최우선 방어 (규정 외 개인상담, 주차, 타종목 등)
+        if (isRecommendIntent) {
+            return getMaster(23).answer;
+        }
+        if (normalizedQuery.includes('주차') || normalizedQuery.includes('셔틀') || normalizedQuery.includes('주차장')) {
+            return getMaster(22).answer;
+        }
+        if (normalizedQuery.includes('요양') && isFeeWord) {
+            return getMaster(17).answer;
+        }
+        if (normalizedQuery.includes('위생사') && (isFeeWord || isScheduleWord)) {
+            return getMaster(18).answer;
+        }
+        if ((normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) && isFeeWord) {
+            return getMaster(19).answer;
+        }
+        if (normalizedQuery.includes('요양') && (normalizedQuery.includes('이수') || normalizedQuery.includes('교육시간') || normalizedQuery.includes('자격조건'))) {
+            return getMaster(20).answer;
+        }
+        if ((normalizedQuery.includes('공인중개사') || normalizedQuery.includes('공개사')) && normalizedQuery.includes('면제') && (normalizedQuery.includes('1년') || normalizedQuery.includes('일년'))) {
+            return getMaster(21).answer;
         }
 
-        // 일상 대화 및 공감/격려 의도 처리
-        if (normalizedQuery.includes('고마워') || normalizedQuery.includes('고맙') || normalizedQuery.includes('감사') || normalizedQuery.includes('수고')) {
-            return '어르신께 도움이 되어 제가 더 기쁩니다! 언제든 편하게 물어보세요. 늘 건강하시고 행복한 하루 보내세요! 😊';
-        }
-        if (normalizedQuery.includes('안녕') || normalizedQuery.includes('반가') || normalizedQuery.includes('반갑')) {
-            return '반갑습니다, 어르신! 두두자격지원센터 공식 AI 상담원입니다. 한식조리, 지게차, 굴착기운전기능사 시험 관련해 무엇이든 편하게 물어보세요!';
-        }
-        if (normalizedQuery.includes('60') || normalizedQuery.includes('70') || normalizedQuery.includes('50') || normalizedQuery.includes('나이') || normalizedQuery.includes('늙') || normalizedQuery.includes('가능할까') || normalizedQuery.includes('할 수 있') || normalizedQuery.includes('딸 수 있') || normalizedQuery.includes('어려워')) {
-            return '그럼요, 어르신! 60대, 70대 어르신들도 용기 내어 도전하시고 당당하게 합격하고 계십니다. 컴퓨터(CBT) 시험도 기출문제를 몇 번 풀어보시면 금방 익숙해지십니다. 어르신의 멋진 도전을 제가 온 마음으로 응원하겠습니다! 접수가 어려우시면 성함과 전화번호만 남겨주시면 무료로 접수를 도와드립니다. 👍';
-        }
-        if (normalizedQuery.includes('날씨') || normalizedQuery.includes('춥') || normalizedQuery.includes('더워') || normalizedQuery.includes('비와')) {
-            return '네 어르신, 날씨 변화에 항상 건강 유의하시고 따뜻하고 편안한 하루 보내세요!';
-        }
+        // 4. 일상 대화 및 시니어 공감/격려
+        if (!hasDiscountIntent && !isFeeWord && !isScheduleWord && !isPrepWord && !isRefundWord && !isDurationIntent && !isPassWord) {
+            // 나이 공감/격려 정규식 매칭 (50대, 60살, 70세, 볼 수 있나요 등)
+            const isAgeEncourage = /(?:50|60|70|80)(?:대|살|세)|나이.*(?:50|60|70|많|먹|늙)|늙은|늙어서|환갑|칠순|어르신도|딸\s*수\s*있|할\s*수\s*있|볼\s*수\s*있|합격할\s*수|도전|가능할까/.test(normalizedQuery);
+            if (isAgeEncourage) {
+                return '그럼요, 어르신! 60대, 70대 어르신들도 용기 내어 도전하시고 당당하게 합격하고 계십니다. 컴퓨터(CBT) 시험도 기출문제를 몇 번 풀어보시면 금방 익숙해지십니다. 어르신의 멋진 도전을 제가 온 마음으로 응원하겠습니다! 접수가 어려우시면 성함과 전화번호만 남겨주시면 무료로 접수를 도와드립니다. 👍';
+            }
 
-        const isPrepIntent = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구');
-        const isRefundIntent = normalizedQuery.includes('환불') || normalizedQuery.includes('취소') || normalizedQuery.includes('돈돌려');
-        const isDurationIntent = normalizedQuery.includes('유효기간') || normalizedQuery.includes('면제') || normalizedQuery.includes('몇년');
-        const isScheduleIntent = normalizedQuery.includes('일정') || normalizedQuery.includes('언제') || normalizedQuery.includes('기간') || normalizedQuery.includes('상시') || normalizedQuery.includes('cbt');
-        const isFeeIntent = normalizedQuery.includes('응시료') || normalizedQuery.includes('수수료') || normalizedQuery.includes('접수비') || normalizedQuery.includes('비용') || normalizedQuery.includes('얼마') || normalizedQuery.includes('돈');
-        const isPassIntent = normalizedQuery.includes('합격') || normalizedQuery.includes('발표') || normalizedQuery.includes('점수') || normalizedQuery.includes('결과');
-        const isSessionIntent = normalizedQuery.includes('몇부') || normalizedQuery.includes('교시') || normalizedQuery.includes('시간대');
-        const isTicketIntent = normalizedQuery.includes('수험표') || normalizedQuery.includes('입장표') || normalizedQuery.includes('핸드폰') || normalizedQuery.includes('스마트폰');
-        const isSmallCertIntent = normalizedQuery.includes('소형') || normalizedQuery.includes('3톤') || normalizedQuery.includes('작은 거');
-        const isPhotoIntent = normalizedQuery.includes('사진') || normalizedQuery.includes('증명사진') || normalizedQuery.includes('오류');
-        const isOfflineRegIntent = normalizedQuery.includes('동사무소') || normalizedQuery.includes('주민센터') || normalizedQuery.includes('우체국') || normalizedQuery.includes('방문');
+            // 감사 인사
+            if (/(고마|감사|수고|덕분)/.test(normalizedQuery)) {
+                return '어르신께 도움이 되어 제가 더 기쁩니다! 언제든 편하게 물어보세요. 늘 건강하시고 행복한 하루 보내세요! 😊';
+            }
 
-        let bestMatch = null;
-        let highestScore = 0;
+            // 인사
+            if (/(안녕|반가|처음)/.test(normalizedQuery)) {
+                return '반갑습니다, 어르신! 두두자격지원센터 공식 AI 상담원입니다. 한식조리, 지게차, 굴착기운전기능사 시험 관련해 무엇이든 편하게 물어보세요!';
+            }
 
-        for (const item of this.knowledgeBase) {
-            let score = 0;
-            const keywords = (item.keywords || '').split(',').map(k => k.trim().toLowerCase());
-            const questionWords = (item.question || '').toLowerCase().split(' ');
-            const cat = item.category || '';
-
-            if (isPrepIntent && cat.includes('시험준비물')) score += 12;
-            if (isRefundIntent && cat.includes('결제/환불')) score += 12;
-            if (isDurationIntent && cat.includes('유효기간')) score += 12;
-            if (isFeeIntent && cat.includes('응시료')) score += 10;
-            if (isScheduleIntent && cat.includes('일정')) score += 10;
-            if (isPassIntent && cat.includes('합격발표')) score += 12;
-            if (isSessionIntent && cat.includes('시험시간')) score += 12;
-            if (isTicketIntent && cat.includes('수험표')) score += 14;
-            if (isSmallCertIntent && cat.includes('소형면허')) score += 14;
-            if (isPhotoIntent && cat.includes('사진')) score += 14;
-            if (isOfflineRegIntent && cat.includes('접수방법')) score += 14;
-
-            keywords.forEach(kw => {
-                if (kw && normalizedQuery.includes(kw)) {
-                    score += 5;
-                }
-            });
-
-            questionWords.forEach(qw => {
-                if (qw && qw.length > 1 && normalizedQuery.includes(qw)) {
-                    score += 1;
-                }
-            });
-
-            if (score > highestScore) {
-                highestScore = score;
-                bestMatch = item;
+            // 날씨/건강 안부
+            if (/(날씨|춥|더워|비와|감기|건강)/.test(normalizedQuery)) {
+                return '네 어르신, 날씨 변화에 항상 건강 유의하시고 따뜻하고 편안한 하루 보내세요!';
             }
         }
 
-        const THRESHOLD = 3;
-        if (!bestMatch || highestScore < THRESHOLD) {
-            return '해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)';
+        // 5. [Tier 1] 사내 23종 Master 공식 규정 매칭
+
+        // A. 50% 감면 규정 (ID 3)
+        if (hasDiscountIntent) {
+            return getMaster(3).answer;
         }
 
-        return bestMatch.answer;
+        // B. 유효기간 (ID 10) - 합격 발표보다 우선 매칭
+        if (isDurationIntent) {
+            return getMaster(10).answer;
+        }
+
+        // C. 실기 관련 문의 (ID 2 또는 거절)
+        if (isPracticalIntent) {
+            if (isFeeWord) {
+                return getMaster(2).answer; // 실기 수수료 안내 (한식 26,900원, 지게차 25,200원...)
+            }
+            return '저희는 필기 접수만 도와드립니다. 실기 시험 관련 문의는 해당 시행기관으로 문의해 주시기 바랍니다.';
+        }
+
+        // D. 수험표 스마트폰/모바일 질문 (Tier 2 보조 지식)
+        if (normalizedQuery.includes('수험표') && (normalizedQuery.includes('스마트폰') || normalizedQuery.includes('핸드폰') || normalizedQuery.includes('모바일') || normalizedQuery.includes('화면'))) {
+            return this.auxiliaryKnowledge.find(k => k.id === 101).answer;
+        }
+
+        // E. 소형 면허 차이 (Tier 2 보조 지식)
+        if (normalizedQuery.includes('소형') || normalizedQuery.includes('3톤') || normalizedQuery.includes('작은 거') || normalizedQuery.includes('소형면허')) {
+            return this.auxiliaryKnowledge.find(k => k.id === 102).answer;
+        }
+
+        // F. 사진 등록 오류 / 규격 (Tier 2 보조 지식)
+        if (normalizedQuery.includes('사진') && (normalizedQuery.includes('등록') || normalizedQuery.includes('규격') || normalizedQuery.includes('오류') || normalizedQuery.includes('실패') || normalizedQuery.includes('크기') || normalizedQuery.includes('셀카'))) {
+            return this.auxiliaryKnowledge.find(k => k.id === 103).answer;
+        }
+
+        // G. 타 종목 일정 및 접수
+        if ((normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) && (normalizedQuery.includes('올해') || normalizedQuery.includes('1차') || normalizedQuery.includes('마감'))) {
+            return getMaster(7).answer;
+        }
+        if (normalizedQuery.includes('전기') && (isScheduleWord || normalizedQuery.includes('회차') || normalizedQuery.includes('정기'))) {
+            return getMaster(5).answer;
+        }
+        if (normalizedQuery.includes('요양') && isScheduleWord) {
+            return getMaster(6).answer;
+        }
+        if ((normalizedQuery.includes('접수 되') || normalizedQuery.includes('접수되') || normalizedQuery.includes('신청 되') || normalizedQuery.includes('신청되') || normalizedQuery.includes('대행 되') || normalizedQuery.includes('다른 자격증') || normalizedQuery.includes('기타 자격증')) &&
+            (normalizedQuery.includes('전기') || normalizedQuery.includes('요양') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('손해평가사') || normalizedQuery.includes('위생사') || normalizedQuery.includes('부동산'))) {
+            return this.auxiliaryKnowledge.find(k => k.id === 104).answer;
+        }
+
+        // H. 접수 시작 시각 (ID 8)
+        if (/시작\s*시간|시작\s*시각|오픈\s*시간|몇\s*시에\s*시작|접수\s*시간/.test(normalizedQuery) && !normalizedQuery.includes('시험시간') && !normalizedQuery.includes('몇부')) {
+            return getMaster(8).answer;
+        }
+
+        // I. 환불 규정 (사후 특별 환불 vs 가상계좌 vs 정규 환불)
+        if (normalizedQuery.includes('사후환불') || normalizedQuery.includes('입원') || normalizedQuery.includes('사망') || normalizedQuery.includes('격리') || normalizedQuery.includes('천재지변') || normalizedQuery.includes('병원') || normalizedQuery.includes('다쳐')) {
+            return getMaster(14).answer;
+        }
+        if (normalizedQuery.includes('가상계좌') || normalizedQuery.includes('무통장') || normalizedQuery.includes('입금기한') || normalizedQuery.includes('입금시간')) {
+            return getMaster(15).answer;
+        }
+        if (isRefundWord) {
+            return getMaster(13).answer;
+        }
+
+        // J. 접수방법 (동사무소 방문, 전화접수 대행 등)
+        if (normalizedQuery.includes('동사무소') || normalizedQuery.includes('주민센터') || normalizedQuery.includes('우체국') || normalizedQuery.includes('방문') || normalizedQuery.includes('대리접수') || normalizedQuery.includes('도와줘') || normalizedQuery.includes('신청방법') || normalizedQuery.includes('어떻게 접수')) {
+            return getMaster(16).answer;
+        }
+
+        // K. 준비물 / 신분증 (ID 12)
+        if (isPrepWord) {
+            return getMaster(12).answer;
+        }
+
+        // L. 합격자 발표 (ID 9)
+        if (isPassWord) {
+            return getMaster(9).answer;
+        }
+
+        // M. 시험시간 / 교시 (ID 11)
+        if (isTimeWord) {
+            return getMaster(11).answer;
+        }
+
+        // N. 응시료 (단독 또는 3대 자격증 질문) (ID 1)
+        if (isFeeWord) {
+            return getMaster(1).answer;
+        }
+
+        // O. 상시 접수 일정 (ID 4)
+        if (isScheduleWord) {
+            return getMaster(4).answer;
+        }
+
+        // 6. [Tier 3] 사내 미확인 규정 무환각 거절
+        return '해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)';
     }
 }
 
@@ -723,7 +956,7 @@ if (typeof window !== 'undefined') {
     window.DuduChatbot = DuduChatbot;
 }
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { DuduChatbot, DEFAULT_FAQ_KNOWLEDGE, SENIOR_SYNONYMS };
+    module.exports = { DuduChatbot, MASTER_OFFICIAL_REGULATIONS, AUXILIARY_KNOWLEDGE, SENIOR_SYNONYMS };
 }
 
 if (typeof document !== 'undefined') {

@@ -875,10 +875,11 @@
                     const { data, error } = await client
                         .from('faq_documents')
                         .select('*')
-                        .order('id', { ascending: true });
+                        .order('id', { ascending: true })
+                        .limit(200);
 
                     if (!error && data && data.length > 0) {
-                        allDocs = data;
+                        allDocs = data.filter(d => d.id <= 23 || (!d.question.startsWith('[전화상담]') && !d.question.startsWith('[Q&A게시판]')));
                         renderList();
                         return;
                     }
@@ -887,7 +888,9 @@
                 }
             }
 
-            if (typeof DEFAULT_FAQ_KNOWLEDGE !== 'undefined') {
+            if (typeof MASTER_OFFICIAL_REGULATIONS !== 'undefined') {
+                allDocs = [...MASTER_OFFICIAL_REGULATIONS];
+            } else if (typeof DEFAULT_FAQ_KNOWLEDGE !== 'undefined') {
                 allDocs = [...DEFAULT_FAQ_KNOWLEDGE];
             }
             renderList();
