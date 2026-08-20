@@ -439,15 +439,175 @@ class DuduChatbot {
         this.fontSize = parseInt(storedSize || '16', 10);
         this.isAIMode = storedMode !== 'false';
         this.conversationHistory = []; // Up to 5 turns (10 messages: 5 user, 5 model)
+        this.isListening = false;
+        this.recognition = null;
         this.init();
     }
 
     async init() {
         if (typeof document === 'undefined' || !document.body) return;
         this.injectStyles();
+        this.initSpeechRecognition();
         this.bindEvents();
         this.adjustChatFontSize(0);
         await this.syncWithSupabase();
+    }
+
+    initSpeechRecognition() {
+        if (typeof window === 'undefined') return;
+        const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRec) {
+            console.log('이 브라우저는 Web Speech API를 지원하지 않습니다.');
+            return;
+        }
+
+        try {
+            this.recognition = new SpeechRec();
+            this.recognition.lang = 'ko-KR';
+            this.recognition.continuous = false;
+            this.recognition.interimResults = true;
+
+            this.recognition.onstart = () => {
+                this.isListening = true;
+                this.updateVoiceUI(true);
+            };
+
+            this.recognition.onresult = (event) => {
+                const input = document.getElementById('chatInput');
+                if (!input) return;
+
+                let transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                input.value = transcript;
+            };
+
+            this.recognition.onend = () => {
+                const wasListening = this.isListening;
+                this.isListening = false;
+                this.updateVoiceUI(false);
+
+                const input = document.getElementById('chatInput');
+                if (wasListening && input && input.value.trim()) {
+                    setTimeout(() => {
+                        this.handleSend();
+                    }, 350);
+                }
+            };
+
+            this.recognition.onerror = (event) => {
+                console.log('Speech recognition event/notice:', event.error);
+                this.isListening = false;
+                this.updateVoiceUI(false);
+
+                if (event.error === 'not-allowed') {
+                    alert('마이크 접근 권한이 허용되지 않았습니다. 브라우저 주소창 좌측의 마이크 권한을 허용해 주시거나 키보드로 입력해 주세요.');
+                }
+            };
+        } catch (e) {
+            console.log('STT init notice:', e);
+        }
+    }
+
+    toggleSpeechRecognition() {
+        if (!this.recognition) {
+            const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRec) {
+                alert('사용 중이신 브라우저가 음성 인식을 지원하지 않습니다. Chrome 또는 Edge 브라우저를 이용해 주세요.');
+                return;
+            }
+            this.initSpeechRecognition();
+        }
+
+        if (this.isListening) {
+            try {
+                this.recognition.stop();
+            } catch (e) {}
+            this.isListening = false;
+            this.updateVoiceUI(false);
+        } else {
+            const input = document.getElementById('chatInput');
+            if (input) input.value = '';
+            try {
+                this.recognition.start();
+            } catch (err) {
+                console.log('Recognition start retry:', err);
+                try {
+                    this.recognition.stop();
+                    setTimeout(() => this.recognition.start(), 150);
+                } catch (e) {}
+            }
+        }
+    }
+
+    updateVoiceUI(listening) {
+        const voiceBtn = document.getElementById('chatVoiceBtn');
+        const input = document.getElementById('chatInput');
+
+        if (voiceBtn) {
+            if (listening) {
+                voiceBtn.classList.add('listening');
+                voiceBtn.innerHTML = '🛑 <em>말씀하세요</em>';
+                voiceBtn.title = '음성 인식 중 (클릭 시 중지)';
+            } else {
+                voiceBtn.classList.remove('listening');
+                voiceBtn.innerHTML = '🎤 음성';
+                voiceBtn.title = '음성으로 질문하기 (클릭 후 말씀하세요)';
+            }
+        }
+
+        if (input) {
+            if (listening) {
+                input.placeholder = '🎤 어르신, 편하게 말씀해 주세요 (듣고 있습니다...)';
+            } else {
+                input.placeholder = this.isAIMode 
+                    ? '궁금하신 점을 편하게 말씀해 주세요 (예: 한식조리 접수비 얼마?)' 
+                    : '⚡ 사내 규정 즉시 검색 (예: 지게차 준비물, 환불 규정)';
+            }
+        }
+    }
+
+    bindEvents() {
+        if (typeof document === 'undefined') return;
+        const fab = document.getElementById('duduChatFab');
+        const closeBtn = document.getElementById('chatCloseBtn');
+        const sendBtn = document.getElementById('chatSendBtn');
+        const input = document.getElementById('chatInput');
+        const fontUp = document.getElementById('chatFontUp');
+        const fontDown = document.getElementById('chatFontDown');
+        const modeBtn = document.getElementById('chatModeToggleBtn');
+        let voiceBtn = document.getElementById('chatVoiceBtn');
+
+        // 만약 정적 DOM에 chatVoiceBtn이 없으면 input과 sendBtn 사이에 동적 주입
+        if (!voiceBtn && input && sendBtn && input.parentNode) {
+            voiceBtn = document.createElement('button');
+            voiceBtn.id = 'chatVoiceBtn';
+            voiceBtn.className = 'chat-voice-btn';
+            voiceBtn.type = 'button';
+            voiceBtn.title = '음성으로 질문하기 (클릭 후 말씀하세요)';
+            voiceBtn.innerHTML = '🎤 음성';
+            input.parentNode.insertBefore(voiceBtn, sendBtn);
+        }
+
+        if (fab) fab.onclick = () => this.toggleChat();
+        if (closeBtn) closeBtn.onclick = () => this.toggleChat(false);
+        if (sendBtn) sendBtn.onclick = () => this.handleSend();
+        if (modeBtn) modeBtn.onclick = () => this.toggleAIMode();
+        if (voiceBtn) voiceBtn.onclick = () => this.toggleSpeechRecognition();
+
+        if (input) {
+            input.onkeydown = (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.handleSend();
+                }
+            };
+        }
+        if (fontUp) fontUp.onclick = () => this.adjustChatFontSize(2);
+        if (fontDown) fontDown.onclick = () => this.adjustChatFontSize(-2);
+
+        this.updateModeUI();
     }
 
     async syncWithSupabase() {
@@ -610,6 +770,40 @@ class DuduChatbot {
                 font-weight: 700 !important;
                 animation: fadeIn 0.3s ease !important;
             }
+            .chat-voice-btn {
+                background: #1e293b !important;
+                border: 2px solid #3b82f6 !important;
+                color: #ffffff !important;
+                border-radius: 12px !important;
+                padding: 0 14px !important;
+                font-size: 15px !important;
+                font-weight: 800 !important;
+                cursor: pointer !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 5px !important;
+                transition: all 0.2s ease !important;
+                white-space: nowrap !important;
+                user-select: none !important;
+            }
+            .chat-voice-btn:hover {
+                background: #2563eb !important;
+                border-color: #60a5fa !important;
+                transform: translateY(-1px) !important;
+            }
+            .chat-voice-btn.listening {
+                background: #dc2626 !important;
+                border-color: #ef4444 !important;
+                color: #ffffff !important;
+                animation: pulseMic 1.2s infinite ease-in-out !important;
+                box-shadow: 0 0 15px rgba(239, 68, 68, 0.7) !important;
+            }
+            @keyframes pulseMic {
+                0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+                50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
+                100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            }
             @media (max-width: 640px) {
                 #duduChatWindow {
                     width: calc(100vw - 20px) !important;
@@ -631,40 +825,6 @@ class DuduChatbot {
                 }
             }
         `;
-        document.head.appendChild(style);
-    }
-
-    bindEvents() {
-        if (typeof document === 'undefined') return;
-        const fab = document.getElementById('duduChatFab');
-        const closeBtn = document.getElementById('chatCloseBtn');
-        const sendBtn = document.getElementById('chatSendBtn');
-        const input = document.getElementById('chatInput');
-        const fontUp = document.getElementById('chatFontUp');
-        const fontDown = document.getElementById('chatFontDown');
-        const modeBtn = document.getElementById('chatModeToggleBtn');
-
-        if (fab) fab.onclick = () => this.toggleChat();
-        if (closeBtn) closeBtn.onclick = () => this.toggleChat(false);
-        if (sendBtn) sendBtn.onclick = () => this.handleSend();
-        if (modeBtn) modeBtn.onclick = () => this.toggleAIMode();
-
-        if (input) {
-            input.onkeydown = (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    this.handleSend();
-                }
-            };
-        }
-        if (fontUp) {
-            fontUp.onclick = () => this.adjustChatFontSize(2);
-        }
-        if (fontDown) {
-            fontDown.onclick = () => this.adjustChatFontSize(-2);
-        }
-
-        this.updateModeUI();
     }
 
     adjustChatFontSize(delta) {

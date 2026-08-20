@@ -1756,6 +1756,7 @@
         </div>
         <div style="padding: 16px; background: #1e293b; border-top: 2px solid #334155; display: flex; gap: 10px;">
             <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" onkeydown="if(event.key==='Enter'){event.preventDefault(); if(window.duduChat) window.duduChat.handleSend();}" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
+            <button id="chatVoiceBtn" class="chat-voice-btn" type="button" title="음성으로 질문하기 (클릭 후 말씀하세요)">🎤 음성</button>
             <button id="chatSendBtn" onclick="window.duduChat && window.duduChat.handleSend()" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
         </div>
     </div>
