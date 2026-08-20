@@ -629,6 +629,8 @@
                             <circle id="donutForklift" cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="15" stroke-dasharray="0 238.76" stroke-dashoffset="0" style="transition: stroke-dasharray 0.8s ease, stroke-dashoffset 0.8s ease;"></circle>
                             <!-- Segment 3: 굴착기 (Pink/Rose) -->
                             <circle id="donutExcavator" cx="50" cy="50" r="38" fill="none" stroke="#f43f5e" stroke-width="15" stroke-dasharray="0 238.76" stroke-dashoffset="0" style="transition: stroke-dasharray 0.8s ease, stroke-dashoffset 0.8s ease;"></circle>
+                            <!-- Segment 4: 기타 미지원 (Purple) -->
+                            <circle id="donutOther" cx="50" cy="50" r="38" fill="none" stroke="#8b5cf6" stroke-width="15" stroke-dasharray="0 238.76" stroke-dashoffset="0" style="transition: stroke-dasharray 0.8s ease, stroke-dashoffset 0.8s ease;"></circle>
                         </svg>
                         <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
                             <div style="font-size: 11px; color: #94a3b8; font-weight: 700;">전체 접수</div>
@@ -637,8 +639,8 @@
                     </div>
 
                     <!-- Legend & Percentage Breakdown -->
-                    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 170px; flex: 1;">
-                        <div onclick="quickFilterQual('한식조리')" style="display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(59, 130, 246, 0.25); transition: all 0.2s;" title="클릭 시 한식조리만 필터링">
+                    <div style="display: flex; flex-direction: column; gap: 7px; min-width: 170px; flex: 1;">
+                        <div onclick="quickFilterQual('한식조리')" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(59, 130, 246, 0.25); transition: all 0.2s;" title="클릭 시 한식조리만 필터링">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 3px;"></div>
                                 <span style="font-size: 13px; font-weight: 700; color: #ffffff;">한식조리</span>
@@ -649,7 +651,7 @@
                             </div>
                         </div>
 
-                        <div onclick="quickFilterQual('지게차')" style="display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(16, 185, 129, 0.25); transition: all 0.2s;" title="클릭 시 지게차만 필터링">
+                        <div onclick="quickFilterQual('지게차')" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(16, 185, 129, 0.25); transition: all 0.2s;" title="클릭 시 지게차만 필터링">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div style="width: 12px; height: 12px; background: #10b981; border-radius: 3px;"></div>
                                 <span style="font-size: 13px; font-weight: 700; color: #ffffff;">지게차운전</span>
@@ -660,7 +662,7 @@
                             </div>
                         </div>
 
-                        <div onclick="quickFilterQual('굴착기')" style="display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(244, 63, 94, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(244, 63, 94, 0.25); transition: all 0.2s;" title="클릭 시 굴착기만 필터링">
+                        <div onclick="quickFilterQual('굴착기')" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(244, 63, 94, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(244, 63, 94, 0.25); transition: all 0.2s;" title="클릭 시 굴착기만 필터링">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div style="width: 12px; height: 12px; background: #f43f5e; border-radius: 3px;"></div>
                                 <span style="font-size: 13px; font-weight: 700; color: #ffffff;">굴착기운전</span>
@@ -668,6 +670,17 @@
                             <div style="text-align: right;">
                                 <span id="legendExcavatorCount" style="font-size: 13px; font-weight: 900; color: #fb7185;">0건</span>
                                 <span id="legendExcavatorPct" style="font-size: 11px; color: #94a3b8; margin-left: 4px;">(0%)</span>
+                            </div>
+                        </div>
+
+                        <div onclick="quickFilterQual('기타')" style="display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; background: rgba(139, 92, 246, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(139, 92, 246, 0.25); transition: all 0.2s;" title="클릭 시 기타(미지원) 종목만 필터링">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 12px; height: 12px; background: #8b5cf6; border-radius: 3px;"></div>
+                                <span style="font-size: 13px; font-weight: 700; color: #ffffff;">기타 (미지원)</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span id="legendOtherCount" style="font-size: 13px; font-weight: 900; color: #a78bfa;">0건</span>
+                                <span id="legendOtherPct" style="font-size: 11px; color: #94a3b8; margin-left: 4px;">(0%)</span>
                             </div>
                         </div>
                     </div>
@@ -725,6 +738,7 @@
                     <option value="한식조리">한식조리기능사</option>
                     <option value="지게차">지게차운전기능사</option>
                     <option value="굴착기">굴착기운전기능사</option>
+                    <option value="기타">기타 (미지원 종목)</option>
                 </select>
                 <select id="regionFilter" class="form-select" onchange="applyFilters()">
                     <option value="ALL">전체 지역 권역</option>
@@ -1078,10 +1092,15 @@
             const cookCount = records.filter(r => (r.qualification || '').includes('한식')).length;
             const forkliftCount = records.filter(r => (r.qualification || '').includes('지게차')).length;
             const excavatorCount = records.filter(r => (r.qualification || '').includes('굴착기') || (r.qualification || '').includes('포크레인')).length;
+            const otherCount = records.filter(r => {
+                const q = (r.qualification || '').toLowerCase();
+                return !(q.includes('한식') || q.includes('지게차') || q.includes('굴착기') || q.includes('포크레인'));
+            }).length;
 
             const cookPct = total > 0 ? (cookCount / total) * 100 : 0;
             const forkliftPct = total > 0 ? (forkliftCount / total) * 100 : 0;
             const excavatorPct = total > 0 ? (excavatorCount / total) * 100 : 0;
+            const otherPct = total > 0 ? (otherCount / total) * 100 : 0;
 
             // 범례 업데이트
             const elCookCount = document.getElementById('legendCookCount');
@@ -1099,15 +1118,22 @@
             const elExcPct = document.getElementById('legendExcavatorPct');
             if (elExcPct) elExcPct.textContent = `(${excavatorPct.toFixed(1)}%)`;
 
+            const elOtherCount = document.getElementById('legendOtherCount');
+            if (elOtherCount) elOtherCount.textContent = otherCount.toLocaleString() + '건';
+            const elOtherPct = document.getElementById('legendOtherPct');
+            if (elOtherPct) elOtherPct.textContent = `(${otherPct.toFixed(1)}%)`;
+
             // SVG 도넛 차트 세그먼트 (둘레 = 2 * PI * 38 = 238.76)
             const circumference = 238.76;
             const cookLen = (cookPct / 100) * circumference;
             const forkliftLen = (forkliftPct / 100) * circumference;
             const excavatorLen = (excavatorPct / 100) * circumference;
+            const otherLen = (otherPct / 100) * circumference;
 
             const donutCook = document.getElementById('donutCook');
             const donutForklift = document.getElementById('donutForklift');
             const donutExcavator = document.getElementById('donutExcavator');
+            const donutOther = document.getElementById('donutOther');
 
             if (donutCook && donutForklift && donutExcavator) {
                 donutCook.setAttribute('stroke-dasharray', `${cookLen} ${circumference}`);
@@ -1118,6 +1144,11 @@
 
                 donutExcavator.setAttribute('stroke-dasharray', `${excavatorLen} ${circumference}`);
                 donutExcavator.setAttribute('stroke-dashoffset', `${-(cookLen + forkliftLen)}`);
+
+                if (donutOther) {
+                    donutOther.setAttribute('stroke-dasharray', `${otherLen} ${circumference}`);
+                    donutOther.setAttribute('stroke-dashoffset', `${-(cookLen + forkliftLen + excavatorLen)}`);
+                }
             }
 
             // 2. 주요 권역별 상위 분포 집계
@@ -1239,6 +1270,8 @@
                     matchQual = true;
                 } else if (qual === 'CORE3') {
                     matchQual = qualName.includes('한식') || qualName.includes('지게차') || qualName.includes('굴착기') || qualName.includes('포크레인');
+                } else if (qual === '기타') {
+                    matchQual = !(qualName.includes('한식') || qualName.includes('지게차') || qualName.includes('굴착기') || qualName.includes('포크레인'));
                 } else {
                     matchQual = qualName.includes(qual.toLowerCase());
                 }
