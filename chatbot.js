@@ -455,6 +455,8 @@ class DuduChatbot {
         this.currentUtterance = null;
         this.isSpeaking = false;
         this.activeTTSButton = null;
+        this.lastBotResponseText = null;
+        this.lastTTSButton = null;
         this.init();
     }
 
@@ -666,6 +668,26 @@ class DuduChatbot {
             input.parentNode.insertBefore(voiceBtn, sendBtn);
         }
 
+        // 챗봇 하단 스페이스바 TTS 단축키 안내 배너
+        let hotkeyHint = document.getElementById('chatHotkeyHint');
+        if (!hotkeyHint && input && input.parentNode) {
+            const inputContainer = input.parentNode;
+            hotkeyHint = document.createElement('div');
+            hotkeyHint.id = 'chatHotkeyHint';
+            hotkeyHint.style.cssText = 'padding: 6px 16px; background: #0b1329; border-top: 1px solid #1e293b; font-size: 12px; color: #94a3b8; display: flex; align-items: center; justify-content: space-between; user-select: none; flex-shrink: 0;';
+            hotkeyHint.innerHTML = `
+                <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="color: #60a5fa;">🔊</span>
+                    <span>마지막 답변 듣기 단축키:</span>
+                    <kbd style="background: #1e293b; color: #93c5fd; border: 1px solid #3b82f6; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 800; font-family: monospace;">Space (스페이스바)</kbd>
+                </div>
+                <span id="chatTTSIndicator" style="font-size: 11px; color: #34d399; font-weight: 800; display: none;">● 음성 낭독 중</span>
+            `;
+            if (inputContainer.parentNode) {
+                inputContainer.parentNode.appendChild(hotkeyHint);
+            }
+        }
+
         if (fab) fab.onclick = () => this.toggleChat();
         if (closeBtn) closeBtn.onclick = () => this.toggleChat(false);
         if (resetBtn) resetBtn.onclick = () => {
@@ -687,6 +709,32 @@ class DuduChatbot {
         }
         if (fontUp) fontUp.onclick = () => this.adjustChatFontSize(2);
         if (fontDown) fontDown.onclick = () => this.adjustChatFontSize(-2);
+
+        // 스페이스바(Space) 누르면 가장 마지막 봇 답변 음성(TTS) 즉시 재생/정지
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' || e.key === ' ') {
+                if (!this.isOpen) return;
+
+                const activeTag = (document.activeElement && document.activeElement.tagName) ? document.activeElement.tagName.toLowerCase() : '';
+                const isInputActive = activeTag === 'input' || activeTag === 'textarea' || (document.activeElement && document.activeElement.isContentEditable);
+
+                // 사용자가 채팅 입력창에 글자를 작성 중일 때는 띄어쓰기 입력을 방해하지 않음
+                if (isInputActive) {
+                    const chatInput = document.getElementById('chatInput');
+                    if (document.activeElement === chatInput && chatInput.value.length > 0) {
+                        return;
+                    }
+                    if (document.activeElement !== chatInput) {
+                        return;
+                    }
+                }
+
+                if (this.lastBotResponseText) {
+                    e.preventDefault();
+                    this.toggleTTS(this.lastBotResponseText, this.lastTTSButton);
+                }
+            }
+        });
 
         this.updateModeUI();
     }
@@ -721,6 +769,13 @@ class DuduChatbot {
                     </div>
                     <div class="quick-chips welcome-chips" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                         ${bubblesHtml}
+                    </div>
+                </div>
+                <div style="margin-top: 14px; padding: 10px 14px; background: rgba(59, 130, 246, 0.12); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 12px; font-size: 13px; color: #93c5fd; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                    <div style="display: flex; align-items: center; gap: 6px;">
+                        <span>🔊</span>
+                        <span>답변 음성 듣기 단축키:</span>
+                        <kbd style="background: #1e293b; color: #60a5fa; border: 1px solid #3b82f6; padding: 2px 7px; border-radius: 6px; font-size: 12px; font-weight: 900;">Space (스페이스바)</kbd>
                     </div>
                 </div>
             </div>
@@ -1456,7 +1511,7 @@ class DuduChatbot {
             const feedbackBar = document.createElement('div');
             feedbackBar.className = 'chat-feedback-bar';
             feedbackBar.innerHTML = `
-                <button type="button" class="feedback-btn btn-tts" title="어르신을 위해 답변을 또박또박 음성으로 들려드립니다">🔊 소리로 듣기</button>
+                <button type="button" class="feedback-btn btn-tts" title="어르신을 위해 답변을 또박또박 음성으로 들려드립니다 (단축키: Space)">🔊 소리로 듣기 <span style="opacity:0.75; font-size:0.85em; font-weight:700;">(Space)</span></button>
                 <span class="feedback-prompt-text" style="margin-left: auto;">도움되었나요?</span>
                 <button type="button" class="feedback-btn btn-thumbs-up" title="도움이 되었어요">👍 도움됨</button>
                 <button type="button" class="feedback-btn btn-thumbs-down" title="아쉬워요">👎 아쉬움</button>
@@ -1466,11 +1521,16 @@ class DuduChatbot {
             const btnUp = feedbackBar.querySelector('.btn-thumbs-up');
             const btnDown = feedbackBar.querySelector('.btn-thumbs-down');
 
+            this.lastBotResponseText = text;
+            this.lastTTSButton = btnTTS;
+
             btnTTS.onclick = () => this.toggleTTS(text, btnTTS);
             btnUp.onclick = () => this.sendFeedback(originQuery, text, 'positive', feedbackBar);
             btnDown.onclick = () => this.sendFeedback(originQuery, text, 'negative', feedbackBar);
 
             msg.appendChild(feedbackBar);
+        } else if (sender === 'bot') {
+            this.lastBotResponseText = text;
         }
 
         container.appendChild(msg);
@@ -1518,9 +1578,11 @@ class DuduChatbot {
                 this.activeTTSButton = btnElement;
                 this.currentUtterance = utter;
                 if (btnElement) {
-                    btnElement.innerHTML = '⏹️ 정지';
+                    btnElement.innerHTML = '⏹️ 낭독 중지 <span style="opacity:0.85; font-size:0.85em; font-weight:700;">(Space)</span>';
                     btnElement.classList.add('active-tts');
                 }
+                const ind = document.getElementById('chatTTSIndicator');
+                if (ind) ind.style.display = 'inline';
             };
 
             utter.onend = () => {
@@ -1545,10 +1607,13 @@ class DuduChatbot {
             } catch (e) {}
         }
         if (this.activeTTSButton) {
-            this.activeTTSButton.innerHTML = '🔊 소리로 듣기';
+            this.activeTTSButton.innerHTML = '🔊 소리로 듣기 <span style="opacity:0.75; font-size:0.85em; font-weight:700;">(Space)</span>';
             this.activeTTSButton.classList.remove('active-tts');
             this.activeTTSButton = null;
         }
+        const ind = document.getElementById('chatTTSIndicator');
+        if (ind) ind.style.display = 'none';
+
         this.isSpeaking = false;
         this.currentUtterance = null;
     }
