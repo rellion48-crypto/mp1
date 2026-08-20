@@ -1818,7 +1818,7 @@
     <div id="duduChatFab" onclick="window.duduChat ? window.duduChat.toggleChat() : (document.getElementById('duduChatWindow').style.display = document.getElementById('duduChatWindow').style.display === 'flex' ? 'none' : 'flex')" onkeydown="if(event.key==='Enter') this.click()" tabindex="0" role="button" style="position: fixed !important; bottom: 30px !important; right: 30px !important; background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; color: #ffffff !important; border: 3px solid #ffffff !important; border-radius: 50px !important; padding: 14px 24px !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important; cursor: pointer !important; z-index: 2147483647 !important; font-family: 'Noto Sans KR', sans-serif !important; user-select: none !important;">
         <div style="width: 13px; height: 13px; background: #34d399; border-radius: 50%; box-shadow: 0 0 14px #34d399;"></div>
         <div style="width: 32px; height: 32px; background: #ffffff; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 2px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); flex-shrink: 0;">
-            <img src="/chatbot.png" alt="두두" style="width: 100%; height: 100%; object-fit: contain;">
+            <img src="/chatbot.png" onerror="this.onerror=null; this.src='chatbot.png'; if(!this.complete) this.src='../chatbot.png';" alt="두두" style="width: 100%; height: 100%; object-fit: contain;">
         </div>
         <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.3px; color: #ffffff;">문의 챗봇</div>
     </div>
@@ -1827,7 +1827,7 @@
         <div style="background: #1e293b; border-bottom: 2px solid #334155; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 42px; height: 42px; background: #ffffff; border: 2px solid #60a5fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-shrink: 0;">
-                    <img src="/chatbot.png" alt="두두 AI" style="width: 100%; height: 100%; object-fit: contain;">
+                    <img src="/chatbot.png" onerror="this.onerror=null; this.src='chatbot.png'; if(!this.complete) this.src='../chatbot.png';" alt="두두 AI" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <div>
                     <h4 style="color: #ffffff; font-size: 17px; font-weight: 900; margin: 0;">자격증 문의 상담원</h4>
