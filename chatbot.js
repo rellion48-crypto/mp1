@@ -760,6 +760,9 @@ class DuduChatbot {
         }
 
         const query = rawQuery.toLowerCase().replace(/\s+/g, ' ').trim();
+        if (!query) {
+            return '궁금하신 자격증 시험 관련 내용을 말씀해 주세요.';
+        }
 
         // 1. 시니어 유의어 사전 치환 및 정규화
         let normalizedQuery = query;
@@ -815,7 +818,13 @@ class DuduChatbot {
             return getMaster(21).answer;
         }
 
-        // 4. 일상 대화 및 시니어 공감/격려
+        // 4. 접수방법 (동사무소 / 주민센터 / 우체국 방문 등) - 나이 격려보다 우선
+        const isOfflineVisit = normalizedQuery.includes('동사무소') || normalizedQuery.includes('주민센터') || normalizedQuery.includes('우체국') || normalizedQuery.includes('방문') || normalizedQuery.includes('대리접수') || normalizedQuery.includes('도와줘') || normalizedQuery.includes('신청방법') || normalizedQuery.includes('어떻게 접수') || normalizedQuery.includes('현장접수');
+        if (isOfflineVisit) {
+            return getMaster(16).answer;
+        }
+
+        // 5. 일상 대화 및 시니어 공감/격려
         if (!hasDiscountIntent && !isFeeWord && !isScheduleWord && !isPrepWord && !isRefundWord && !isDurationIntent && !isPassWord) {
             // 나이 공감/격려 정규식 매칭 (50대, 60살, 70세, 볼 수 있나요 등)
             const isAgeEncourage = /(?:50|60|70|80)(?:대|살|세)|나이.*(?:50|60|70|많|먹|늙)|늙은|늙어서|환갑|칠순|어르신도|딸\s*수\s*있|할\s*수\s*있|볼\s*수\s*있|합격할\s*수|도전|가능할까/.test(normalizedQuery);
@@ -905,10 +914,7 @@ class DuduChatbot {
             return getMaster(13).answer;
         }
 
-        // J. 접수방법 (동사무소 방문, 전화접수 대행 등)
-        if (normalizedQuery.includes('동사무소') || normalizedQuery.includes('주민센터') || normalizedQuery.includes('우체국') || normalizedQuery.includes('방문') || normalizedQuery.includes('대리접수') || normalizedQuery.includes('도와줘') || normalizedQuery.includes('신청방법') || normalizedQuery.includes('어떻게 접수')) {
-            return getMaster(16).answer;
-        }
+        // J. 접수방법은 이미 위(step 4)에서 처리됨
 
         // K. 준비물 / 신분증 (ID 12)
         if (isPrepWord) {
