@@ -1700,6 +1700,40 @@ class DuduChatbot {
             if (btnDown) btnDown.classList.add('active-neg');
             if (btnUp) btnUp.style.opacity = '0.3';
             if (promptText) promptText.innerHTML = '📝 <span class="feedback-thanks" style="color:#fca5a5 !important;">더 나은 답변을 위해 규정을 보강하겠습니다!</span>';
+
+            // 빠른 규정 모드(!this.isAIMode)에서 아쉬움 피드백을 받은 경우: AI 정밀상담 모드 전환 제안 버튼 노출
+            if (!this.isAIMode) {
+                const suggestContainer = document.createElement('div');
+                suggestContainer.className = 'ai-switch-suggestion';
+                suggestContainer.style.cssText = 'margin-top: 10px; padding: 12px 14px; background: linear-gradient(135deg, rgba(30, 58, 138, 0.4), rgba(59, 130, 246, 0.2)); border: 1.5px solid #3b82f6; border-radius: 14px; display: flex; align-items: center; justify-content: space-between; gap: 10px; animation: fadeIn 0.3s ease; flex-wrap: wrap; box-shadow: 0 4px 14px rgba(0,0,0,0.3);';
+                suggestContainer.innerHTML = `
+                    <div style="font-size: 12.5px; color: #93c5fd; font-weight: 700; line-height: 1.45; min-width: 200px; flex: 1;">
+                        💡 <strong>답변이 부족하셨나요?</strong><br>
+                        <span style="color: #e2e8f0;">AI 정밀상담 모드로 전환하시면 더 상세하고 친절하게 설명해 드려요.</span>
+                    </div>
+                    <button type="button" class="btn-switch-to-ai" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: 1.5px solid #60a5fa; border-radius: 10px; padding: 8px 14px; font-size: 12.5px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.4); white-space: nowrap; transition: all 0.2s;">
+                        🤖 AI 정밀상담으로 다시 질문 ➔
+                    </button>
+                `;
+
+                const btnSwitch = suggestContainer.querySelector('.btn-switch-to-ai');
+                btnSwitch.onclick = () => {
+                    this.isAIMode = true;
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('dudu_ai_mode', 'true');
+                    }
+                    this.updateModeUI();
+                    btnSwitch.disabled = true;
+                    btnSwitch.innerHTML = '⚡ AI 정밀상담 질문 중...';
+                    this.askQuestion(question);
+                };
+
+                if (feedbackBar.parentNode) {
+                    feedbackBar.parentNode.appendChild(suggestContainer);
+                    const chatMessages = document.getElementById('chatMessages');
+                    if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+                }
+            }
         }
 
         const payload = {
