@@ -393,8 +393,11 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 10000;
             padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex !important;
         }
 
         .modal-card {
@@ -889,7 +892,7 @@
     </div>
 
     <!-- Bubble Edit Modal -->
-    <div class="modal-overlay" id="bubbleModal">
+    <div class="modal-overlay" id="bubbleModal" onclick="if(event.target === this) closeBubbleModal()">
         <div class="modal-card">
             <h3 id="bubbleModalTitle" style="font-size: calc(20px * var(--font-scale)); font-weight: 900; margin-bottom: 16px;">추천 버블 추가</h3>
             <form id="bubbleEditForm" onsubmit="saveBubbleItem(event)">
@@ -927,7 +930,7 @@
     </div>
 
     <!-- Edit Modal -->
-    <div class="modal-overlay" id="editModal">
+    <div class="modal-overlay" id="editModal" onclick="if(event.target === this) closeModal()">
         <div class="modal-card">
             <h3 id="modalTitle" style="font-size: calc(20px * var(--font-scale)); font-weight: 900; margin-bottom: 16px;">안내 규정 편집</h3>
             <form id="faqEditForm" onsubmit="saveDoc(event)">
@@ -1838,11 +1841,15 @@
             document.getElementById('bubbleLabel').value = '';
             document.getElementById('bubbleQuery').value = '';
             document.getElementById('bubbleActive').checked = true;
-            document.getElementById('bubbleModal').classList.add('active');
+            const modal = document.getElementById('bubbleModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+            }
         }
 
         function openEditBubbleModal(id) {
-            const item = adminBubbles.find(b => b.id === id);
+            const item = adminBubbles.find(b => b.id == id);
             if (!item) return;
             document.getElementById('bubbleModalTitle').textContent = '추천 버블 수정';
             document.getElementById('bubbleId').value = item.id;
@@ -1850,11 +1857,19 @@
             document.getElementById('bubbleLabel').value = item.label || '';
             document.getElementById('bubbleQuery').value = item.query || '';
             document.getElementById('bubbleActive').checked = item.active !== false;
-            document.getElementById('bubbleModal').classList.add('active');
+            const modal = document.getElementById('bubbleModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+            }
         }
 
         function closeBubbleModal() {
-            document.getElementById('bubbleModal').classList.remove('active');
+            const modal = document.getElementById('bubbleModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
         }
 
         function saveBubbleItem(e) {
