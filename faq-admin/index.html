@@ -177,22 +177,24 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .accessibility-controls {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .zoom-btn {
+        .zoom-btn, .theme-toggle-btn {
             background: #1e293b;
             border: 2px solid #475569;
             color: #ffffff;
-            padding: 4px 12px;
+            padding: 5px 12px;
             border-radius: 8px;
             font-size: calc(13px * var(--font-scale));
             font-weight: 800;
             cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
-        .zoom-btn:hover { background: var(--primary); }
+        .zoom-btn:hover, .theme-toggle-btn:hover { 
+            background: var(--primary); 
+            border-color: #60a5fa;
+        }
 
         header {
             background: var(--card-bg);
@@ -1010,16 +1012,21 @@
             applyFontScale();
         }
 
-        let isLightContrast = localStorage.getItem('dudu_contrast') !== 'dark';
+        let isLightContrast = localStorage.getItem('dudu_contrast') === 'light';
         function applyContrast() {
+            const btn = document.getElementById('btnContrast');
             if (isLightContrast) {
                 document.body.classList.add('light-contrast');
-                const btn = document.getElementById('btnContrast');
-                if (btn) btn.textContent = '🌙 어두운 화면';
+                if (btn) {
+                    btn.textContent = '🌙 어두운 화면';
+                    btn.title = '어두운 화면(다크 모드)으로 전환';
+                }
             } else {
                 document.body.classList.remove('light-contrast');
-                const btn = document.getElementById('btnContrast');
-                if (btn) btn.textContent = '☀️ 밝은 화면';
+                if (btn) {
+                    btn.textContent = '☀️ 밝은 화면';
+                    btn.title = '밝은 화면(라이트 모드)으로 전환';
+                }
             }
             localStorage.setItem('dudu_contrast', isLightContrast ? 'light' : 'dark');
         }

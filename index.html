@@ -1579,16 +1579,21 @@
             applyFontScale();
         }
 
-        let isLightContrast = localStorage.getItem('dudu_contrast') !== 'dark';
+        let isLightContrast = localStorage.getItem('dudu_contrast') === 'light';
         function applyContrast() {
+            const btn = document.getElementById('btnContrast');
             if (isLightContrast) {
                 document.body.classList.add('light-contrast');
-                const btn = document.getElementById('btnContrast');
-                if (btn) btn.textContent = '🌙 어두운 화면';
+                if (btn) {
+                    btn.textContent = '🌙 어두운 화면';
+                    btn.title = '어두운 화면(다크 모드)으로 전환';
+                }
             } else {
                 document.body.classList.remove('light-contrast');
-                const btn = document.getElementById('btnContrast');
-                if (btn) btn.textContent = '☀️ 밝은 화면';
+                if (btn) {
+                    btn.textContent = '☀️ 밝은 화면';
+                    btn.title = '밝은 화면(라이트 모드)으로 전환';
+                }
             }
             localStorage.setItem('dudu_contrast', isLightContrast ? 'light' : 'dark');
             updateGenderStyle();
