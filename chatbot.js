@@ -300,11 +300,139 @@ const SENIOR_SYNONYMS = {
     '고맙구먼': '고마워'
 };
 
+/**
+ * 브라우저 & Node.js 겸용 시나리오 확장 TF-IDF 검색 엔진
+ */
+class ClientTfIdfEngine {
+    constructor() {
+        this.documents = [];
+        this.docCount = 0;
+        this.vocab = new Map();
+        this.idf = [];
+        this.docVectors = [];
+        this.docLengths = [];
+        this.isIndexed = false;
+    }
+
+    tokenize(text) {
+        if (!text || typeof text !== 'string') return [];
+        const clean = text.toLowerCase().replace(/[^가-힣a-zA-Z0-9\s%]/g, ' ');
+        return clean.split(/\s+/).filter(w => w.length > 1);
+    }
+
+    buildIndex(docs) {
+        this.documents = docs || [];
+        this.docCount = this.documents.length;
+        if (this.docCount === 0) return;
+
+        this.vocab.clear();
+        const docTermFreqs = [];
+        const docFreqMap = new Map();
+
+        for (let i = 0; i < this.docCount; i++) {
+            const doc = this.documents[i];
+            const content = `${doc.qualification || doc.cert || ''} ${doc.category || ''} ${doc.question || doc.title || ''} ${doc.keywords || ''} ${doc.answer || ''}`;
+            const tokens = this.tokenize(content);
+
+            const tfMap = new Map();
+            const uniqueTerms = new Set();
+
+            for (const token of tokens) {
+                let termId = this.vocab.get(token);
+                if (termId === undefined) {
+                    termId = this.vocab.size;
+                    this.vocab.set(token, termId);
+                }
+                tfMap.set(termId, (tfMap.get(termId) || 0) + 1);
+                uniqueTerms.add(termId);
+            }
+
+            for (const termId of uniqueTerms) {
+                docFreqMap.set(termId, (docFreqMap.get(termId) || 0) + 1);
+            }
+            docTermFreqs.push({ tfMap, total: tokens.length || 1 });
+        }
+
+        const vocabSize = this.vocab.size;
+        this.idf = new Float32Array(vocabSize);
+        for (let termId = 0; termId < vocabSize; termId++) {
+            const df = docFreqMap.get(termId) || 0;
+            this.idf[termId] = Math.log((this.docCount + 1) / (df + 1)) + 1.0;
+        }
+
+        this.docVectors = [];
+        this.docLengths = new Float32Array(this.docCount);
+
+        for (let i = 0; i < this.docCount; i++) {
+            const { tfMap, total } = docTermFreqs[i];
+            const vec = new Map();
+            let sumSq = 0;
+
+            for (const [termId, count] of tfMap.entries()) {
+                const tf = count / total;
+                const val = tf * this.idf[termId];
+                vec.set(termId, val);
+                sumSq += val * val;
+            }
+            this.docVectors.push(vec);
+            this.docLengths[i] = Math.sqrt(sumSq) || 1.0;
+        }
+
+        this.isIndexed = true;
+    }
+
+    search(query, topK = 2, minScore = 0.05) {
+        if (!this.isIndexed || !query) return [];
+        const tokens = this.tokenize(query);
+        if (tokens.length === 0) return [];
+
+        const qTfMap = new Map();
+        for (const token of tokens) {
+            const termId = this.vocab.get(token);
+            if (termId !== undefined) {
+                qTfMap.set(termId, (qTfMap.get(termId) || 0) + 1);
+            }
+        }
+        if (qTfMap.size === 0) return [];
+
+        const qVec = new Map();
+        let sumSq = 0;
+        const total = tokens.length;
+        for (const [termId, count] of qTfMap.entries()) {
+            const tf = count / total;
+            const val = tf * this.idf[termId];
+            qVec.set(termId, val);
+            sumSq += val * val;
+        }
+        const qNorm = Math.sqrt(sumSq) || 1.0;
+
+        const scored = [];
+        for (let i = 0; i < this.docCount; i++) {
+            const docVec = this.docVectors[i];
+            let dot = 0;
+            for (const [termId, qVal] of qVec.entries()) {
+                const dVal = docVec.get(termId);
+                if (dVal !== undefined) dot += qVal * dVal;
+            }
+            if (dot > 0) {
+                const sim = dot / (qNorm * this.docLengths[i]);
+                if (sim >= minScore) {
+                    scored.push({ score: sim, doc: this.documents[i] });
+                }
+            }
+        }
+        scored.sort((a, b) => b.score - a.score);
+        return scored.slice(0, topK);
+    }
+}
+
 class DuduChatbot {
     constructor() {
         this.masterRegulations = [...MASTER_OFFICIAL_REGULATIONS];
         this.auxiliaryKnowledge = [...AUXILIARY_KNOWLEDGE];
-        this.knowledgeBase = [...MASTER_OFFICIAL_REGULATIONS];
+        this.knowledgeBase = [...MASTER_OFFICIAL_REGULATIONS, ...AUXILIARY_KNOWLEDGE];
+        this.tfidfEngine = new ClientTfIdfEngine();
+        this.tfidfEngine.buildIndex(this.knowledgeBase);
         this.isOpen = false;
         const storedSize = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_chat_font_size') : null;
         const storedMode = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_ai_mode') : null;
@@ -343,6 +471,7 @@ class DuduChatbot {
                         this.masterRegulations = masters;
                     }
                     this.knowledgeBase = data;
+                    this.tfidfEngine.buildIndex(this.knowledgeBase);
                 }
             }
         } catch (e) {
@@ -795,8 +924,8 @@ class DuduChatbot {
         const isPrepWord = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구') || normalizedQuery.includes('가져갈');
         const isRefundWord = normalizedQuery.includes('환불') || normalizedQuery.includes('취소') || normalizedQuery.includes('돈돌려');
 
-        // 3. 확인불가(거절) 항목 최우선 방어 (규정 외 개인상담, 주차, 타종목 등)
-        if (isRecommendIntent) {
+        // 3. 확인불가(거절) 항목 최우선 방어 (규정 외 개인상담, 주차, 타종목, 합격률 등)
+        if (isRecommendIntent || normalizedQuery.includes('합격률') || normalizedQuery.includes('합격률이')) {
             return getMaster(23).answer;
         }
         if (normalizedQuery.includes('주차') || normalizedQuery.includes('셔틀') || normalizedQuery.includes('주차장')) {
@@ -941,7 +1070,15 @@ class DuduChatbot {
             return getMaster(4).answer;
         }
 
-        // 6. [Tier 3] 사내 미확인 규정 무환각 거절
+        // 6. [Tier 2] 시나리오 확장 TF-IDF 검색으로 보조 지식 베이스 질의
+        if (this.tfidfEngine && this.tfidfEngine.isIndexed) {
+            const tfidfResults = this.tfidfEngine.search(normalizedQuery, 1, 0.12);
+            if (tfidfResults && tfidfResults.length > 0 && tfidfResults[0].doc && tfidfResults[0].doc.answer) {
+                return tfidfResults[0].doc.answer;
+            }
+        }
+
+        // 7. [Tier 3] 사내 미확인 규정 무환각 거절
         return '해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)';
     }
 }

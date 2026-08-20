@@ -20,83 +20,30 @@ function getApiKey() {
     return Buffer.from('QVEuQWI4Uk42SmhGQ085QTN5cWtGR2FLNlcxLXIzZEhiM0hrSk5kdE5lWFlDQVE2Z3VvTWc=', 'base64').toString('utf-8');
 }
 
-// 4,705건 FAQ 지식 베이스 로딩
+const { tfidfEngine } = require('../lib/tfidf.js');
+
+// 4,705건 FAQ 지식 베이스 로딩 및 TF-IDF 인덱스 사전 구축
 let FAQ_KNOWLEDGE_BASE = [];
 try {
     const faqPath = path.join(process.cwd(), 'data', 'faq_knowledge_base.json');
     if (fs.existsSync(faqPath)) {
         FAQ_KNOWLEDGE_BASE = JSON.parse(fs.readFileSync(faqPath, 'utf-8'));
+        tfidfEngine.buildIndex(FAQ_KNOWLEDGE_BASE);
     }
 } catch (e) {
     console.warn('FAQ knowledge base load warning:', e.message);
 }
 
-const SENIOR_SYNONYMS = {
-    '포크레인': '굴착기',
-    '포클레인': '굴착기',
-    '요보사': '요양보호사',
-    '요양사': '요양보호사',
-    '한조기': '한식조리기능사',
-    '공개사': '공인중개사',
-    '손평사': '손해평가사',
-    '전기기사': '전기기능사',
-    '지게차면허': '지게차운전기능사',
-    '접수비': '응시료',
-    '시험비': '응시료',
-    '수수료': '응시료',
-    '등록금': '응시료',
-    '돈 얼마': '응시료',
-    '동사무소': '접수방법 큐넷'
-};
-
-function tokenize(text) {
-    if (!text) return [];
-    return text.toLowerCase().match(/[가-힣a-zA-Z0-9]+/g) || [];
-}
-
+/**
+ * 시나리오 확장 TF-IDF 기반 RAG 검색 함수
+ */
 function retrieveTopFaq(query, topK = 4) {
     if (!FAQ_KNOWLEDGE_BASE || FAQ_KNOWLEDGE_BASE.length === 0) return [];
-
-    let expandedQuery = query.toLowerCase();
-    for (const [k, v] of Object.entries(SENIOR_SYNONYMS)) {
-        if (expandedQuery.includes(k.toLowerCase())) {
-            expandedQuery += ' ' + v.toLowerCase();
-        }
+    if (!tfidfEngine.isIndexed) {
+        tfidfEngine.buildIndex(FAQ_KNOWLEDGE_BASE);
     }
-
-    const qTokens = tokenize(expandedQuery);
-    if (qTokens.length === 0) return [];
-
-    const scored = [];
-
-    for (const doc of FAQ_KNOWLEDGE_BASE) {
-        let score = 0;
-        const searchBlob = doc.search_text || '';
-        const titleBlob = (doc.title || '').toLowerCase();
-        const answerBlob = (doc.answer || '').toLowerCase();
-
-        for (const token of qTokens) {
-            if (token.length <= 1) continue;
-
-            if (titleBlob.includes(token)) score += 5;
-            if (searchBlob.includes(token)) score += 2;
-            if (answerBlob.includes(token)) score += 1;
-        }
-
-        if (doc.cert && expandedQuery.includes(doc.cert.toLowerCase())) {
-            score += 4;
-        }
-        if (doc.category && expandedQuery.includes(doc.category.toLowerCase())) {
-            score += 3;
-        }
-
-        if (score > 0) {
-            scored.push({ score, doc });
-        }
-    }
-
-    scored.sort((a, b) => b.score - a.score);
-    return scored.slice(0, topK).map(item => item.doc);
+    const results = tfidfEngine.search(query, topK, 0.04);
+    return results.map(item => item.doc);
 }
 
 const DEFAULT_REGULATIONS = `1. 취급 종목: 오직 3대 핵심 국가기술자격(한식조리기능사, 지게차운전기능사, 굴착기운전기능사(포크레인))의 '필기시험' 접수만 지원 및 대행합니다.
