@@ -616,7 +616,20 @@ class DuduChatbot {
         const fontUp = document.getElementById('chatFontUp');
         const fontDown = document.getElementById('chatFontDown');
         const modeBtn = document.getElementById('chatModeToggleBtn');
+        let resetBtn = document.getElementById('chatResetBtn');
         let voiceBtn = document.getElementById('chatVoiceBtn');
+
+        // 만약 헤더에 resetBtn이 없으면 closeBtn 바로 앞에 동적 주입
+        if (!resetBtn && closeBtn && closeBtn.parentNode) {
+            resetBtn = document.createElement('button');
+            resetBtn.id = 'chatResetBtn';
+            resetBtn.className = 'chat-header-btn';
+            resetBtn.type = 'button';
+            resetBtn.title = '대화 내용 전체 지우기 (초기화)';
+            resetBtn.innerHTML = '🧹 지우기';
+            resetBtn.style.cssText = 'background: rgba(239, 68, 68, 0.2) !important; border: 1px solid #ef4444 !important; color: #fca5a5 !important; border-radius: 6px !important; padding: 5px 9px !important; font-size: 12px !important; font-weight: 800 !important; cursor: pointer !important; margin-right: 4px !important; transition: all 0.2s ease !important;';
+            closeBtn.parentNode.insertBefore(resetBtn, closeBtn);
+        }
 
         // 만약 정적 DOM에 chatVoiceBtn이 없으면 input과 sendBtn 사이에 동적 주입
         if (!voiceBtn && input && sendBtn && input.parentNode) {
@@ -631,6 +644,11 @@ class DuduChatbot {
 
         if (fab) fab.onclick = () => this.toggleChat();
         if (closeBtn) closeBtn.onclick = () => this.toggleChat(false);
+        if (resetBtn) resetBtn.onclick = () => {
+            if (confirm('대화 내용을 모두 지우고 처음 상태로 초기화하시겠습니까?')) {
+                this.resetChat();
+            }
+        };
         if (sendBtn) sendBtn.onclick = () => this.handleSend();
         if (modeBtn) modeBtn.onclick = () => this.toggleAIMode();
         if (voiceBtn) voiceBtn.onclick = () => this.toggleSpeechRecognition();
@@ -647,6 +665,29 @@ class DuduChatbot {
         if (fontDown) fontDown.onclick = () => this.adjustChatFontSize(-2);
 
         this.updateModeUI();
+    }
+
+    resetChat() {
+        if (this.isListening && this.recognition) {
+            try { this.recognition.stop(); } catch (e) {}
+            this.isListening = false;
+            this.updateVoiceUI(false);
+        }
+        this.conversationHistory = [];
+        const container = document.getElementById('chatMessages');
+        if (container) {
+            container.innerHTML = `
+                <div class="chat-msg bot" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #334155; border-bottom-left-radius: 4px; padding: 14px 18px; border-radius: 18px; line-height: 1.55; font-size: ${this.fontSize}px; word-break: keep-all; font-weight: 500;">
+                    안녕하세요, 어르신! <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
+                    <strong>한식조리, 지게차운전, 굴착기운전기능사</strong>의 응시료(14,500원), 상시 접수 일정, 당일 합격 발표 등에 대해 편하게 물어보세요.
+                </div>
+            `;
+        }
+        const input = document.getElementById('chatInput');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
     }
 
     async syncWithSupabase() {
