@@ -81,6 +81,17 @@
         body.light-contrast .metric-sub {
             color: #64748b;
         }
+        body.light-contrast .visual-dashboard-grid .card {
+            background: #ffffff !important;
+            border: 2px solid #e2e8f0 !important;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.04) !important;
+        }
+        body.light-contrast .visual-dashboard-grid h3 {
+            color: #0f172a !important;
+        }
+        body.light-contrast #donutCenterTotal {
+            color: #0f172a !important;
+        }
         body.light-contrast .filter-card {
             background: #ffffff;
             border: 2px solid #e2e8f0;
@@ -516,6 +527,7 @@
             .nav-btn { flex: 1 1 calc(50% - 6px); justify-content: center; text-align: center; padding: 8px 10px; font-size: 13px; }
             .main-container { margin: 14px auto; padding: 0 12px; }
             .metrics-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+            .visual-dashboard-grid { grid-template-columns: 1fr !important; gap: 14px !important; }
             .filter-card { padding: 14px; flex-direction: column; align-items: stretch; }
             .filter-inputs { flex-direction: column; }
             .form-input, .form-select { width: 100%; font-size: 16px; min-height: 46px; }
@@ -589,6 +601,114 @@
                 <div class="metric-label">🏗️ 굴착기운전기능사</div>
                 <div class="metric-value" style="color: #f472b6;" id="statExcavator">0건</div>
                 <div class="metric-sub">토목 / 건설 포크레인</div>
+            </div>
+        </div>
+
+        <!-- Visual Analytics Dashboard (Pure SVG & CSS Charts) -->
+        <div class="visual-dashboard-grid" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 20px; margin-bottom: 24px;">
+            <!-- Left Chart: Qualification Share SVG Donut Chart -->
+            <div class="card" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <div>
+                        <h3 style="font-size: calc(17px * var(--font-scale)); font-weight: 900; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>📊</span> 종목별 접수 점유율 분포
+                        </h3>
+                        <p style="font-size: calc(12px * var(--font-scale)); color: var(--text-sub); margin: 4px 0 0;">3대 핵심 국가기술자격 실시간 비중</p>
+                    </div>
+                    <span style="background: rgba(59, 130, 246, 0.15); color: #60a5fa; border: 1px solid #3b82f6; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 20px;">실시간 연동</span>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-around; flex: 1; flex-wrap: wrap; gap: 20px;">
+                    <!-- SVG Donut Chart -->
+                    <div style="position: relative; width: 160px; height: 160px; flex-shrink: 0;">
+                        <svg viewBox="0 0 100 100" style="width: 100%; height: 100%; transform: rotate(-90deg); border-radius: 50%;">
+                            <circle cx="50" cy="50" r="38" fill="none" stroke="#1e293b" stroke-width="15"></circle>
+                            <!-- Segment 1: 한식조리 (Blue) -->
+                            <circle id="donutCook" cx="50" cy="50" r="38" fill="none" stroke="#3b82f6" stroke-width="15" stroke-dasharray="0 238.76" stroke-dashoffset="0" style="transition: stroke-dasharray 0.8s ease, stroke-dashoffset 0.8s ease;"></circle>
+                            <!-- Segment 2: 지게차 (Green) -->
+                            <circle id="donutForklift" cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="15" stroke-dasharray="0 238.76" stroke-dashoffset="0" style="transition: stroke-dasharray 0.8s ease, stroke-dashoffset 0.8s ease;"></circle>
+                            <!-- Segment 3: 굴착기 (Pink/Rose) -->
+                            <circle id="donutExcavator" cx="50" cy="50" r="38" fill="none" stroke="#f43f5e" stroke-width="15" stroke-dasharray="0 238.76" stroke-dashoffset="0" style="transition: stroke-dasharray 0.8s ease, stroke-dashoffset 0.8s ease;"></circle>
+                        </svg>
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
+                            <div style="font-size: 11px; color: #94a3b8; font-weight: 700;">전체 접수</div>
+                            <div id="donutCenterTotal" style="font-size: 18px; font-weight: 900; color: #ffffff;">0</div>
+                        </div>
+                    </div>
+
+                    <!-- Legend & Percentage Breakdown -->
+                    <div style="display: flex; flex-direction: column; gap: 8px; min-width: 170px; flex: 1;">
+                        <div onclick="quickFilterQual('한식조리')" style="display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(59, 130, 246, 0.25); transition: all 0.2s;" title="클릭 시 한식조리만 필터링">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 3px;"></div>
+                                <span style="font-size: 13px; font-weight: 700; color: #ffffff;">한식조리</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span id="legendCookCount" style="font-size: 13px; font-weight: 900; color: #60a5fa;">0건</span>
+                                <span id="legendCookPct" style="font-size: 11px; color: #94a3b8; margin-left: 4px;">(0%)</span>
+                            </div>
+                        </div>
+
+                        <div onclick="quickFilterQual('지게차')" style="display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(16, 185, 129, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(16, 185, 129, 0.25); transition: all 0.2s;" title="클릭 시 지게차만 필터링">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 12px; height: 12px; background: #10b981; border-radius: 3px;"></div>
+                                <span style="font-size: 13px; font-weight: 700; color: #ffffff;">지게차운전</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span id="legendForkliftCount" style="font-size: 13px; font-weight: 900; color: #34d399;">0건</span>
+                                <span id="legendForkliftPct" style="font-size: 11px; color: #94a3b8; margin-left: 4px;">(0%)</span>
+                            </div>
+                        </div>
+
+                        <div onclick="quickFilterQual('굴착기')" style="display: flex; align-items: center; justify-content: space-between; padding: 7px 10px; background: rgba(244, 63, 94, 0.1); border-radius: 8px; cursor: pointer; border: 1px solid rgba(244, 63, 94, 0.25); transition: all 0.2s;" title="클릭 시 굴착기만 필터링">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 12px; height: 12px; background: #f43f5e; border-radius: 3px;"></div>
+                                <span style="font-size: 13px; font-weight: 700; color: #ffffff;">굴착기운전</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span id="legendExcavatorCount" style="font-size: 13px; font-weight: 900; color: #fb7185;">0건</span>
+                                <span id="legendExcavatorPct" style="font-size: 11px; color: #94a3b8; margin-left: 4px;">(0%)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Chart: Regional & Discount Progress Gauge Bars -->
+            <div class="card" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 22px; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                        <h3 style="font-size: calc(17px * var(--font-scale)); font-weight: 900; color: #ffffff; margin: 0; display: flex; align-items: center; gap: 8px;">
+                            <span>🗺️</span> 주요 권역별 접수 상위 현황
+                        </h3>
+                        <span style="font-size: 12px; color: #94a3b8;">지역 점유율</span>
+                    </div>
+
+                    <!-- Region Progress Bars Container -->
+                    <div id="regionProgressContainer" style="display: flex; flex-direction: column; gap: 10px;">
+                        <!-- Dynamically filled by JS -->
+                        <div style="color: #94a3b8; font-size: 13px; text-align: center; padding: 20px;">권역별 데이터 집계 중...</div>
+                    </div>
+                </div>
+
+                <!-- Bottom Summary Highlights (50% 감면 수혜율 & 접수 완료율) -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed rgba(255,255,255,0.12);">
+                    <div style="background: rgba(2, 6, 23, 0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px;">
+                        <div style="font-size: 11px; color: #94a3b8; font-weight: 700;">💳 50% 수수료 감면율</div>
+                        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 2px;">
+                            <span id="statDiscountRate" style="font-size: 15px; font-weight: 900; color: #38bdf8;">0%</span>
+                            <span id="statDiscountCount" style="font-size: 11px; color: #94a3b8;">0건</span>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(2, 6, 23, 0.4); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; padding: 8px 12px;">
+                        <div style="font-size: 11px; color: #94a3b8; font-weight: 700;">✅ 원서접수 완료율</div>
+                        <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 2px;">
+                            <span id="statCompleteRate" style="font-size: 15px; font-weight: 900; color: #34d399;">100%</span>
+                            <span id="statCompleteCount" style="font-size: 11px; color: #94a3b8;">0건</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -944,6 +1064,129 @@
             document.getElementById('statCook').textContent = cookCount.toLocaleString() + '건';
             document.getElementById('statForklift').textContent = forkliftCount.toLocaleString() + '건';
             document.getElementById('statExcavator').textContent = excavatorCount.toLocaleString() + '건';
+
+            // 비주얼 통계 차트 실시간 갱신
+            updateVisualCharts(records);
+        }
+
+        function updateVisualCharts(records) {
+            const total = records.length;
+            const centerTotalEl = document.getElementById('donutCenterTotal');
+            if (centerTotalEl) centerTotalEl.textContent = total.toLocaleString() + '건';
+
+            // 1. 종목별 건수 및 비율 계산
+            const cookCount = records.filter(r => (r.qualification || '').includes('한식')).length;
+            const forkliftCount = records.filter(r => (r.qualification || '').includes('지게차')).length;
+            const excavatorCount = records.filter(r => (r.qualification || '').includes('굴착기') || (r.qualification || '').includes('포크레인')).length;
+
+            const cookPct = total > 0 ? (cookCount / total) * 100 : 0;
+            const forkliftPct = total > 0 ? (forkliftCount / total) * 100 : 0;
+            const excavatorPct = total > 0 ? (excavatorCount / total) * 100 : 0;
+
+            // 범례 업데이트
+            const elCookCount = document.getElementById('legendCookCount');
+            if (elCookCount) elCookCount.textContent = cookCount.toLocaleString() + '건';
+            const elCookPct = document.getElementById('legendCookPct');
+            if (elCookPct) elCookPct.textContent = `(${cookPct.toFixed(1)}%)`;
+
+            const elForkCount = document.getElementById('legendForkliftCount');
+            if (elForkCount) elForkCount.textContent = forkliftCount.toLocaleString() + '건';
+            const elForkPct = document.getElementById('legendForkliftPct');
+            if (elForkPct) elForkPct.textContent = `(${forkliftPct.toFixed(1)}%)`;
+
+            const elExcCount = document.getElementById('legendExcavatorCount');
+            if (elExcCount) elExcCount.textContent = excavatorCount.toLocaleString() + '건';
+            const elExcPct = document.getElementById('legendExcavatorPct');
+            if (elExcPct) elExcPct.textContent = `(${excavatorPct.toFixed(1)}%)`;
+
+            // SVG 도넛 차트 세그먼트 (둘레 = 2 * PI * 38 = 238.76)
+            const circumference = 238.76;
+            const cookLen = (cookPct / 100) * circumference;
+            const forkliftLen = (forkliftPct / 100) * circumference;
+            const excavatorLen = (excavatorPct / 100) * circumference;
+
+            const donutCook = document.getElementById('donutCook');
+            const donutForklift = document.getElementById('donutForklift');
+            const donutExcavator = document.getElementById('donutExcavator');
+
+            if (donutCook && donutForklift && donutExcavator) {
+                donutCook.setAttribute('stroke-dasharray', `${cookLen} ${circumference}`);
+                donutCook.setAttribute('stroke-dashoffset', '0');
+
+                donutForklift.setAttribute('stroke-dasharray', `${forkliftLen} ${circumference}`);
+                donutForklift.setAttribute('stroke-dashoffset', `${-cookLen}`);
+
+                donutExcavator.setAttribute('stroke-dasharray', `${excavatorLen} ${circumference}`);
+                donutExcavator.setAttribute('stroke-dashoffset', `${-(cookLen + forkliftLen)}`);
+            }
+
+            // 2. 주요 권역별 상위 분포 집계
+            const regionCounts = {};
+            records.forEach(r => {
+                let reg = (r.exam_region || '서울').trim();
+                if (reg.includes('서울')) reg = '서울 권역';
+                else if (reg.includes('경기') || reg.includes('인천') || reg.includes('수원')) reg = '경기/인천';
+                else if (reg.includes('부산') || reg.includes('울산') || reg.includes('경남')) reg = '부산/경남';
+                else if (reg.includes('대구') || reg.includes('경북')) reg = '대구/경북';
+                else if (reg.includes('대전') || reg.includes('충청') || reg.includes('천안') || reg.includes('청주')) reg = '충청/대전';
+                else if (reg.includes('광주') || reg.includes('전라') || reg.includes('전주')) reg = '호남/광주';
+                else if (reg.includes('강원')) reg = '강원';
+                else if (reg.includes('제주')) reg = '제주';
+                else reg = '기타 권역';
+
+                regionCounts[reg] = (regionCounts[reg] || 0) + 1;
+            });
+
+            const sortedRegions = Object.entries(regionCounts)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 4);
+
+            const colors = ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'];
+            const regionContainer = document.getElementById('regionProgressContainer');
+            if (regionContainer) {
+                if (sortedRegions.length === 0) {
+                    regionContainer.innerHTML = '<div style="color: #94a3b8; font-size: 13px; text-align: center; padding: 10px;">접수 내역이 없습니다.</div>';
+                } else {
+                    regionContainer.innerHTML = sortedRegions.map(([regName, count], idx) => {
+                        const pct = total > 0 ? (count / total) * 100 : 0;
+                        const color = colors[idx % colors.length];
+                        return `
+                            <div>
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 4px;">
+                                    <span style="color: #ffffff;">${regName}</span>
+                                    <span style="color: #cbd5e1;">${count.toLocaleString()}건 <strong style="color: ${color};">(${pct.toFixed(1)}%)</strong></span>
+                                </div>
+                                <div style="width: 100%; height: 8px; background: #020617; border-radius: 4px; overflow: hidden; border: 1px solid rgba(255,255,255,0.06);">
+                                    <div style="width: ${pct}%; height: 100%; background: ${color}; border-radius: 4px; transition: width 0.8s ease;"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+            }
+
+            // 3. 50% 감면 수혜율 & 접수 완료율
+            const discountList = records.filter(r => (r.fee_discount_type && r.fee_discount_type !== '없음') || (r.fee_final && r.fee_final < 14500));
+            const discountCount = discountList.length;
+            const discountRate = total > 0 ? ((discountCount / total) * 100).toFixed(1) : 0;
+            const elDisRate = document.getElementById('statDiscountRate');
+            if (elDisRate) elDisRate.textContent = `${discountRate}%`;
+            const elDisCount = document.getElementById('statDiscountCount');
+            if (elDisCount) elDisCount.textContent = `${discountCount}건`;
+
+            const completeCount = records.filter(r => (r.status || '접수완료') === '접수완료').length;
+            const completeRate = total > 0 ? ((completeCount / total) * 100).toFixed(1) : 100;
+            const elCompRate = document.getElementById('statCompleteRate');
+            if (elCompRate) elCompRate.textContent = `${completeRate}%`;
+            const elCompCount = document.getElementById('statCompleteCount');
+            if (elCompCount) elCompCount.textContent = `${completeCount}건`;
+        }
+
+        function quickFilterQual(qualName) {
+            const select = document.getElementById('qualFilter');
+            if (!select) return;
+            select.value = qualName;
+            applyFilters();
         }
 
         function toggleTodayFilter() {
