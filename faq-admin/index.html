@@ -813,9 +813,9 @@
             <div class="filter-bar">
                 <input type="text" id="searchFeedback" class="form-input" placeholder="질문, 답변 내용 검색..." style="flex: 1; min-width: 240px;" oninput="renderFeedbackTable()">
                 <select id="filterFbRating" class="form-select" onchange="renderFeedbackTable()">
-                    <option value="ALL">전체 평가 보기</option>
-                    <option value="negative">👎 아쉬워요 (규정 보강 대상만)</option>
-                    <option value="positive">👍 도움돼요만 보기</option>
+                    <option value="ALL">전체 평가</option>
+                    <option value="negative">아쉬움 (보강 대상만)</option>
+                    <option value="positive">도움됨</option>
                 </select>
                 <select id="filterFbMode" class="form-select" onchange="renderFeedbackTable()">
                     <option value="ALL">전체 상담 모드</option>
@@ -829,10 +829,10 @@
                 <table>
                     <thead>
                         <tr>
-                            <th style="width: 110px;">평가</th>
-                            <th style="width: 150px;">일시 (KST)</th>
-                            <th style="width: 100px;">상담 모드</th>
-                            <th style="width: 280px;">사용자 질문</th>
+                            <th style="width: 85px; text-align: center;">평가</th>
+                            <th style="width: 140px;">일시 (KST)</th>
+                            <th style="width: 100px; text-align: center;">상담 모드</th>
+                            <th style="width: 260px;">사용자 질문</th>
                             <th>챗봇 답변 내용</th>
                             <th style="width: 180px; text-align: center;">규정 보강 조치</th>
                         </tr>
@@ -1647,29 +1647,29 @@
             tbody.innerHTML = filtered.map(item => {
                 const isPos = item.rating === 'positive' || item.rating === 1;
                 const ratingBadge = isPos 
-                    ? `<span style="background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid #10b981; border-radius: 6px; padding: 4px 10px; font-weight: 800; font-size: 13px;">👍 도움됨</span>`
-                    : `<span style="background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; border-radius: 6px; padding: 4px 10px; font-weight: 800; font-size: 13px;">👎 아쉬움</span>`;
+                    ? `<span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; border-radius: 6px; padding: 4px 10px; font-weight: 800; font-size: 13px; white-space: nowrap; display: inline-block;">도움됨</span>`
+                    : `<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; border-radius: 6px; padding: 4px 10px; font-weight: 800; font-size: 13px; white-space: nowrap; display: inline-block;">아쉬움</span>`;
 
                 const dateStr = item.created_at ? new Date(item.created_at).toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }) : '-';
                 const modeStr = (item.mode || 'AI') === 'AI' 
-                    ? `<span style="color: #60a5fa; font-weight: 800; font-size: 12px;">🤖 AI 상담</span>`
-                    : `<span style="color: #94a3b8; font-weight: 700; font-size: 12px;">⚡ 룰엔진</span>`;
+                    ? `<span style="color: #60a5fa; font-weight: 800; font-size: 12px; white-space: nowrap;">AI 상담</span>`
+                    : `<span style="color: #94a3b8; font-weight: 700; font-size: 12px; white-space: nowrap;">룰엔진</span>`;
 
                 const escapedQ = encodeURIComponent(item.question || '');
                 const escapedA = encodeURIComponent(item.answer || '');
 
                 const actionBtn = !isPos 
-                    ? `<button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 8px; width: 100%; box-shadow: 0 2px 8px rgba(37,99,235,0.4);" onclick="openModalWithFeedback(decodeURIComponent('${escapedQ}'), decodeURIComponent('${escapedA}'))">✨ 규정 보강하기 ➔</button>`
-                    : `<span style="color: #34d399; font-size: 12px; font-weight: 700;">✅ 만족 답변 (유지)</span>`;
+                    ? `<button class="btn btn-primary" style="padding: 6px 12px; font-size: 12px; font-weight: 800; background: linear-gradient(135deg, #2563eb, #1d4ed8); border-radius: 8px; width: 100%; box-shadow: 0 2px 8px rgba(37,99,235,0.4); white-space: nowrap;" onclick="openModalWithFeedback(decodeURIComponent('${escapedQ}'), decodeURIComponent('${escapedA}'))">규정 보강하기 ➔</button>`
+                    : `<span style="color: #34d399; font-size: 12px; font-weight: 700; white-space: nowrap;">만족 (유지)</span>`;
 
                 return `
                     <tr style="${!isPos ? 'background: rgba(239, 68, 68, 0.04);' : ''}">
-                        <td>${ratingBadge}</td>
-                        <td style="color: var(--text-sub); font-family: monospace; font-size: 12px;">${dateStr}</td>
-                        <td>${modeStr}</td>
+                        <td style="text-align: center; vertical-align: middle;">${ratingBadge}</td>
+                        <td style="color: var(--text-sub); font-family: monospace; font-size: 12px; white-space: nowrap;">${dateStr}</td>
+                        <td style="text-align: center; vertical-align: middle;">${modeStr}</td>
                         <td><strong style="color: #ffffff; font-size: 14px;">${item.question}</strong></td>
                         <td style="color: #cbd5e1; font-size: 13px; line-height: 1.4;">${item.answer || '-'}</td>
-                        <td style="text-align: center;">${actionBtn}</td>
+                        <td style="text-align: center; vertical-align: middle;">${actionBtn}</td>
                     </tr>
                 `;
             }).join('');
