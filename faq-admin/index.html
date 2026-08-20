@@ -550,6 +550,7 @@
             <button class="btn-tab" id="tabBtnStats" onclick="switchAdminTab('stats')">📊 자주 묻는 질문(FAQ) 통계</button>
             <button class="btn-tab" id="tabBtnFeedback" onclick="switchAdminTab('feedback')">💬 챗봇 답변 피드백 & 규정 보강 (<span id="feedbackCountBadge">0</span>건)</button>
             <button class="btn-tab" id="tabBtnBubbles" onclick="switchAdminTab('bubbles')" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(16, 185, 129, 0.2)); border-color: #3b82f6;">🌟 챗봇 추천 질문 버블 관리 (<span id="bubblesCountBadge">6</span>개)</button>
+            <button class="btn-tab" id="tabBtnSynonyms" onclick="switchAdminTab('synonyms')" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(236, 72, 153, 0.2)); border-color: #a855f7;">🗣️ 어르신 말바꾸기 사전 (<span id="synonymCountBadge">0</span>개)</button>
         </div>
 
         <!-- 1. FAQ Management Section -->
@@ -895,6 +896,134 @@
                 </div>
             </div>
         </div>
+
+        <!-- 6. Senior Synonym / Colloquial Replacement Dictionary Section -->
+        <div id="synonymsSection" style="display: none;">
+            <div class="action-bar">
+                <div>
+                    <h2 style="font-size: calc(23px * var(--font-scale)); font-weight: 900; color: #ffffff;">🗣️ 어르신 말바꾸기 (동의어 & 구어체 치환) 사전 관리</h2>
+                    <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub); margin-top: 4px;">
+                        어르신 특유의 구어체("쓰는 거"➔필기), 사투리("고마워유"), 자격증 통칭("포크레인/굴삭기"➔굴착기)을 정규 표준어로 실시간 치환하여 챗봇 인식률을 극대화합니다.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="resetDefaultSynonyms()" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;">기본 25대 사전 복원</button>
+                    <button class="btn btn-secondary" onclick="openAddSynonymModal()">+ 새 말바꾸기 단어 추가</button>
+                    <button class="btn btn-primary" onclick="saveAllSynonyms()" style="background: linear-gradient(135deg, #a855f7, #9333ea); border: none;">💾 말바꾸기 사전 저장 & 챗봇 즉시 반영</button>
+                </div>
+            </div>
+
+            <!-- Synonym Statistics Highlight Bar -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 24px;">
+                <div style="background: var(--card-bg); border: 2px solid #a855f7; border-radius: var(--radius-lg); padding: 18px;">
+                    <div style="font-size: 13px; color: #d8b4fe; font-weight: 700;">총 등록된 말바꾸기 단어</div>
+                    <div style="font-size: 26px; font-weight: 900; color: #c084fc; margin: 4px 0;" id="synTotalCount">0개</div>
+                    <div style="font-size: 11px; color: #94a3b8;">실시간 챗봇 치환 연동</div>
+                </div>
+                <div style="background: var(--card-bg); border: 2px solid #3b82f6; border-radius: var(--radius-lg); padding: 18px;">
+                    <div style="font-size: 13px; color: #93c5fd; font-weight: 700;">자격증 명칭 / 통칭</div>
+                    <div style="font-size: 26px; font-weight: 900; color: #60a5fa; margin: 4px 0;" id="synCertCount">0개</div>
+                    <div style="font-size: 11px; color: #94a3b8;">굴삭기, 포크레인, 한조기 등</div>
+                </div>
+                <div style="background: var(--card-bg); border: 2px solid #10b981; border-radius: var(--radius-lg); padding: 18px;">
+                    <div style="font-size: 13px; color: #6ee7b7; font-weight: 700;">비용 & 감면 복지 어휘</div>
+                    <div style="font-size: 26px; font-weight: 900; color: #34d399; margin: 4px 0;" id="synFeeCount">0개</div>
+                    <div style="font-size: 11px; color: #94a3b8;">접수비, 복지카드, 수급자 등</div>
+                </div>
+                <div style="background: var(--card-bg); border: 2px solid #f59e0b; border-radius: var(--radius-lg); padding: 18px;">
+                    <div style="font-size: 13px; color: #fde68a; font-weight: 700;">구어체 & 시니어 일상어</div>
+                    <div style="font-size: 26px; font-weight: 900; color: #fbbf24; margin: 4px 0;" id="synColloquialCount">0개</div>
+                    <div style="font-size: 11px; color: #94a3b8;">쓰는거, 늙어서, 몇개맞아야 등</div>
+                </div>
+            </div>
+
+            <!-- Synonym Filter Bar -->
+            <div class="filter-bar">
+                <input type="text" id="searchSynonym" class="form-input" placeholder="어르신 입력 표현, 치환 표준어 검색..." style="flex: 1; min-width: 240px;" oninput="renderSynonymsAdmin()">
+                <select id="filterSynCategory" class="form-select" onchange="renderSynonymsAdmin()">
+                    <option value="ALL">전체 카테고리</option>
+                    <option value="자격증명칭">자격증 명칭 / 통칭</option>
+                    <option value="비용/수수료">비용 및 수수료</option>
+                    <option value="감면/복지">감면 및 복지 서류</option>
+                    <option value="시험방식/일정">시험 방식 및 일정</option>
+                    <option value="신분증/준비물">신분증 및 준비물</option>
+                    <option value="나이/학력">나이 및 학력 걱정</option>
+                    <option value="합격기준">합격 점수 및 발표</option>
+                    <option value="접수처/방문">접수처 및 대리접수</option>
+                    <option value="일상/인사">일상 대화 및 사투리</option>
+                </select>
+            </div>
+
+            <!-- Synonym Table -->
+            <div class="inquiry-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 70px; text-align: center;">번호</th>
+                            <th style="width: 140px; text-align: center;">카테고리</th>
+                            <th style="width: 220px;">어르신 입력 표현 (줄임말/구어체)</th>
+                            <th style="width: 200px;">정규 치환어 (표준 검색어)</th>
+                            <th>어르신 실제 질문 예시</th>
+                            <th style="width: 130px; text-align: center;">관리</th>
+                        </tr>
+                    </thead>
+                    <tbody id="synonymsTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-sub);">
+                                말바꾸기 사전을 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Synonym Edit Modal -->
+    <div class="modal-overlay" id="synonymModal" onclick="if(event.target === this) closeSynonymModal()">
+        <div class="modal-card">
+            <h3 id="synonymModalTitle" style="font-size: calc(20px * var(--font-scale)); font-weight: 900; margin-bottom: 16px;">새 말바꾸기 단어 추가</h3>
+            <form id="synonymEditForm" onsubmit="saveSynonymItem(event)">
+                <input type="hidden" id="synonymId">
+
+                <div class="form-group">
+                    <label class="form-label">카테고리 분류</label>
+                    <select id="synCategory" class="form-select" style="width: 100%;" required>
+                        <option value="자격증명칭">자격증 명칭 / 통칭</option>
+                        <option value="비용/수수료">비용 및 수수료</option>
+                        <option value="감면/복지">감면 및 복지 서류</option>
+                        <option value="시험방식/일정">시험 방식 및 일정</option>
+                        <option value="신분증/준비물">신분증 및 준비물</option>
+                        <option value="나이/학력">나이 및 학력 걱정</option>
+                        <option value="합격기준">합격 점수 및 발표</option>
+                        <option value="접수처/방문">접수처 및 대리접수</option>
+                        <option value="일상/인사">일상 대화 및 사투리</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">어르신 입력 표현 (줄임말, 구어체, 사투리)</label>
+                    <input type="text" id="synInput" class="form-input" style="width: 100%;" placeholder="예: 굴삭기, 복지카드, 쓰는 거" required>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">어르신이 질문할 때 실제로 쓰는 어휘를 입력하세요.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">정규 치환어 (시스템이 인식할 표준 단어)</label>
+                    <input type="text" id="synTarget" class="form-input" style="width: 100%;" placeholder="예: 굴착기, 감면, 필기" required>
+                    <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">FAQ 및 룰엔진이 정확히 매칭할 표준어를 입력하세요.</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">어르신 실제 질문 예시 (선택)</label>
+                    <input type="text" id="synExample" class="form-input" style="width: 100%;" placeholder="예: 굴삭기 시험비 얼마예요?">
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeSynonymModal()">취소</button>
+                    <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #a855f7, #9333ea);">저장하기</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Bubble Edit Modal -->
@@ -1201,25 +1330,33 @@
             const statsSection = document.getElementById('statsSection');
             const feedbackSection = document.getElementById('feedbackSection');
             const bubblesSection = document.getElementById('bubblesSection');
+            const synonymsSection = document.getElementById('synonymsSection');
             const tabBtnFaq = document.getElementById('tabBtnFaq');
             const tabBtnDataset = document.getElementById('tabBtnDataset');
             const tabBtnStats = document.getElementById('tabBtnStats');
             const tabBtnFeedback = document.getElementById('tabBtnFeedback');
             const tabBtnBubbles = document.getElementById('tabBtnBubbles');
+            const tabBtnSynonyms = document.getElementById('tabBtnSynonyms');
 
             faqSection.style.display = 'none';
             datasetSection.style.display = 'none';
             statsSection.style.display = 'none';
             if (feedbackSection) feedbackSection.style.display = 'none';
             if (bubblesSection) bubblesSection.style.display = 'none';
+            if (synonymsSection) synonymsSection.style.display = 'none';
 
             tabBtnFaq.classList.remove('active');
             tabBtnDataset.classList.remove('active');
             tabBtnStats.classList.remove('active');
             if (tabBtnFeedback) tabBtnFeedback.classList.remove('active');
             if (tabBtnBubbles) tabBtnBubbles.classList.remove('active');
+            if (tabBtnSynonyms) tabBtnSynonyms.classList.remove('active');
 
-            if (tab === 'bubbles') {
+            if (tab === 'synonyms') {
+                if (synonymsSection) synonymsSection.style.display = 'block';
+                if (tabBtnSynonyms) tabBtnSynonyms.classList.add('active');
+                loadSynonymsAdmin();
+            } else if (tab === 'bubbles') {
                 if (bubblesSection) bubblesSection.style.display = 'block';
                 if (tabBtnBubbles) tabBtnBubbles.classList.add('active');
                 loadBubbleSettings();
@@ -1989,6 +2126,245 @@
                 alert('✅ 추천 버블 설정이 성공적으로 저장되었습니다!\n챗봇 웰컴 카드에 즉시 반영됩니다.');
             } catch (err) {
                 alert('버블 설정 저장 중 오류가 발생했습니다: ' + err.message);
+            }
+        }
+
+        // ==========================================
+        // 🗣️ 어르신 말바꾸기(동의어/구어체 치환) 사전 관리 스크립트
+        // ==========================================
+        const DEFAULT_SENIOR_SYNONYMS = [
+            // 자격증 명칭 / 통칭
+            { id: 's1', category: '자격증명칭', input: '굴삭기', target: '굴착기', example: '굴삭기 시험 언제 봐요?' },
+            { id: 's2', category: '자격증명칭', input: '포크레인', target: '굴착기', example: '포크레인 접수비 얼마예요?' },
+            { id: 's3', category: '자격증명칭', input: '포클레인', target: '굴착기', example: '포클레인 상시 시험 일정' },
+            { id: 's4', category: '자격증명칭', input: '한식요리사', target: '한식조리기능사', example: '한식요리사 필기시험 접수' },
+            { id: 's5', category: '자격증명칭', input: '한식조리사', target: '한식조리기능사', example: '한식조리사 자격증 따려면' },
+            { id: 's6', category: '자격증명칭', input: '한조기', target: '한식조리기능사', example: '한조기 필기 응시료' },
+            { id: 's7', category: '자격증명칭', input: '지게차면허', target: '지게차운전기능사', example: '지게차면허 시험 언제예요?' },
+            { id: 's8', category: '자격증명칭', input: '요보사', target: '요양보호사', example: '요보사 시험 응시료 얼마?' },
+            { id: 's9', category: '자격증명칭', input: '요양사', target: '요양보호사', example: '요양사 접수 언제까지예요?' },
+            { id: 's10', category: '자격증명칭', input: '전기기사', target: '전기기능사', example: '전기기사 4차 접수 기간' },
+            { id: 's11', category: '자격증명칭', input: '공개사', target: '공인중개사', example: '공개사 1차 접수되나요?' },
+            { id: 's12', category: '자격증명칭', input: '손평사', target: '손해평가사', example: '손평사 올해 1차 시험' },
+
+            // 비용 & 감면 복지
+            { id: 's13', category: '비용/수수료', input: '접수비', target: '응시료', example: '한식 필기 접수비 얼마?' },
+            { id: 's14', category: '비용/수수료', input: '시험비', target: '응시료', example: '지게차 시험비 얼마예요?' },
+            { id: 's15', category: '비용/수수료', input: '돈 얼마', target: '응시료', example: '굴착기 보려면 돈 얼마 들어요?' },
+            { id: 's16', category: '감면/복지', input: '복지카드', target: '감면', example: '장애인 복지카드 있으면 할인되나요?' },
+            { id: 's17', category: '감면/복지', input: '수급자증명서', target: '감면', example: '기초생활수급자 증명서 서류 내면 반값인가요?' },
+            { id: 's18', category: '감면/복지', input: '유공자증', target: '감면', example: '국가유공자 50% 감면 어떻게 받나요?' },
+
+            // 시험 방식 및 일정 (구어체)
+            { id: 's19', category: '시험방식/일정', input: '쓰는 거', target: '필기', example: '쓰는 거 시험 언제예요?' },
+            { id: 's20', category: '시험방식/일정', input: '직접 하는 거', target: '실기', example: '직접 하는 거 실기 접수도 되나요?' },
+            { id: 's21', category: '시험방식/일정', input: '이론시험', target: '필기', example: '이론시험만 여기서 접수되나요?' },
+
+            // 나이 및 합격 기준
+            { id: 's22', category: '나이/학력', input: '늙어서', target: '나이제한', example: '나이 늙어서 70살인데 시험 볼 수 있나요?' },
+            { id: 's23', category: '나이/학력', input: '글씨 몰라도', target: '나이제한', example: '글자 몰라도 컴퓨터 시험 볼 수 있나요?' },
+            { id: 's24', category: '합격기준', input: '몇 개 맞아야', target: '합격', example: '60문제 중에 몇 개 맞아야 합격인가요?' },
+            { id: 's25', category: '합격기준', input: '당일날 나와', target: '합격', example: '합격자 발표 당일날 바로 나와요?' }
+        ];
+
+        let adminSynonyms = [...DEFAULT_SENIOR_SYNONYMS];
+
+        function loadSynonymsAdmin() {
+            try {
+                const local = localStorage.getItem('dudu_senior_synonyms');
+                if (local) {
+                    const parsed = JSON.parse(local);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        adminSynonyms = parsed;
+                    }
+                }
+            } catch (e) {
+                console.log('말바꾸기 사전 로드 알림:', e);
+            }
+            renderSynonymsAdmin();
+        }
+
+        function renderSynonymsAdmin() {
+            const badge = document.getElementById('synonymCountBadge');
+            const totalEl = document.getElementById('synTotalCount');
+            const certEl = document.getElementById('synCertCount');
+            const feeEl = document.getElementById('synFeeCount');
+            const collEl = document.getElementById('synColloquialCount');
+
+            const total = adminSynonyms.length;
+            if (badge) badge.textContent = total;
+            if (totalEl) totalEl.textContent = `${total}개`;
+
+            const certCount = adminSynonyms.filter(s => s.category === '자격증명칭').length;
+            const feeCount = adminSynonyms.filter(s => s.category === '비용/수수료' || s.category === '감면/복지').length;
+            const collCount = adminSynonyms.filter(s => s.category === '시험방식/일정' || s.category === '나이/학력' || s.category === '합격기준' || s.category === '일상/인사').length;
+
+            if (certEl) certEl.textContent = `${certCount}개`;
+            if (feeEl) feeEl.textContent = `${feeCount}개`;
+            if (collEl) collEl.textContent = `${collCount}개`;
+
+            const search = (document.getElementById('searchSynonym')?.value || '').trim().toLowerCase();
+            const cat = document.getElementById('filterSynCategory')?.value || 'ALL';
+
+            const filtered = adminSynonyms.filter(item => {
+                const matchSearch = !search ||
+                    (item.input && item.input.toLowerCase().includes(search)) ||
+                    (item.target && item.target.toLowerCase().includes(search)) ||
+                    (item.example && item.example.toLowerCase().includes(search));
+                const matchCat = cat === 'ALL' || item.category === cat;
+                return matchSearch && matchCat;
+            });
+
+            const tbody = document.getElementById('synonymsTableBody');
+            if (!tbody) return;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-sub);">조건에 일치하는 말바꾸기 단어가 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((s, idx) => {
+                let badgeColor = '#3b82f6';
+                if (s.category === '비용/수수료') badgeColor = '#10b981';
+                else if (s.category === '감면/복지') badgeColor = '#06b6d4';
+                else if (s.category === '나이/학력') badgeColor = '#ec4899';
+                else if (s.category === '합격기준') badgeColor = '#f59e0b';
+                else if (s.category === '일상/인사') badgeColor = '#8b5cf6';
+
+                return `
+                    <tr>
+                        <td style="text-align: center; color: var(--text-sub); font-weight: 700;">${idx + 1}</td>
+                        <td style="text-align: center;">
+                            <span style="background: rgba(255,255,255,0.06); color: ${badgeColor}; border: 1px solid ${badgeColor}; border-radius: 6px; padding: 3px 8px; font-size: 11.5px; font-weight: 800; white-space: nowrap;">${s.category}</span>
+                        </td>
+                        <td>
+                            <div style="font-weight: 900; font-size: 14.5px; color: #f87171; display: flex; align-items: center; gap: 6px;">
+                                <span>🗣️</span>
+                                <span>“${s.input}”</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 900; font-size: 14.5px; color: #34d399; display: flex; align-items: center; gap: 6px;">
+                                <span>➔</span>
+                                <span>“${s.target}”</span>
+                            </div>
+                        </td>
+                        <td style="color: #cbd5e1; font-size: 13px;">
+                            ${s.example ? `<span style="color: #94a3b8; font-style: italic;">“${s.example}”</span>` : '-'}
+                        </td>
+                        <td style="text-align: center;">
+                            <div style="display: flex; gap: 6px; justify-content: center;">
+                                <button type="button" class="btn btn-secondary" onclick="openEditSynonymModal('${s.id}')" style="padding: 4px 10px; font-size: 12px; background: #2563eb; color: #fff; border-color: #3b82f6;">수정</button>
+                                <button type="button" class="btn btn-secondary" onclick="deleteSynonym('${s.id}')" style="padding: 4px 10px; font-size: 12px; background: rgba(239, 68, 68, 0.2); color: #fca5a5; border-color: #ef4444;">삭제</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function openAddSynonymModal() {
+            document.getElementById('synonymModalTitle').textContent = '새 말바꾸기 단어 추가';
+            document.getElementById('synonymId').value = '';
+            document.getElementById('synCategory').value = '자격증명칭';
+            document.getElementById('synInput').value = '';
+            document.getElementById('synTarget').value = '';
+            document.getElementById('synExample').value = '';
+            const modal = document.getElementById('synonymModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+            }
+        }
+
+        function openEditSynonymModal(id) {
+            const item = adminSynonyms.find(s => s.id == id);
+            if (!item) return;
+            document.getElementById('synonymModalTitle').textContent = '말바꾸기 단어 수정';
+            document.getElementById('synonymId').value = item.id;
+            document.getElementById('synCategory').value = item.category || '자격증명칭';
+            document.getElementById('synInput').value = item.input || '';
+            document.getElementById('synTarget').value = item.target || '';
+            document.getElementById('synExample').value = item.example || '';
+            const modal = document.getElementById('synonymModal');
+            if (modal) {
+                modal.classList.add('active');
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closeSynonymModal() {
+            const modal = document.getElementById('synonymModal');
+            if (modal) {
+                modal.classList.remove('active');
+                modal.style.display = 'none';
+            }
+        }
+
+        function saveSynonymItem(e) {
+            if (e) e.preventDefault();
+            const id = document.getElementById('synonymId').value;
+            const category = document.getElementById('synCategory').value;
+            const input = document.getElementById('synInput').value.trim();
+            const target = document.getElementById('synTarget').value.trim();
+            const example = document.getElementById('synExample').value.trim();
+
+            if (!input || !target) {
+                alert('어르신 입력 표현과 정규 치환어를 모두 입력해 주세요.');
+                return;
+            }
+
+            if (id) {
+                const item = adminSynonyms.find(s => s.id === id);
+                if (item) {
+                    item.category = category;
+                    item.input = input;
+                    item.target = target;
+                    item.example = example;
+                }
+            } else {
+                adminSynonyms.push({
+                    id: 's_' + Date.now(),
+                    category: category,
+                    input: input,
+                    target: target,
+                    example: example
+                });
+            }
+
+            closeSynonymModal();
+            renderSynonymsAdmin();
+            saveAllSynonyms(true); // 자동 로컬 저장
+        }
+
+        function deleteSynonym(id) {
+            if (!confirm('이 말바꾸기 단어를 사전에서 삭제하시겠습니까?')) return;
+            adminSynonyms = adminSynonyms.filter(s => s.id !== id);
+            renderSynonymsAdmin();
+            saveAllSynonyms(true);
+        }
+
+        function resetDefaultSynonyms() {
+            if (!confirm('기본 25대 시니어 말바꾸기 사전(굴삭기, 포크레인, 한식요리사, 복지카드 등)으로 초기화하시겠습니까?')) return;
+            adminSynonyms = [...DEFAULT_SENIOR_SYNONYMS];
+            renderSynonymsAdmin();
+            saveAllSynonyms(true);
+        }
+
+        function saveAllSynonyms(silent = false) {
+            try {
+                localStorage.setItem('dudu_senior_synonyms', JSON.stringify(adminSynonyms));
+
+                // 챗봇 엔진에 즉시 동기화
+                if (window.duduChat && typeof window.duduChat.updateCustomSynonyms === 'function') {
+                    window.duduChat.updateCustomSynonyms(adminSynonyms);
+                }
+
+                if (!silent) {
+                    alert('✅ 어르신 말바꾸기 사전이 성공적으로 저장되었습니다!\n챗봇 상담 엔진에 즉시 반영되었습니다.');
+                }
+            } catch (err) {
+                alert('말바꾸기 사전 저장 중 오류 발생: ' + err.message);
             }
         }
 

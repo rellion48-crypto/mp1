@@ -268,7 +268,8 @@ const AUXILIARY_KNOWLEDGE = [
     }
 ];
 
-const SENIOR_SYNONYMS = {
+let SENIOR_SYNONYMS = {
+    // 비용 & 수수료
     '접수비': '응시료',
     '시험비': '응시료',
     '돈 얼마': '응시료',
@@ -276,25 +277,63 @@ const SENIOR_SYNONYMS = {
     '비용': '응시료',
     '수수료': '응시료',
     '등록금': '응시료',
+
+    // 자격증 명칭 / 통칭
+    '굴삭기': '굴착기',
     '포크레인': '굴착기',
     '포클레인': '굴착기',
+    '포크래인': '굴착기',
+    '한식요리사': '한식조리기능사',
+    '한식조리사': '한식조리기능사',
+    '한식요리': '한식조리',
+    '한조기': '한식조리기능사',
+    '지게차 면허': '지게차',
+    '지게차면허': '지게차',
+    '지게차기능사': '지게차',
     '요양사': '요양보호사',
     '요보사': '요양보호사',
-    '한조기': '한식조리기능사',
+    '노인돌봄': '요양보호사',
     '공개사': '공인중개사',
     '손평사': '손해평가사',
     '전기기사': '전기기능사',
-    '지게차 면허': '지게차',
-    '지게차면허': '지게차',
+
+    // 감면 / 복지 서류
+    '복지카드': '감면',
+    '유공자증': '감면',
+    '수급자증명서': '감면',
+    '기초생활수급': '감면',
+    '기초수급': '감면',
+    '차상위계층': '감면',
+    '반값': '감면',
+
+    // 시험 방식 (구어체)
     '1차': '필기',
     '이론': '필기',
     '쓰는 거': '필기',
     '2차': '실기',
     '실습': '실기',
     '직접 하는 거': '실기',
+
+    // 나이 / 합격 / 신분증
+    '늙어서': '나이제한',
+    '나이많은데': '나이제한',
+    '칠순': '나이제한',
+    '환갑': '나이제한',
+    '글씨 몰라도': '나이제한',
+    '몇 개 맞아야': '합격',
+    '당일날 나와': '합격',
+    '주민증': '신분증',
+    '운전면허': '신분증',
+    '신분증 깜빡': '신분증',
+
+    // 접수처 / 방식
     '동사무소': '접수방법',
     '주민센터': '접수방법',
     '우체국': '접수방법',
+    '전화신청': '접수방법',
+    '대신신청': '접수방법',
+
+    // 사투리 / 감사
     '고마워유': '고마워',
     '감사유': '감사',
     '고맙구먼': '고마워'
@@ -475,8 +514,34 @@ class DuduChatbot {
 
         await Promise.all([
             this.syncWithSupabase(),
-            this.syncRecommendedBubbles()
+            this.syncRecommendedBubbles(),
+            this.syncSeniorSynonyms()
         ]);
+    }
+
+    syncSeniorSynonyms() {
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const stored = localStorage.getItem('dudu_senior_synonyms');
+                if (stored) {
+                    const list = JSON.parse(stored);
+                    if (Array.isArray(list)) {
+                        this.updateCustomSynonyms(list);
+                    }
+                }
+            }
+        } catch (e) {
+            console.log('시니어 동의어 사전 동기화 알림:', e);
+        }
+    }
+
+    updateCustomSynonyms(customList) {
+        if (!Array.isArray(customList)) return;
+        customList.forEach(item => {
+            if (item && item.input && item.target) {
+                SENIOR_SYNONYMS[item.input.trim()] = item.target.trim();
+            }
+        });
     }
 
     initSpeechRecognition() {
