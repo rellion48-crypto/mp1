@@ -703,7 +703,10 @@ class DuduChatbot {
         return `
             <div class="chat-msg bot welcome-msg" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #3b82f6; border-bottom-left-radius: 4px; padding: 16px 20px; border-radius: 20px; line-height: 1.6; font-size: ${this.fontSize}px; word-break: keep-all; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:900; color:#60a5fa; font-size:1.08em;">
-                    <span style="font-size:1.3em;">👋</span> 안녕하세요, 어르신!
+                    <div style="width: 26px; height: 26px; background: #ffffff; border: 1.5px solid #60a5fa; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center; overflow: hidden; padding: 2px; flex-shrink: 0; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">
+                        <img src="/dudutrain.png" alt="두두" style="width: 100%; height: 100%; object-fit: contain;">
+                    </div>
+                    <span>안녕하세요, 어르신!</span>
                 </div>
                 <div>
                     저희는 <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>

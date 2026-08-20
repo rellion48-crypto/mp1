@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>두두자격지원센터 - 시니어 3대 핵심 국가기술자격 간편 원서접수</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="dudutrain.png">
     <!-- Google Fonts: Noto Sans KR -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1002,7 +1004,9 @@
     <header>
         <div class="header-container">
             <a href="index.html" class="logo">
-                <div class="logo-badge">두</div>
+                <div class="logo-badge" style="background: #ffffff; border: 2px solid #3b82f6; overflow: hidden; padding: 3px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(37,99,235,0.3);">
+                    <img src="dudutrain.png" alt="두두 로고" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
                 <div class="logo-text">
                     <h1>두두자격지원센터</h1>
                     <p>중장년·시니어 취업 3대 핵심 국가기술자격 간편 원서접수 포털</p>
@@ -1471,16 +1475,20 @@
     </footer>
 
     <!-- 7. Guaranteed Static Chatbot DOM Elements -->
-    <div id="duduChatFab" onclick="window.duduChat ? window.duduChat.toggleChat() : (document.getElementById('duduChatWindow').style.display = document.getElementById('duduChatWindow').style.display === 'flex' ? 'none' : 'flex')" onkeydown="if(event.key==='Enter') this.click()" tabindex="0" role="button" style="position: fixed !important; bottom: 30px !important; right: 30px !important; background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; color: #ffffff !important; border: 3px solid #ffffff !important; border-radius: 50px !important; padding: 16px 26px !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important; cursor: pointer !important; z-index: 2147483647 !important; font-family: 'Noto Sans KR', sans-serif !important; user-select: none !important;">
+    <div id="duduChatFab" onclick="window.duduChat ? window.duduChat.toggleChat() : (document.getElementById('duduChatWindow').style.display = document.getElementById('duduChatWindow').style.display === 'flex' ? 'none' : 'flex')" onkeydown="if(event.key==='Enter') this.click()" tabindex="0" role="button" style="position: fixed !important; bottom: 30px !important; right: 30px !important; background: linear-gradient(135deg, #1d4ed8, #2563eb) !important; color: #ffffff !important; border: 3px solid #ffffff !important; border-radius: 50px !important; padding: 14px 24px !important; display: flex !important; align-items: center !important; gap: 12px !important; box-shadow: 0 12px 35px rgba(0,0,0,0.7) !important; cursor: pointer !important; z-index: 2147483647 !important; font-family: 'Noto Sans KR', sans-serif !important; user-select: none !important;">
         <div style="width: 13px; height: 13px; background: #34d399; border-radius: 50%; box-shadow: 0 0 14px #34d399;"></div>
-        <div style="font-size: 28px; display: flex; align-items: center;">🤖</div>
+        <div style="width: 32px; height: 32px; background: #ffffff; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 2px; box-shadow: 0 2px 6px rgba(0,0,0,0.3); flex-shrink: 0;">
+            <img src="dudutrain.png" alt="두두" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
         <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.3px; color: #ffffff;">문의 챗봇</div>
     </div>
 
     <div id="duduChatWindow" style="position: fixed !important; bottom: 95px !important; right: 25px !important; width: 580px !important; max-width: calc(100vw - 32px) !important; height: 720px !important; max-height: calc(100vh - 110px) !important; background: #0f172a !important; border: 3px solid #3b82f6 !important; border-radius: 24px !important; box-shadow: 0 30px 80px rgba(0,0,0,0.95) !important; display: none; flex-direction: column !important; z-index: 2147483647 !important; overflow: hidden !important; font-family: 'Noto Sans KR', sans-serif !important;">
         <div style="background: #1e293b; border-bottom: 2px solid #334155; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 42px; height: 42px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #ffffff;">두</div>
+                <div style="width: 42px; height: 42px; background: #ffffff; border: 2px solid #60a5fa; border-radius: 12px; display: flex; align-items: center; justify-content: center; overflow: hidden; padding: 3px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); flex-shrink: 0;">
+                    <img src="dudutrain.png" alt="두두 AI" style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
                 <div>
                     <h4 style="color: #ffffff; font-size: 17px; font-weight: 900; margin: 0;">3대 자격증 AI 안내 상담원</h4>
                     <p style="color: #94a3b8; font-size: 12px; font-weight: 600; margin: 0;">한식·지게차·굴착기 상시 CBT 정밀 안내</p>
