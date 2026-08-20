@@ -688,16 +688,16 @@ class DuduChatbot {
             #duduChatWindow {
                 --chat-font-size: 16px;
                 position: fixed !important;
-                bottom: 105px !important;
-                right: 30px !important;
-                width: 440px !important;
-                max-width: calc(100vw - 36px) !important;
-                height: 640px !important;
-                max-height: calc(100vh - 130px) !important;
+                bottom: 95px !important;
+                right: 25px !important;
+                width: 500px !important;
+                max-width: calc(100vw - 30px) !important;
+                height: 700px !important;
+                max-height: calc(100vh - 110px) !important;
                 background: #0f172a !important;
                 border: 3px solid #3b82f6 !important;
                 border-radius: 24px !important;
-                box-shadow: 0 30px 70px rgba(0, 0, 0, 0.9) !important;
+                box-shadow: 0 30px 80px rgba(0, 0, 0, 0.95) !important;
                 display: none;
                 flex-direction: column !important;
                 z-index: 2147483647 !important;
@@ -883,20 +883,50 @@ class DuduChatbot {
                 0% { transform: scaleY(0.4); opacity: 0.5; }
                 100% { transform: scaleY(1.2); opacity: 1; }
             }
+            #chatInput {
+                flex: 1 1 auto !important;
+                min-width: 0 !important;
+                width: auto !important;
+                box-sizing: border-box !important;
+            }
+            #chatVoiceBtn, .chat-voice-btn {
+                flex-shrink: 0 !important;
+                height: 48px !important;
+                padding: 0 14px !important;
+                font-size: 15px !important;
+            }
+            #chatSendBtn {
+                flex-shrink: 0 !important;
+                height: 48px !important;
+                padding: 0 20px !important;
+                font-size: 16px !important;
+                font-weight: 900 !important;
+                white-space: nowrap !important;
+            }
             @media (max-width: 640px) {
                 #duduChatWindow {
-                    width: calc(100vw - 20px) !important;
-                    right: 10px !important;
-                    bottom: 75px !important;
-                    height: calc(100vh - 90px) !important;
-                    max-height: calc(100vh - 90px) !important;
+                    width: calc(100vw - 16px) !important;
+                    right: 8px !important;
+                    bottom: 70px !important;
+                    height: calc(100vh - 85px) !important;
+                    max-height: calc(100vh - 85px) !important;
                     border-radius: 18px !important;
                 }
                 #duduChatFab {
-                    bottom: 18px !important;
-                    right: 14px !important;
-                    padding: 12px 18px !important;
+                    bottom: 16px !important;
+                    right: 12px !important;
+                    padding: 10px 16px !important;
                     font-size: 14px !important;
+                }
+                #chatVoiceBtn, .chat-voice-btn {
+                    padding: 0 10px !important;
+                    font-size: 13px !important;
+                    height: 44px !important;
+                }
+                #chatSendBtn {
+                    padding: 0 14px !important;
+                    font-size: 14px !important;
+                    height: 44px !important;
                 }
                 .chat-msg {
                     max-width: 92% !important;
