@@ -450,6 +450,13 @@ class DuduChatbot {
         this.initSpeechRecognition();
         this.bindEvents();
         this.adjustChatFontSize(0);
+
+        // 초기 웰컴 메시지가 정적 DOM에 존재하지 않거나 추천 버블이 없는 경우 고도화 웰컴 버블 카드로 갱신
+        const container = document.getElementById('chatMessages');
+        if (container && (!container.querySelector('.welcome-chips') || container.children.length <= 1)) {
+            container.innerHTML = this.getWelcomeMessageHTML();
+        }
+
         await this.syncWithSupabase();
     }
 
@@ -667,6 +674,45 @@ class DuduChatbot {
         this.updateModeUI();
     }
 
+    getWelcomeMessageHTML() {
+        return `
+            <div class="chat-msg bot welcome-msg" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #3b82f6; border-bottom-left-radius: 4px; padding: 16px 20px; border-radius: 20px; line-height: 1.6; font-size: ${this.fontSize}px; word-break: keep-all; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:900; color:#60a5fa; font-size:1.08em;">
+                    <span style="font-size:1.3em;">👋</span> 안녕하세요, 어르신!
+                </div>
+                <div>
+                    저희는 <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
+                    <strong>한식조리 · 지게차운전 · 굴착기운전기능사</strong>의 응시료(<span style="color:#93c5fd; font-weight:800;">14,500원</span>), 상시 접수 일정, 당일 합격 발표 등에 대해 무엇이든 편하게 물어보세요!
+                </div>
+                <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.15);">
+                    <div style="font-size: 13px; font-weight: 800; color: #34d399; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                        <span>✨</span> 자주 묻는 질문 (버블을 누르시면 바로 답변해 드려요):
+                    </div>
+                    <div class="quick-chips welcome-chips" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('한식조리 접수비 얼마예요?')">
+                            <span class="bubble-icon">🍲</span> <span class="bubble-txt">한식조리 응시료 (14,500원)</span>
+                        </button>
+                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('지게차 시험일정 언제예요?')">
+                            <span class="bubble-icon">🚜</span> <span class="bubble-txt">지게차 상시 시험일정</span>
+                        </button>
+                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('기초생활수급자나 유공자 50% 감면 혜택 어떻게 받아요?')">
+                            <span class="bubble-icon">💳</span> <span class="bubble-txt">50% 감면 혜택 (7,250원)</span>
+                        </button>
+                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('시험 당일 필수 준비물이 뭐예요?')">
+                            <span class="bubble-icon">🪪</span> <span class="bubble-txt">필수 준비물 & 신분증</span>
+                        </button>
+                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('합격자 발표는 언제 나오나요?')">
+                            <span class="bubble-icon">⏱️</span> <span class="bubble-txt">CBT 당일 합격자 발표</span>
+                        </button>
+                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('인터넷 접수가 어려운데 전화로 대신 접수해 주나요?')">
+                            <span class="bubble-icon">📞</span> <span class="bubble-txt">어르신 무료 대리접수</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
     resetChat() {
         if (this.isListening && this.recognition) {
             try { this.recognition.stop(); } catch (e) {}
@@ -676,12 +722,7 @@ class DuduChatbot {
         this.conversationHistory = [];
         const container = document.getElementById('chatMessages');
         if (container) {
-            container.innerHTML = `
-                <div class="chat-msg bot" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #334155; border-bottom-left-radius: 4px; padding: 14px 18px; border-radius: 18px; line-height: 1.55; font-size: ${this.fontSize}px; word-break: keep-all; font-weight: 500;">
-                    안녕하세요, 어르신! <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
-                    <strong>한식조리, 지게차운전, 굴착기운전기능사</strong>의 응시료(14,500원), 상시 접수 일정, 당일 합격 발표 등에 대해 편하게 물어보세요.
-                </div>
-            `;
+            container.innerHTML = this.getWelcomeMessageHTML();
         }
         const input = document.getElementById('chatInput');
         if (input) {
@@ -797,6 +838,40 @@ class DuduChatbot {
             .quick-chip:hover {
                 background: #2563eb !important;
                 color: #ffffff !important;
+            }
+            .welcome-chips {
+                margin-top: 6px !important;
+            }
+            .welcome-bubble-btn {
+                background: linear-gradient(135deg, rgba(30, 58, 138, 0.45), rgba(15, 23, 42, 0.75)) !important;
+                border: 1.5px solid #3b82f6 !important;
+                color: #e2e8f0 !important;
+                border-radius: 14px !important;
+                padding: 10px 12px !important;
+                font-size: calc(var(--chat-font-size, 16px) * 0.85) !important;
+                font-weight: 700 !important;
+                cursor: pointer !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 8px !important;
+                text-align: left !important;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
+            }
+            .welcome-bubble-btn:hover {
+                background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+                border-color: #60a5fa !important;
+                color: #ffffff !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45) !important;
+            }
+            .welcome-bubble-btn .bubble-icon {
+                font-size: 18px !important;
+                flex-shrink: 0 !important;
+            }
+            .welcome-bubble-btn .bubble-txt {
+                flex: 1 !important;
+                line-height: 1.3 !important;
             }
             .chat-feedback-bar {
                 display: flex !important;
