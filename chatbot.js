@@ -731,9 +731,9 @@ class DuduChatbot {
                 position: fixed !important;
                 bottom: 95px !important;
                 right: 25px !important;
-                width: 500px !important;
-                max-width: calc(100vw - 30px) !important;
-                height: 700px !important;
+                width: 580px !important;
+                max-width: calc(100vw - 32px) !important;
+                height: 720px !important;
                 max-height: calc(100vh - 110px) !important;
                 background: #0f172a !important;
                 border: 3px solid #3b82f6 !important;

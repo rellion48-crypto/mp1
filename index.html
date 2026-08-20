@@ -1477,7 +1477,7 @@
         <div style="font-size: 19px; font-weight: 900; letter-spacing: -0.3px; color: #ffffff;">문의 챗봇</div>
     </div>
 
-    <div id="duduChatWindow" style="position: fixed !important; bottom: 105px !important; right: 30px !important; width: 440px !important; max-width: calc(100vw - 36px) !important; height: 640px !important; max-height: calc(100vh - 130px) !important; background: #0f172a !important; border: 3px solid #3b82f6 !important; border-radius: 24px !important; box-shadow: 0 30px 70px rgba(0,0,0,0.9) !important; display: none; flex-direction: column !important; z-index: 2147483647 !important; overflow: hidden !important; font-family: 'Noto Sans KR', sans-serif !important;">
+    <div id="duduChatWindow" style="position: fixed !important; bottom: 95px !important; right: 25px !important; width: 580px !important; max-width: calc(100vw - 32px) !important; height: 720px !important; max-height: calc(100vh - 110px) !important; background: #0f172a !important; border: 3px solid #3b82f6 !important; border-radius: 24px !important; box-shadow: 0 30px 80px rgba(0,0,0,0.95) !important; display: none; flex-direction: column !important; z-index: 2147483647 !important; overflow: hidden !important; font-family: 'Noto Sans KR', sans-serif !important;">
         <div style="background: #1e293b; border-bottom: 2px solid #334155; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 42px; height: 42px; background: #2563eb; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; color: #ffffff;">두</div>
@@ -1487,6 +1487,7 @@
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 6px;">
+                <button style="background: rgba(239, 68, 68, 0.2); border: 1px solid #ef4444; color: #fca5a5; border-radius: 6px; padding: 5px 9px; font-size: 12px; font-weight: 800; cursor: pointer;" id="chatResetBtn" onclick="if(confirm('대화 내용을 모두 지우고 처음 상태로 초기화하시겠습니까?')) window.duduChat && window.duduChat.resetChat()" title="대화 내용 지우기">🧹 지우기</button>
                 <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontDown" onclick="window.duduChat && window.duduChat.adjustChatFontSize(-2)" onkeydown="if(event.key==='Enter') this.click()">가-</button>
                 <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatFontUp" onclick="window.duduChat && window.duduChat.adjustChatFontSize(2)" onkeydown="if(event.key==='Enter') this.click()">가+</button>
                 <button style="background: #334155; border: 1px solid #475569; color: #ffffff; border-radius: 6px; padding: 5px 10px; font-size: 13px; font-weight: 800; cursor: pointer;" id="chatCloseBtn" onclick="window.duduChat ? window.duduChat.toggleChat(false) : (document.getElementById('duduChatWindow').style.display='none')" onkeydown="if(event.key==='Enter') this.click()">✕</button>
@@ -1521,6 +1522,7 @@
         </div>
         <div style="padding: 16px; background: #1e293b; border-top: 2px solid #334155; display: flex; gap: 10px;">
             <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
+            <button id="chatVoiceBtn" class="chat-voice-btn" type="button" title="음성으로 질문하기 (클릭 후 말씀하세요)">🎤 음성</button>
             <button id="chatSendBtn" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
         </div>
     </div>
