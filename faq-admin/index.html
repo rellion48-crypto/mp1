@@ -1800,13 +1800,19 @@
                     return;
                 }
 
-                tableBody.innerHTML = adminBubbles.map((b, idx) => `
+                tableBody.innerHTML = adminBubbles.map((b, idx) => {
+                    const isFirst = idx === 0;
+                    const isLast = idx === adminBubbles.length - 1;
+                    const btnBase = "height: 36px; font-size: 13px; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; transition: all 0.2s;";
+                    const arrowStyle = `${btnBase} width: 36px; min-width: 36px; padding: 0;`;
+
+                    return `
                     <div style="display:flex; align-items:center; justify-content:space-between; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px 18px; gap: 14px; flex-wrap: wrap;">
                         <div style="display:flex; align-items:center; gap: 12px; min-width: 280px; flex: 1;">
-                            <div style="width: 32px; height: 32px; background: #2563eb; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:14px; color:#ffffff;">
+                            <div style="width: 32px; height: 32px; background: #2563eb; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:14px; color:#ffffff; flex-shrink: 0;">
                                 ${idx + 1}
                             </div>
-                            <div style="font-size: 24px;">${b.icon || '💡'}</div>
+                            <div style="font-size: 24px; flex-shrink: 0;">${b.icon || '💡'}</div>
                             <div>
                                 <div style="font-weight: 800; font-size: 15px; color: #ffffff; display: flex; align-items: center; gap: 8px;">
                                     ${b.label}
@@ -1821,16 +1827,16 @@
                         </div>
 
                         <div style="display:flex; align-items:center; gap: 6px;">
-                            <button type="button" class="btn btn-secondary" onclick="moveBubble('${b.id}', -1)" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''} title="위로 이동" style="padding: 6px 10px; font-size: 12px;">▲</button>
-                            <button type="button" class="btn btn-secondary" onclick="moveBubble('${b.id}', 1)" ${idx === adminBubbles.length - 1 ? 'disabled style="opacity:0.3;"' : ''} title="아래로 이동" style="padding: 6px 10px; font-size: 12px;">▼</button>
-                            <button type="button" class="btn btn-secondary" onclick="toggleBubbleActive('${b.id}')" style="padding: 6px 12px; font-size: 12px; background: ${b.active !== false ? '#334155' : 'rgba(16,185,129,0.2)'};">
+                            <button type="button" class="btn btn-secondary" onclick="moveBubble('${b.id}', -1)" ${isFirst ? 'disabled' : ''} title="위로 이동" style="${arrowStyle} ${isFirst ? 'opacity: 0.35; cursor: not-allowed; border-color: #334155; background: #1e293b; color: #64748b;' : 'cursor: pointer;'}">▲</button>
+                            <button type="button" class="btn btn-secondary" onclick="moveBubble('${b.id}', 1)" ${isLast ? 'disabled' : ''} title="아래로 이동" style="${arrowStyle} ${isLast ? 'opacity: 0.35; cursor: not-allowed; border-color: #334155; background: #1e293b; color: #64748b;' : 'cursor: pointer;'}">▼</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleBubbleActive('${b.id}')" style="${btnBase} padding: 0 14px; min-width: 68px; background: ${b.active !== false ? '#334155' : 'rgba(16,185,129,0.2)'}; border-color: ${b.active !== false ? '#475569' : '#10b981'}; color: ${b.active !== false ? '#e2e8f0' : '#34d399'}; cursor: pointer;">
                                 ${b.active !== false ? '숨기기' : '노출하기'}
                             </button>
-                            <button type="button" class="btn btn-secondary" onclick="openEditBubbleModal('${b.id}')" style="padding: 6px 12px; font-size: 12px; background: #2563eb; color: #ffffff;">수정</button>
-                            <button type="button" class="btn btn-secondary" onclick="deleteBubble('${b.id}')" style="padding: 6px 10px; font-size: 12px; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;">삭제</button>
+                            <button type="button" class="btn btn-secondary" onclick="openEditBubbleModal('${b.id}')" style="${btnBase} padding: 0 14px; min-width: 58px; background: #2563eb; border-color: #3b82f6; color: #ffffff; cursor: pointer;">수정</button>
+                            <button type="button" class="btn btn-secondary" onclick="deleteBubble('${b.id}')" style="${btnBase} padding: 0 14px; min-width: 58px; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5; cursor: pointer;">삭제</button>
                         </div>
                     </div>
-                `).join('');
+                `;}).join('');
             }
         }
 
