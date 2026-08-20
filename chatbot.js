@@ -1548,7 +1548,7 @@ class DuduChatbot {
         const isPracticalIntent = normalizedQuery.includes('실기') || normalizedQuery.includes('2차') || normalizedQuery.includes('실습') || normalizedQuery.includes('직접 하는');
         const isFeeWord = normalizedQuery.includes('응시료') || normalizedQuery.includes('접수비') || normalizedQuery.includes('시험비') || normalizedQuery.includes('비용') || normalizedQuery.includes('수수료') || normalizedQuery.includes('얼마') || normalizedQuery.includes('돈') || normalizedQuery.includes('등록금');
         const isScheduleWord = normalizedQuery.includes('일정') || normalizedQuery.includes('언제') || normalizedQuery.includes('기간') || normalizedQuery.includes('상시') || normalizedQuery.includes('cbt') || normalizedQuery.includes('날짜');
-        const isPassWord = (normalizedQuery.includes('합격') || normalizedQuery.includes('점수') || normalizedQuery.includes('결과')) && (normalizedQuery.includes('발표') || normalizedQuery.includes('당일') || normalizedQuery.includes('언제나와') || normalizedQuery.includes('몇점') || normalizedQuery.includes('합격여부'));
+        const isPassWord = normalizedQuery.includes('결과') || normalizedQuery.includes('합격') || normalizedQuery.includes('점수') || normalizedQuery.includes('발표');
         const isTimeWord = normalizedQuery.includes('교시') || /몇\s*부|1부|2부|3부|4부|5부|시험\s*시간|소요시간/.test(normalizedQuery);
         const isPrepWord = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구') || normalizedQuery.includes('가져갈');
         const isRefundWord = normalizedQuery.includes('환불') || normalizedQuery.includes('취소') || normalizedQuery.includes('돈돌려');
@@ -1560,13 +1560,13 @@ class DuduChatbot {
         if (normalizedQuery.includes('주차') || normalizedQuery.includes('셔틀') || normalizedQuery.includes('주차장')) {
             return getMaster(22).answer;
         }
-        if (normalizedQuery.includes('요양') && isFeeWord) {
+        if (normalizedQuery.includes('요양') && (normalizedQuery.includes('응시료') || normalizedQuery.includes('수수료') || normalizedQuery.includes('비용') || normalizedQuery.includes('얼마') || normalizedQuery.includes('돈'))) {
             return getMaster(17).answer;
         }
         if (normalizedQuery.includes('위생사') && (isFeeWord || isScheduleWord)) {
             return getMaster(18).answer;
         }
-        if ((normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) && isFeeWord) {
+        if ((normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) && (normalizedQuery.includes('응시료') || normalizedQuery.includes('수수료') || normalizedQuery.includes('비용') || normalizedQuery.includes('얼마') || normalizedQuery.includes('돈'))) {
             return getMaster(19).answer;
         }
         if (normalizedQuery.includes('요양') && (normalizedQuery.includes('이수') || normalizedQuery.includes('교육시간') || normalizedQuery.includes('자격조건'))) {
@@ -1576,9 +1576,21 @@ class DuduChatbot {
             return getMaster(21).answer;
         }
 
-        // 4. 접수방법 (동사무소 / 주민센터 / 우체국 방문 등) - 나이 격려보다 우선
-        const isOfflineVisit = normalizedQuery.includes('동사무소') || normalizedQuery.includes('주민센터') || normalizedQuery.includes('우체국') || normalizedQuery.includes('방문') || normalizedQuery.includes('대리접수') || normalizedQuery.includes('도와줘') || normalizedQuery.includes('신청방법') || normalizedQuery.includes('어떻게 접수') || normalizedQuery.includes('현장접수');
-        if (isOfflineVisit) {
+        // 4. 접수방법 및 어르신 무료 대리접수 지원 안내 (나이 격려보다 우선)
+        const isProxyOrOffline = normalizedQuery.includes('동사무소') || 
+                                 normalizedQuery.includes('주민센터') || 
+                                 normalizedQuery.includes('우체국') || 
+                                 normalizedQuery.includes('방문') || 
+                                 normalizedQuery.includes('대리접수') || 
+                                 normalizedQuery.includes('대리') || 
+                                 normalizedQuery.includes('대신') || 
+                                 normalizedQuery.includes('직원이') || 
+                                 normalizedQuery.includes('도와줘') || 
+                                 normalizedQuery.includes('도와주') || 
+                                 normalizedQuery.includes('신청방법') || 
+                                 normalizedQuery.includes('어떻게 접수') || 
+                                 normalizedQuery.includes('현장접수');
+        if (isProxyOrOffline && !isFeeWord && !isScheduleWord && !isPassWord && !isPrepWord) {
             return getMaster(16).answer;
         }
 
@@ -1606,7 +1618,7 @@ class DuduChatbot {
             }
         }
 
-        // 5. [Tier 1] 사내 23종 Master 공식 규정 매칭
+        // 6. [Tier 1] 사내 23종 Master 공식 규정 매칭
 
         // A. 50% 감면 규정 (ID 3)
         if (hasDiscountIntent) {
@@ -1641,8 +1653,15 @@ class DuduChatbot {
             return this.auxiliaryKnowledge.find(k => k.id === 103).answer;
         }
 
-        // G. 타 종목 일정 및 접수
-        if ((normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) && (normalizedQuery.includes('올해') || normalizedQuery.includes('1차') || normalizedQuery.includes('마감'))) {
+        // G. 타 종목 대리접수 지원 여부 질의 (Tier 2 보조 지식 ID 104)
+        if ((normalizedQuery.includes('접수 되') || normalizedQuery.includes('접수되') || normalizedQuery.includes('신청 되') || normalizedQuery.includes('신청되') || normalizedQuery.includes('대행 되') || normalizedQuery.includes('다른 자격증') || normalizedQuery.includes('기타 자격증')) &&
+            (normalizedQuery.includes('전기') || normalizedQuery.includes('요양') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('손해평가사') || normalizedQuery.includes('위생사') || normalizedQuery.includes('부동산')) &&
+            !normalizedQuery.includes('올해') && !normalizedQuery.includes('1차') && !normalizedQuery.includes('마감') && !normalizedQuery.includes('일정') && !normalizedQuery.includes('기간')) {
+            return this.auxiliaryKnowledge.find(k => k.id === 104).answer;
+        }
+
+        // H. 타 종목 일정 및 접수
+        if ((normalizedQuery.includes('손해평가사') || normalizedQuery.includes('공인중개사') || normalizedQuery.includes('부동산')) && (normalizedQuery.includes('올해') || normalizedQuery.includes('1차') || normalizedQuery.includes('마감') || normalizedQuery.includes('언제') || normalizedQuery.includes('지금') || isScheduleWord)) {
             return getMaster(7).answer;
         }
         if (normalizedQuery.includes('전기') && (isScheduleWord || normalizedQuery.includes('회차') || normalizedQuery.includes('정기'))) {
