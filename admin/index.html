@@ -688,10 +688,14 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 22px;">
-                <button class="btn btn-primary" onclick="openEditModal(currentRecordId)">✏️ 전체 정보 수정</button>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 22px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-primary" onclick="openEditModal(currentRecordId)">✏️ 정보 수정</button>
+                    <button class="btn" onclick="printAdminReceipt()" style="background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #93c5fd; font-weight: 800; cursor: pointer;">🖨️ 수험표 인쇄</button>
+                    <button class="btn" onclick="copyAdminSMS()" style="background: rgba(255,255,255,0.08); border: 1px solid #475569; color: #cbd5e1; font-weight: 700; cursor: pointer;">📱 SMS문구 복사</button>
+                </div>
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-danger" onclick="deleteCurrentRecord()">접수 삭제</button>
+                    <button class="btn btn-danger" onclick="deleteCurrentRecord()">삭제</button>
                     <button class="btn btn-secondary" onclick="closeDetailModal()">닫기</button>
                 </div>
             </div>
@@ -1281,6 +1285,137 @@
             } catch (err) {
                 alert('삭제 실패: ' + err.message);
             }
+        }
+
+        /* 🖨️ 관리자 수험표 인쇄 및 📱 SMS 복사 */
+        function printAdminReceipt() {
+            if (!currentRecordId) return;
+            const rec = allRecords.find(r => r.id === currentRecordId);
+            if (!rec) return;
+
+            const printHtml = `
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+                <meta charset="UTF-8">
+                <title>원서접수 확인증 - ${rec.receipt_number || ('DN2026' + rec.id)}</title>
+                <style>
+                    body { font-family: 'Noto Sans KR', sans-serif, malgun gothic; padding: 30px; color: #111827; background: #fff; }
+                    .ticket-container { max-width: 680px; margin: 0 auto; border: 3px solid #1e3a8a; border-radius: 12px; padding: 28px; position: relative; }
+                    .header { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 16px; margin-bottom: 20px; }
+                    .header h1 { font-size: 24px; color: #1e3a8a; margin: 0 0 6px; font-weight: 900; }
+                    .header p { font-size: 13px; color: #4b5563; margin: 0; }
+                    .table-info { width: 100%; border-collapse: collapse; margin-bottom: 22px; }
+                    .table-info th, .table-info td { border: 1px solid #d1d5db; padding: 12px 14px; font-size: 14px; }
+                    .table-info th { background: #f3f4f6; color: #1f2937; text-align: left; width: 32%; font-weight: 800; }
+                    .table-info td { font-weight: 600; }
+                    .notes { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; font-size: 13px; color: #1e40af; line-height: 1.6; }
+                    .notes strong { display: block; font-size: 14px; margin-bottom: 6px; }
+                    .footer { text-align: center; margin-top: 24px; font-size: 13px; color: #6b7280; font-weight: 700; }
+                    .stamp { position: absolute; right: 40px; bottom: 35px; width: 80px; height: 80px; border: 3px dashed #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ef4444; font-weight: 900; font-size: 14px; transform: rotate(-15deg); opacity: 0.85; }
+                    @media print {
+                        body { padding: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="ticket-container">
+                    <div class="header">
+                        <h1>두두자격지원센터 원서접수 확인증 (관리자 보관/발급용)</h1>
+                        <p>중장년·시니어 취업 3대 국가기술자격 간편 원서접수 증명서</p>
+                    </div>
+                    <table class="table-info">
+                        <tr>
+                            <th>접수 번호</th>
+                            <td style="font-family: monospace; color: #1d4ed8; font-size: 16px; font-weight: 900;">${rec.receipt_number || ('DN2026' + rec.id)}</td>
+                        </tr>
+                        <tr>
+                            <th>수험자 성함</th>
+                            <td>${rec.name}</td>
+                        </tr>
+                        <tr>
+                            <th>연락처</th>
+                            <td>${rec.phone}</td>
+                        </tr>
+                        <tr>
+                            <th>생년월일 / 성별</th>
+                            <td>${rec.birth_date || '-'} (${rec.gender || '남'}성)</td>
+                        </tr>
+                        <tr>
+                            <th>응시 종목</th>
+                            <td style="font-size: 15px; font-weight: 800; color: #111827;">${rec.qualification}</td>
+                        </tr>
+                        <tr>
+                            <th>시험 방식 / 회차</th>
+                            <td>국가기술자격 상시 CBT (${rec.exam_stage || '필기'})</td>
+                        </tr>
+                        <tr>
+                            <th>희망 시험장 / 교시</th>
+                            <td>${rec.exam_region} ${rec.exam_center || ''} (${rec.exam_session || '1부'})</td>
+                        </tr>
+                        <tr>
+                            <th>응시 수수료</th>
+                            <td style="color: #059669; font-weight: 800;">${(rec.fee_final || rec.fee_amount || 14500).toLocaleString()}원 ${rec.fee_discount_type ? '(' + rec.fee_discount_type + ')' : ''}</td>
+                        </tr>
+                        <tr>
+                            <th>접수 등록 일시</th>
+                            <td>${rec.created_at ? new Date(rec.created_at).toLocaleString('ko-KR') : '-'}</td>
+                        </tr>
+                    </table>
+
+                    <div class="notes">
+                        <strong>📌 수험자 필수 안내 및 유의사항</strong>
+                        1. 시험 당일 <strong>실물 신분증(주민등록증·운전면허증 등)</strong>과 수험표를 반드시 지참하시기 바랍니다.<br>
+                        2. 시험 시작 20분 전까지 지정된 시험실에 입실하셔야 합니다.<br>
+                        3. CBT 시험은 컴퓨터로 진행되며 시험 종료 즉시 점수와 합격 여부를 확인하실 수 있습니다.
+                    </div>
+
+                    <div class="stamp">두두지원<br>접수확인</div>
+
+                    <div class="footer">
+                        발행처: 두두자격지원센터 (문의: 1588-0000)
+                    </div>
+                </div>
+                <div class="no-print" style="text-align: center; margin-top: 20px;">
+                    <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 10px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer;">인쇄하기 / PDF 저장</button>
+                    <button onclick="window.close()" style="background: #4b5563; color: #fff; border: none; padding: 10px 20px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-left: 8px;">창 닫기</button>
+                </div>
+            </body>
+            </html>
+            `;
+
+            const printWindow = window.open('', '_blank', 'width=800,height=900');
+            if (printWindow) {
+                printWindow.document.open();
+                printWindow.document.write(printHtml);
+                printWindow.document.close();
+                setTimeout(() => {
+                    printWindow.print();
+                }, 400);
+            }
+        }
+
+        function copyAdminSMS() {
+            if (!currentRecordId) return;
+            const rec = allRecords.find(r => r.id === currentRecordId);
+            if (!rec) return;
+
+            const txt = `[두두자격지원센터 원서접수 완료 안내]\n` +
+                `안녕하세요, ${rec.name}님!\n` +
+                `신청하신 국가기술자격 원서접수가 정상 완료되었습니다.\n\n` +
+                `▶ 접수번호: ${rec.receipt_number || ('DN2026' + rec.id)}\n` +
+                `▶ 응시종목: ${rec.qualification}\n` +
+                `▶ 시험장/교시: ${rec.exam_region} (${rec.exam_session || '1부'})\n` +
+                `▶ 결제금액: ${(rec.fee_final || 14500).toLocaleString()}원\n\n` +
+                `※ 시험 당일 실물 신분증(주민등록증/운전면허증)을 지참해 주시기 바랍니다.\n` +
+                `문의: 두두자격지원센터 (1588-0000)`;
+
+            navigator.clipboard.writeText(txt).then(() => {
+                alert('📋 수험자 안내 SMS 문구가 클립보드에 복사되었습니다!\n문자 발송창에 바로 붙여넣기 하실 수 있습니다.');
+            }).catch(() => {
+                prompt('아래 안내 문구를 복사(Ctrl+C)하세요:', txt);
+            });
         }
 
         function exportToCSV() {

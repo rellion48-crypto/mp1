@@ -839,7 +839,49 @@
             font-weight: 500;
         }
 
-        /* 9. Mobile Responsive Enhancements */
+        /* 9. Print Optimized Styles */
+        @media print {
+            body {
+                background: #ffffff !important;
+                color: #000000 !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .top-utility-bar, header, .hero-section, .application-section, footer, #duduChatFab, #duduChatWindow, #privacyConsentModal, #lookupModal, .modal-badge-check, button {
+                display: none !important;
+            }
+            #receiptModal {
+                position: static !important;
+                background: transparent !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+            #receiptModal .modal-card {
+                background: #ffffff !important;
+                color: #000000 !important;
+                border: 2px solid #000000 !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 24px !important;
+            }
+            #receiptModal h3, #receiptModal p, #receiptModal span, #receiptModal strong {
+                color: #000000 !important;
+            }
+            .modal-receipt-box {
+                background: #f8fafc !important;
+                border: 1px solid #cbd5e1 !important;
+                color: #000000 !important;
+            }
+            .modal-receipt-box span {
+                color: #475569 !important;
+            }
+            .modal-receipt-box strong {
+                color: #000000 !important;
+            }
+        }
+
+        /* 10. Mobile Responsive Enhancements */
         @media (max-width: 768px) {
             body {
                 padding-bottom: 110px;
@@ -1386,15 +1428,15 @@
 
     <!-- 5. Success Receipt Modal -->
     <div class="modal-overlay" id="receiptModal">
-        <div class="modal-card">
+        <div class="modal-card" style="max-width: 540px;">
             <div class="modal-badge-check">✓</div>
             <h3 style="font-size: calc(24px * var(--font-scale)); font-weight: 900; margin-bottom: 8px; color: #ffffff;">원서접수 신청이 완료되었습니다!</h3>
             <p style="font-size: calc(15px * var(--font-scale)); color: var(--text-sub);">두두자격지원센터 접수 대장에 정상 등록되었습니다.</p>
 
-            <div class="modal-receipt-box">
+            <div class="modal-receipt-box" id="printableReceiptBox">
                 <div class="receipt-row">
                     <span style="color: var(--text-sub);">접수번호:</span>
-                    <strong style="color: #60a5fa;" id="receiptNo">-</strong>
+                    <strong style="color: #60a5fa; font-family: monospace;" id="receiptNo">-</strong>
                 </div>
                 <div class="receipt-row">
                     <span style="color: var(--text-sub);">신청자 성함:</span>
@@ -1418,10 +1460,21 @@
                 </div>
             </div>
 
-            <p style="font-size: calc(14px * var(--font-scale)); color: #cbd5e1; margin-bottom: 24px; line-height: 1.5; font-weight: 600;">
+            <p style="font-size: calc(14px * var(--font-scale)); color: #cbd5e1; margin-bottom: 18px; line-height: 1.5; font-weight: 600;">
                 입력하신 휴대전화로 접수 확인 안내 문자가 발송되며, 담당 직원이 시험장 배정을 위해 연락드리겠습니다.
             </p>
-            <button class="modal-btn" onclick="closeReceiptModal()">확인 및 닫기</button>
+
+            <div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap;">
+                <button type="button" class="modal-btn" onclick="printReceiptTicket()" style="flex: 1; min-width: 200px; background: linear-gradient(135deg, #2563eb, #1d4ed8); border: 2px solid #60a5fa; color: #ffffff; padding: 14px; font-size: calc(15px * var(--font-scale)); font-weight: 900; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 14px rgba(37,99,235,0.4);">
+                    <span>🖨️ 접수증 인쇄 / PDF 저장</span>
+                </button>
+                <button type="button" class="modal-btn" onclick="copyReceiptText()" style="flex: 1; min-width: 180px; background: #334155; border: 2px solid #475569; color: #ffffff; padding: 14px; font-size: calc(15px * var(--font-scale)); font-weight: 800; border-radius: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                    <span>📋 접수내역 복사</span>
+                </button>
+            </div>
+            <button class="modal-btn" onclick="closeReceiptModal()" style="background: transparent; border: 1px solid #475569; color: #94a3b8; padding: 10px; width: 100%; font-size: 14px; border-radius: 10px; cursor: pointer;">
+                확인 및 창 닫기 ✕
+            </button>
         </div>
     </div>
 
@@ -2170,23 +2223,168 @@
                 }
 
                 countBadge.textContent = data.length;
-                list.innerHTML = data.map(item => `
+                list.innerHTML = data.map((item, idx) => `
                     <div style="background: #020617; border: 1.5px solid #3b82f6; border-radius: 12px; padding: 16px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <span style="font-family: monospace; font-weight: 800; color: #60a5fa; font-size: 15px;"># ${item.receipt_number || ('DN2026' + item.id)}</span>
                             <span style="background: rgba(16, 185, 129, 0.25); color: #34d399; border: 1px solid #10b981; border-radius: 20px; padding: 3px 10px; font-size: 12px; font-weight: 800;">${item.status || '접수완료'}</span>
                         </div>
                         <div style="font-size: 17px; font-weight: 900; color: #ffffff; margin-bottom: 6px;">${item.qualification} (${item.name} 님)</div>
-                        <div style="font-size: 14px; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px;">
+                        <div style="font-size: 14px; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px;">
                             <div>📍 희망 지역/교시: <strong>${item.exam_region || '서울'} ${item.exam_session ? '(' + item.exam_session + ')' : ''}</strong></div>
                             <div>💳 응시 수수료: <strong>${(item.fee_final || item.fee_amount || 14500).toLocaleString()}원</strong> ${item.fee_discount_type ? '(' + item.fee_discount_type + ')' : ''}</div>
-                            <div style="font-size: 12px; color: #94a3b8; margin-top: 4px;">접수일시: ${item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-'}</div>
+                            <div style="font-size: 12px; color: #94a3b8; margin-top: 2px;">접수일시: ${item.created_at ? new Date(item.created_at).toLocaleString('ko-KR') : '-'}</div>
+                        </div>
+                        <div style="display: flex; gap: 8px; border-top: 1px dashed rgba(255,255,255,0.12); padding-top: 10px;">
+                            <button type="button" onclick="printReceiptTicket(${JSON.stringify(item).replace(/"/g, '&quot;')})" style="flex: 1; background: rgba(37,99,235,0.25); border: 1px solid #3b82f6; color: #93c5fd; padding: 8px; font-size: 13px; font-weight: 800; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                🖨️ 접수증 인쇄
+                            </button>
+                            <button type="button" onclick="copyReceiptText(${JSON.stringify(item).replace(/"/g, '&quot;')})" style="flex: 1; background: rgba(255,255,255,0.06); border: 1px solid #475569; color: #cbd5e1; padding: 8px; font-size: 13px; font-weight: 700; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                                📋 복사
+                            </button>
                         </div>
                     </div>
                 `).join('');
             } catch (err) {
                 list.innerHTML = `<div style="color: #f87171; text-align: center; padding: 20px;">조회 중 오류가 발생했습니다: ${err.message}</div>`;
             }
+        }
+
+        /* 🖨️ 접수확인증 인쇄 & 📋 복사 기능 */
+        function printReceiptTicket(customData) {
+            const data = customData || {
+                receipt_number: document.getElementById('receiptNo').textContent,
+                name: document.getElementById('receiptName').textContent,
+                birth_gender: document.getElementById('receiptBirthGender').textContent,
+                qualification: document.getElementById('receiptQual').textContent,
+                region: document.getElementById('receiptRegion').textContent,
+                fee: document.getElementById('receiptFee').textContent,
+                created_at: new Date().toLocaleString('ko-KR')
+            };
+
+            const printHtml = `
+            <!DOCTYPE html>
+            <html lang="ko">
+            <head>
+                <meta charset="UTF-8">
+                <title>원서접수 확인증 - ${data.receipt_number}</title>
+                <style>
+                    body { font-family: 'Noto Sans KR', sans-serif, malgun gothic; padding: 30px; color: #111827; background: #fff; }
+                    .ticket-container { max-width: 680px; margin: 0 auto; border: 3px solid #1e3a8a; border-radius: 12px; padding: 28px; position: relative; }
+                    .header { text-align: center; border-bottom: 2px solid #1e3a8a; padding-bottom: 16px; margin-bottom: 20px; }
+                    .header h1 { font-size: 24px; color: #1e3a8a; margin: 0 0 6px; font-weight: 900; }
+                    .header p { font-size: 13px; color: #4b5563; margin: 0; }
+                    .table-info { width: 100%; border-collapse: collapse; margin-bottom: 22px; }
+                    .table-info th, .table-info td { border: 1px solid #d1d5db; padding: 12px 14px; font-size: 14px; }
+                    .table-info th { background: #f3f4f6; color: #1f2937; text-align: left; width: 32%; font-weight: 800; }
+                    .table-info td { font-weight: 600; }
+                    .notes { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 14px; font-size: 13px; color: #1e40af; line-height: 1.6; }
+                    .notes strong { display: block; font-size: 14px; margin-bottom: 6px; }
+                    .footer { text-align: center; margin-top: 24px; font-size: 13px; color: #6b7280; font-weight: 700; }
+                    .stamp { position: absolute; right: 40px; bottom: 35px; width: 80px; height: 80px; border: 3px dashed #ef4444; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ef4444; font-weight: 900; font-size: 14px; transform: rotate(-15deg); opacity: 0.85; }
+                    @media print {
+                        body { padding: 0; }
+                        .no-print { display: none; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="ticket-container">
+                    <div class="header">
+                        <h1>두두자격지원센터 원서접수 확인증</h1>
+                        <p>중장년·시니어 취업 3대 국가기술자격 간편 원서접수 증명서</p>
+                    </div>
+                    <table class="table-info">
+                        <tr>
+                            <th>접수 번호</th>
+                            <td style="font-family: monospace; color: #1d4ed8; font-size: 16px; font-weight: 900;">${data.receipt_number}</td>
+                        </tr>
+                        <tr>
+                            <th>수험자 성함</th>
+                            <td>${data.name}</td>
+                        </tr>
+                        <tr>
+                            <th>생년월일 / 성별</th>
+                            <td>${data.birth_gender || data.birth_date || '-'}</td>
+                        </tr>
+                        <tr>
+                            <th>응시 종목</th>
+                            <td style="font-size: 15px; font-weight: 800; color: #111827;">${data.qualification}</td>
+                        </tr>
+                        <tr>
+                            <th>시험 방식 / 회차</th>
+                            <td>국가기술자격 상시 CBT (컴퓨터 시험)</td>
+                        </tr>
+                        <tr>
+                            <th>희망 시험장 / 교시</th>
+                            <td>${data.region || (data.exam_region + ' (' + (data.exam_session || '1부') + ')')}</td>
+                        </tr>
+                        <tr>
+                            <th>응시 수수료</th>
+                            <td style="color: #059669; font-weight: 800;">${data.fee || ((data.fee_final || 14500).toLocaleString() + '원')}</td>
+                        </tr>
+                        <tr>
+                            <th>접수 등록 일시</th>
+                            <td>${data.created_at || new Date().toLocaleString('ko-KR')}</td>
+                        </tr>
+                    </table>
+
+                    <div class="notes">
+                        <strong>📌 수험자 필수 안내 및 유의사항</strong>
+                        1. 시험 당일 <strong>실물 신분증(주민등록증·운전면허증 등)</strong>과 수험표를 반드시 지참하시기 바랍니다.<br>
+                        2. 시험 시작 20분 전까지 지정된 시험실에 입실하셔야 합니다.<br>
+                        3. CBT 시험은 컴퓨터로 진행되며 시험 종료 즉시 점수와 합격 여부를 확인하실 수 있습니다.
+                    </div>
+
+                    <div class="stamp">두두지원<br>접수확인</div>
+
+                    <div class="footer">
+                        발행처: 두두자격지원센터 (문의: 1588-0000)
+                    </div>
+                </div>
+                <div class="no-print" style="text-align: center; margin-top: 20px;">
+                    <button onclick="window.print()" style="background: #2563eb; color: #fff; border: none; padding: 10px 24px; font-size: 16px; font-weight: 800; border-radius: 8px; cursor: pointer;">인쇄하기 / PDF 저장</button>
+                    <button onclick="window.close()" style="background: #4b5563; color: #fff; border: none; padding: 10px 20px; font-size: 15px; font-weight: 700; border-radius: 8px; cursor: pointer; margin-left: 8px;">창 닫기</button>
+                </div>
+            </body>
+            </html>
+            `;
+
+            const printWindow = window.open('', '_blank', 'width=800,height=900');
+            if (printWindow) {
+                printWindow.document.open();
+                printWindow.document.write(printHtml);
+                printWindow.document.close();
+                setTimeout(() => {
+                    printWindow.print();
+                }, 400);
+            } else {
+                window.print();
+            }
+        }
+
+        function copyReceiptText(customData) {
+            const data = customData || {
+                receipt_number: document.getElementById('receiptNo').textContent,
+                name: document.getElementById('receiptName').textContent,
+                qualification: document.getElementById('receiptQual').textContent,
+                region: document.getElementById('receiptRegion').textContent,
+                fee: document.getElementById('receiptFee').textContent
+            };
+
+            const txt = `[두두자격지원센터 원서접수 확인]\n` +
+                `- 접수번호: ${data.receipt_number}\n` +
+                `- 신청자: ${data.name} 님\n` +
+                `- 자격종목: ${data.qualification}\n` +
+                `- 희망지역/교시: ${data.region || (data.exam_region + ' ' + (data.exam_session || ''))}\n` +
+                `- 수수료: ${data.fee || (data.fee_final ? data.fee_final.toLocaleString() + '원' : '14,500원')}\n` +
+                `\n※ 시험 당일 실물 신분증(주민등록증/운전면허증)을 꼭 지참해 주세요.`;
+
+            navigator.clipboard.writeText(txt).then(() => {
+                alert('📋 접수 확인 문자 양식이 클립보드에 복사되었습니다!\n카카오톡이나 문자 메시지에 바로 붙여넣기 하실 수 있습니다.');
+            }).catch(() => {
+                prompt('아래 접수내역 텍스트를 복사(Ctrl+C)하세요:', txt);
+            });
         }
 
         window.addEventListener('DOMContentLoaded', () => {

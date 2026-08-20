@@ -452,6 +452,9 @@ class DuduChatbot {
         this.conversationHistory = []; // Up to 5 turns (10 messages: 5 user, 5 model)
         this.isListening = false;
         this.recognition = null;
+        this.currentUtterance = null;
+        this.isSpeaking = false;
+        this.activeTTSButton = null;
         this.init();
     }
 
@@ -748,6 +751,7 @@ class DuduChatbot {
     }
 
     resetChat() {
+        this.stopTTS();
         if (this.isListening && this.recognition) {
             try { this.recognition.stop(); } catch (e) {}
             this.isListening = false;
@@ -940,6 +944,24 @@ class DuduChatbot {
                 background: rgba(255, 255, 255, 0.15) !important;
                 color: #ffffff !important;
                 transform: translateY(-1px) !important;
+            }
+            .feedback-btn.btn-tts {
+                background: rgba(59, 130, 246, 0.15) !important;
+                border: 1px solid #3b82f6 !important;
+                color: #93c5fd !important;
+                font-weight: 800 !important;
+                padding: 3px 10px !important;
+            }
+            .feedback-btn.btn-tts.active-tts {
+                background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
+                border-color: #60a5fa !important;
+                color: #ffffff !important;
+                animation: pulseTTS 1.2s infinite ease-in-out !important;
+            }
+            @keyframes pulseTTS {
+                0% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
+                50% { box-shadow: 0 0 10px 3px rgba(37, 99, 235, 0.5); }
+                100% { box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.7); }
             }
             .feedback-btn.active-pos {
                 background: rgba(16, 185, 129, 0.25) !important;
@@ -1200,6 +1222,7 @@ class DuduChatbot {
                 setTimeout(() => inp.focus(), 100);
             }
         } else {
+            this.stopTTS();
             win.style.display = 'none';
             win.classList.remove('open');
         }
@@ -1429,18 +1452,21 @@ class DuduChatbot {
                 msg.appendChild(chipContainer);
             }
 
-            // 2. 피드백 액션 바
+            // 2. 피드백 액션 바 (TTS 음성 듣기 + 평가)
             const feedbackBar = document.createElement('div');
             feedbackBar.className = 'chat-feedback-bar';
             feedbackBar.innerHTML = `
-                <span class="feedback-prompt-text">답변이 도움되었나요?</span>
-                <button type="button" class="feedback-btn btn-thumbs-up" title="도움이 되었어요">👍 도움돼요</button>
-                <button type="button" class="feedback-btn btn-thumbs-down" title="아쉬워요">👎 아쉬워요</button>
+                <button type="button" class="feedback-btn btn-tts" title="어르신을 위해 답변을 또박또박 음성으로 들려드립니다">🔊 소리로 듣기</button>
+                <span class="feedback-prompt-text" style="margin-left: auto;">도움되었나요?</span>
+                <button type="button" class="feedback-btn btn-thumbs-up" title="도움이 되었어요">👍 도움됨</button>
+                <button type="button" class="feedback-btn btn-thumbs-down" title="아쉬워요">👎 아쉬움</button>
             `;
 
+            const btnTTS = feedbackBar.querySelector('.btn-tts');
             const btnUp = feedbackBar.querySelector('.btn-thumbs-up');
             const btnDown = feedbackBar.querySelector('.btn-thumbs-down');
 
+            btnTTS.onclick = () => this.toggleTTS(text, btnTTS);
             btnUp.onclick = () => this.sendFeedback(originQuery, text, 'positive', feedbackBar);
             btnDown.onclick = () => this.sendFeedback(originQuery, text, 'negative', feedbackBar);
 
@@ -1449,6 +1475,82 @@ class DuduChatbot {
 
         container.appendChild(msg);
         container.scrollTop = container.scrollHeight;
+    }
+
+    toggleTTS(rawText, btnElement) {
+        if (typeof window === 'undefined' || !('speechSynthesis' in window)) {
+            alert('사용 중이신 브라우저가 음성 듣기(TTS) 기능을 지원하지 않습니다.');
+            return;
+        }
+
+        // 현재 재생 중이고 같은 버튼을 누른 경우 -> 정지
+        if (this.isSpeaking && this.activeTTSButton === btnElement) {
+            this.stopTTS();
+            return;
+        }
+
+        // 다른 음성이 재생 중이면 먼저 정지
+        this.stopTTS();
+
+        // 텍스트 정제 (HTML 태그, 마크다운 기호, 이모지 필터링)
+        const cleanText = (rawText || '')
+            .replace(/<[^>]*>?/gm, '')
+            .replace(/[#*●💡📌✨🍲🚜💳🪪⏱️📞🤖⚡👋]/g, '')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+        if (!cleanText) return;
+
+        try {
+            const utter = new SpeechSynthesisUtterance(cleanText);
+            utter.lang = 'ko-KR';
+            utter.rate = 0.92; // 어르신 눈높이의 차분하고 또박또박한 속도
+            utter.pitch = 1.0;
+
+            const voices = window.speechSynthesis.getVoices();
+            const koVoice = voices.find(v => v.lang.includes('ko') || v.lang.includes('KO'));
+            if (koVoice) {
+                utter.voice = koVoice;
+            }
+
+            utter.onstart = () => {
+                this.isSpeaking = true;
+                this.activeTTSButton = btnElement;
+                this.currentUtterance = utter;
+                if (btnElement) {
+                    btnElement.innerHTML = '⏹️ 정지';
+                    btnElement.classList.add('active-tts');
+                }
+            };
+
+            utter.onend = () => {
+                this.stopTTS();
+            };
+
+            utter.onerror = () => {
+                this.stopTTS();
+            };
+
+            window.speechSynthesis.speak(utter);
+        } catch (e) {
+            console.log('TTS playback error:', e);
+            this.stopTTS();
+        }
+    }
+
+    stopTTS() {
+        if (typeof window !== 'undefined' && ('speechSynthesis' in window)) {
+            try {
+                window.speechSynthesis.cancel();
+            } catch (e) {}
+        }
+        if (this.activeTTSButton) {
+            this.activeTTSButton.innerHTML = '🔊 소리로 듣기';
+            this.activeTTSButton.classList.remove('active-tts');
+            this.activeTTSButton = null;
+        }
+        this.isSpeaking = false;
+        this.currentUtterance = null;
     }
 
     async sendFeedback(question, answer, rating, feedbackBar) {
