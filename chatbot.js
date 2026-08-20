@@ -426,6 +426,15 @@ class ClientTfIdfEngine {
     }
 }
 
+const DEFAULT_RECOMMENDED_BUBBLES = [
+    { id: 'b1', icon: '🍲', label: '한식조리 응시료 (14,500원)', query: '한식조리 접수비 얼마예요?', active: true, order: 1 },
+    { id: 'b2', icon: '🚜', label: '지게차 상시 시험일정', query: '지게차 시험일정 언제예요?', active: true, order: 2 },
+    { id: 'b3', icon: '💳', label: '50% 감면 혜택 (7,250원)', query: '기초생활수급자나 유공자 50% 감면 혜택 어떻게 받아요?', active: true, order: 3 },
+    { id: 'b4', icon: '🪪', label: '필수 준비물 & 신분증', query: '시험 당일 필수 준비물이 뭐예요?', active: true, order: 4 },
+    { id: 'b5', icon: '⏱️', label: 'CBT 당일 합격자 발표', query: '합격자 발표는 언제 나오나요?', active: true, order: 5 },
+    { id: 'b6', icon: '📞', label: '어르신 무료 대리접수', query: '인터넷 접수가 어려운데 전화로 대신 접수해 주나요?', active: true, order: 6 }
+];
+
 class DuduChatbot {
     constructor() {
         this.masterRegulations = [...MASTER_OFFICIAL_REGULATIONS];
@@ -436,8 +445,10 @@ class DuduChatbot {
         this.isOpen = false;
         const storedSize = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_chat_font_size') : null;
         const storedMode = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_ai_mode') : null;
+        const storedBubbles = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_custom_bubbles') : null;
         this.fontSize = parseInt(storedSize || '16', 10);
         this.isAIMode = storedMode !== 'false';
+        this.recommendedBubbles = storedBubbles ? JSON.parse(storedBubbles) : [...DEFAULT_RECOMMENDED_BUBBLES];
         this.conversationHistory = []; // Up to 5 turns (10 messages: 5 user, 5 model)
         this.isListening = false;
         this.recognition = null;
@@ -451,13 +462,16 @@ class DuduChatbot {
         this.bindEvents();
         this.adjustChatFontSize(0);
 
-        // 초기 웰컴 메시지가 정적 DOM에 존재하지 않거나 추천 버블이 없는 경우 고도화 웰컴 버블 카드로 갱신
+        // 초기 웰컴 메시지 렌더링
         const container = document.getElementById('chatMessages');
         if (container && (!container.querySelector('.welcome-chips') || container.children.length <= 1)) {
             container.innerHTML = this.getWelcomeMessageHTML();
         }
 
-        await this.syncWithSupabase();
+        await Promise.all([
+            this.syncWithSupabase(),
+            this.syncRecommendedBubbles()
+        ]);
     }
 
     initSpeechRecognition() {
@@ -675,6 +689,17 @@ class DuduChatbot {
     }
 
     getWelcomeMessageHTML() {
+        const activeBubbles = (this.recommendedBubbles || DEFAULT_RECOMMENDED_BUBBLES)
+            .filter(b => b && b.active !== false)
+            .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+        const bubblesHtml = activeBubbles.map(b => `
+            <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('${(b.query || '').replace(/'/g, "\\'")}')">
+                <span class="bubble-icon">${b.icon || '💡'}</span>
+                <span class="bubble-txt">${b.label || b.query}</span>
+            </button>
+        `).join('');
+
         return `
             <div class="chat-msg bot welcome-msg" style="align-self: flex-start; background: #1e293b; color: #ffffff; border: 2px solid #3b82f6; border-bottom-left-radius: 4px; padding: 16px 20px; border-radius: 20px; line-height: 1.6; font-size: ${this.fontSize}px; word-break: keep-all; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
                 <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px; font-weight:900; color:#60a5fa; font-size:1.08em;">
@@ -689,28 +714,34 @@ class DuduChatbot {
                         <span>✨</span> 자주 묻는 질문 (버블을 누르시면 바로 답변해 드려요):
                     </div>
                     <div class="quick-chips welcome-chips" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('한식조리 접수비 얼마예요?')">
-                            <span class="bubble-icon">🍲</span> <span class="bubble-txt">한식조리 응시료 (14,500원)</span>
-                        </button>
-                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('지게차 시험일정 언제예요?')">
-                            <span class="bubble-icon">🚜</span> <span class="bubble-txt">지게차 상시 시험일정</span>
-                        </button>
-                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('기초생활수급자나 유공자 50% 감면 혜택 어떻게 받아요?')">
-                            <span class="bubble-icon">💳</span> <span class="bubble-txt">50% 감면 혜택 (7,250원)</span>
-                        </button>
-                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('시험 당일 필수 준비물이 뭐예요?')">
-                            <span class="bubble-icon">🪪</span> <span class="bubble-txt">필수 준비물 & 신분증</span>
-                        </button>
-                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('합격자 발표는 언제 나오나요?')">
-                            <span class="bubble-icon">⏱️</span> <span class="bubble-txt">CBT 당일 합격자 발표</span>
-                        </button>
-                        <button type="button" class="quick-chip welcome-bubble-btn" onclick="window.duduChat && window.duduChat.askQuestion('인터넷 접수가 어려운데 전화로 대신 접수해 주나요?')">
-                            <span class="bubble-icon">📞</span> <span class="bubble-txt">어르신 무료 대리접수</span>
-                        </button>
+                        ${bubblesHtml}
                     </div>
                 </div>
             </div>
         `;
+    }
+
+    async syncRecommendedBubbles() {
+        try {
+            if (typeof window === 'undefined') return;
+            const res = await fetch('/api/bubbles');
+            if (res.ok) {
+                const data = await res.json();
+                if (data && data.success && Array.isArray(data.bubbles) && data.bubbles.length > 0) {
+                    this.recommendedBubbles = data.bubbles;
+                    if (typeof localStorage !== 'undefined') {
+                        localStorage.setItem('dudu_custom_bubbles', JSON.stringify(data.bubbles));
+                    }
+                    // 화면에 웰컴 메시지가 있는 상태라면 실시간 갱신
+                    const welcomeCard = document.querySelector('.welcome-msg');
+                    if (welcomeCard && welcomeCard.parentNode && welcomeCard.parentNode.children.length === 1) {
+                        welcomeCard.parentNode.innerHTML = this.getWelcomeMessageHTML();
+                    }
+                }
+            }
+        } catch (e) {
+            console.log('버블 동기화 알림 (기본 버블 사용):', e.message);
+        }
     }
 
     resetChat() {

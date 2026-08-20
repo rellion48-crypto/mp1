@@ -540,6 +540,7 @@
             <button class="btn-tab" id="tabBtnDataset" onclick="switchAdminTab('dataset')">🗂️ 상담 지식 베이스 (<span id="datasetCountBadge">4,705</span>건 Q&A)</button>
             <button class="btn-tab" id="tabBtnStats" onclick="switchAdminTab('stats')">📊 자주 묻는 질문(FAQ) 통계</button>
             <button class="btn-tab" id="tabBtnFeedback" onclick="switchAdminTab('feedback')">💬 챗봇 답변 피드백 & 규정 보강 (<span id="feedbackCountBadge">0</span>건)</button>
+            <button class="btn-tab" id="tabBtnBubbles" onclick="switchAdminTab('bubbles')" style="background: linear-gradient(135deg, rgba(37, 99, 235, 0.2), rgba(16, 185, 129, 0.2)); border-color: #3b82f6;">🌟 챗봇 추천 질문 버블 관리 (<span id="bubblesCountBadge">6</span>개)</button>
         </div>
 
         <!-- 1. FAQ Management Section -->
@@ -846,6 +847,83 @@
                 </table>
             </div>
         </div>
+
+        <!-- 5. Chatbot Recommendation Bubbles Management Section -->
+        <div id="bubblesSection" style="display: none;">
+            <div class="action-bar">
+                <div>
+                    <h2 style="font-size: calc(23px * var(--font-scale)); font-weight: 900;">🌟 챗봇 웰컴 카드 추천 질문 버블 관리</h2>
+                    <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub); margin-top: 4px;">
+                        챗봇을 열었을 때 어르신들에게 노출되는 <strong>자주 묻는 질문 퀵 버블(A3)</strong>을 직접 추가·수정·삭제하고 순서를 지정합니다.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="resetDefaultBubbles()" style="background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;">기본 6대 버블로 초기화</button>
+                    <button class="btn btn-secondary" onclick="openAddBubbleModal()">+ 새 추천 버블 추가</button>
+                    <button class="btn btn-primary" onclick="saveAllBubbles()" style="background: linear-gradient(135deg, #10b981, #059669); border: none;">💾 버블 설정 저장 & 챗봇 즉시 반영</button>
+                </div>
+            </div>
+
+            <!-- Bubble Preview Card -->
+            <div style="background: #0f172a; border: 2px solid #3b82f6; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <div style="font-size: 15px; font-weight: 800; color: #60a5fa; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                    <span>📱 챗봇 웰컴 카드 실시간 미리보기 (Live Preview)</span>
+                    <span style="font-size: 13px; color: #94a3b8; font-weight: 600;">총 <strong id="previewBubbleCount" style="color:#34d399;">6</strong>개 활성화됨 (클릭 시 동작 테스트)</span>
+                </div>
+                <div id="bubblePreviewGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px;">
+                    <!-- Live preview elements rendered via JS -->
+                </div>
+            </div>
+
+            <!-- Bubble List Table/Cards -->
+            <div style="background: #1e293b; border: 1px solid #334155; border-radius: 16px; overflow: hidden;">
+                <div style="padding: 16px 20px; background: #0f172a; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 900; font-size: 16px; color: #ffffff;">📋 추천 버블 목록 관리 및 순서 조정</span>
+                    <span style="font-size: 13px; color: #94a3b8;">▲ / ▼ 버튼으로 노출 순서를 변경할 수 있습니다.</span>
+                </div>
+                <div id="bubblesTableBody" style="display: flex; flex-direction: column; gap: 8px; padding: 16px;">
+                    <!-- Editable Bubble Row Cards rendered via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bubble Edit Modal -->
+    <div class="modal-overlay" id="bubbleModal">
+        <div class="modal-card">
+            <h3 id="bubbleModalTitle" style="font-size: calc(20px * var(--font-scale)); font-weight: 900; margin-bottom: 16px;">추천 버블 추가</h3>
+            <form id="bubbleEditForm" onsubmit="saveBubbleItem(event)">
+                <input type="hidden" id="bubbleId">
+
+                <div class="form-group">
+                    <label class="form-label">아이콘 (Emoji)</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" id="bubbleIcon" class="form-input" style="width: 80px; font-size: 20px; text-align: center;" value="💡" required maxlength="4">
+                        <span style="font-size: 13px; color: #94a3b8;">추천: 🍲, 🚜, 💳, 🪪, ⏱️, 📞, 🚗, 🏆, 💡, ❓</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">버블 표시 문구 (버튼에 보이는 텍스트)</label>
+                    <input type="text" id="bubbleLabel" class="form-input" style="width: 100%;" placeholder="예: 한식조리 응시료 (14,500원)" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">실제 질문 쿼리 (클릭 시 챗봇에 입력될 문장)</label>
+                    <input type="text" id="bubbleQuery" class="form-input" style="width: 100%;" placeholder="예: 한식조리 접수비 얼마예요?" required>
+                </div>
+
+                <div class="form-group" style="display: flex; align-items: center; gap: 10px; margin-top: 14px;">
+                    <input type="checkbox" id="bubbleActive" checked style="width: 18px; height: 18px; cursor: pointer;">
+                    <label for="bubbleActive" style="font-weight: 700; color: #ffffff; cursor: pointer;">웰컴 카드에 노출 활성화</label>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                    <button type="button" class="btn btn-secondary" onclick="closeBubbleModal()">취소</button>
+                    <button type="submit" class="btn btn-primary">적용하기</button>
+                </div>
+            </form>
+        </div>
     </div>
 
     <!-- Edit Modal -->
@@ -1108,22 +1186,30 @@
             const datasetSection = document.getElementById('datasetSection');
             const statsSection = document.getElementById('statsSection');
             const feedbackSection = document.getElementById('feedbackSection');
+            const bubblesSection = document.getElementById('bubblesSection');
             const tabBtnFaq = document.getElementById('tabBtnFaq');
             const tabBtnDataset = document.getElementById('tabBtnDataset');
             const tabBtnStats = document.getElementById('tabBtnStats');
             const tabBtnFeedback = document.getElementById('tabBtnFeedback');
+            const tabBtnBubbles = document.getElementById('tabBtnBubbles');
 
             faqSection.style.display = 'none';
             datasetSection.style.display = 'none';
             statsSection.style.display = 'none';
             if (feedbackSection) feedbackSection.style.display = 'none';
+            if (bubblesSection) bubblesSection.style.display = 'none';
 
             tabBtnFaq.classList.remove('active');
             tabBtnDataset.classList.remove('active');
             tabBtnStats.classList.remove('active');
             if (tabBtnFeedback) tabBtnFeedback.classList.remove('active');
+            if (tabBtnBubbles) tabBtnBubbles.classList.remove('active');
 
-            if (tab === 'feedback') {
+            if (tab === 'bubbles') {
+                if (bubblesSection) bubblesSection.style.display = 'block';
+                if (tabBtnBubbles) tabBtnBubbles.classList.add('active');
+                loadBubbleSettings();
+            } else if (tab === 'feedback') {
                 if (feedbackSection) feedbackSection.style.display = 'block';
                 if (tabBtnFeedback) tabBtnFeedback.classList.add('active');
                 loadFeedbackData();
@@ -1646,6 +1732,232 @@
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+        }
+
+        // ==========================================
+        // 🌟 챗봇 추천 질문 버블(A3) 관리 스크립트
+        // ==========================================
+        let adminBubbles = [
+            { id: 'b1', icon: '🍲', label: '한식조리 응시료 (14,500원)', query: '한식조리 접수비 얼마예요?', active: true, order: 1 },
+            { id: 'b2', icon: '🚜', label: '지게차 상시 시험일정', query: '지게차 시험일정 언제예요?', active: true, order: 2 },
+            { id: 'b3', icon: '💳', label: '50% 감면 혜택 (7,250원)', query: '기초생활수급자나 유공자 50% 감면 혜택 어떻게 받아요?', active: true, order: 3 },
+            { id: 'b4', icon: '🪪', label: '필수 준비물 & 신분증', query: '시험 당일 필수 준비물이 뭐예요?', active: true, order: 4 },
+            { id: 'b5', icon: '⏱️', label: 'CBT 당일 합격자 발표', query: '합격자 발표는 언제 나오나요?', active: true, order: 5 },
+            { id: 'b6', icon: '📞', label: '어르신 무료 대리접수', query: '인터넷 접수가 어려운데 전화로 대신 접수해 주나요?', active: true, order: 6 }
+        ];
+
+        async function loadBubbleSettings() {
+            try {
+                const res = await fetch('/api/bubbles');
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data && data.bubbles && Array.isArray(data.bubbles) && data.bubbles.length > 0) {
+                        adminBubbles = data.bubbles;
+                    }
+                }
+            } catch (e) {
+                console.log('버블 로드 알림:', e);
+            }
+            renderBubblesAdmin();
+        }
+
+        function renderBubblesAdmin() {
+            adminBubbles.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+            const badge = document.getElementById('bubblesCountBadge');
+            const previewCount = document.getElementById('previewBubbleCount');
+            const activeCount = adminBubbles.filter(b => b.active !== false).length;
+            if (badge) badge.textContent = activeCount;
+            if (previewCount) previewCount.textContent = activeCount;
+
+            // 1. 챗봇 웰컴 카드 실시간 미리보기 렌더링
+            const previewGrid = document.getElementById('bubblePreviewGrid');
+            if (previewGrid) {
+                const activeItems = adminBubbles.filter(b => b.active !== false);
+                if (activeItems.length === 0) {
+                    previewGrid.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:20px; color:#94a3b8;">활성화된 추천 버블이 없습니다. 아래에서 버블을 추가하거나 활성화해 주세요.</div>`;
+                } else {
+                    previewGrid.innerHTML = activeItems.map(b => `
+                        <button type="button" class="welcome-bubble-btn" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.5), rgba(30, 41, 59, 0.8)); border: 1.5px solid #3b82f6; color: #e2e8f0; border-radius: 14px; padding: 10px 14px; font-size: 13.5px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px; text-align: left;" onclick="if(window.duduChat){window.duduChat.toggleChat(true); window.duduChat.askQuestion('${(b.query || '').replace(/'/g, "\\'")}');}">
+                            <span style="font-size: 20px;">${b.icon || '💡'}</span>
+                            <div style="flex:1;">
+                                <div style="color: #ffffff; font-weight: 800;">${b.label}</div>
+                                <div style="font-size: 11px; color: #94a3b8; margin-top: 2px;">질의: “${b.query}”</div>
+                            </div>
+                        </button>
+                    `).join('');
+                }
+            }
+
+            // 2. 관리 테이블 렌더링
+            const tableBody = document.getElementById('bubblesTableBody');
+            if (tableBody) {
+                if (adminBubbles.length === 0) {
+                    tableBody.innerHTML = `<div style="text-align:center; padding:30px; color:#94a3b8;">등록된 버블이 없습니다. [+ 새 추천 버블 추가]를 눌러주세요.</div>`;
+                    return;
+                }
+
+                tableBody.innerHTML = adminBubbles.map((b, idx) => `
+                    <div style="display:flex; align-items:center; justify-content:space-between; background: #0f172a; border: 1px solid #334155; border-radius: 12px; padding: 14px 18px; gap: 14px; flex-wrap: wrap;">
+                        <div style="display:flex; align-items:center; gap: 12px; min-width: 280px; flex: 1;">
+                            <div style="width: 32px; height: 32px; background: #2563eb; border-radius: 8px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:14px; color:#ffffff;">
+                                ${idx + 1}
+                            </div>
+                            <div style="font-size: 24px;">${b.icon || '💡'}</div>
+                            <div>
+                                <div style="font-weight: 800; font-size: 15px; color: #ffffff; display: flex; align-items: center; gap: 8px;">
+                                    ${b.label}
+                                    ${b.active !== false 
+                                        ? '<span style="background: rgba(16, 185, 129, 0.2); color: #34d399; font-size: 11px; padding: 2px 8px; border-radius: 10px; border: 1px solid #10b981;">노출중</span>' 
+                                        : '<span style="background: rgba(239, 68, 68, 0.2); color: #f87171; font-size: 11px; padding: 2px 8px; border-radius: 10px; border: 1px solid #ef4444;">숨김</span>'}
+                                </div>
+                                <div style="font-size: 13px; color: #93c5fd; margin-top: 3px;">
+                                    질의문: “<strong>${b.query}</strong>”
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; align-items:center; gap: 6px;">
+                            <button type="button" class="btn btn-secondary" onclick="moveBubble('${b.id}', -1)" ${idx === 0 ? 'disabled style="opacity:0.3;"' : ''} title="위로 이동" style="padding: 6px 10px; font-size: 12px;">▲</button>
+                            <button type="button" class="btn btn-secondary" onclick="moveBubble('${b.id}', 1)" ${idx === adminBubbles.length - 1 ? 'disabled style="opacity:0.3;"' : ''} title="아래로 이동" style="padding: 6px 10px; font-size: 12px;">▼</button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleBubbleActive('${b.id}')" style="padding: 6px 12px; font-size: 12px; background: ${b.active !== false ? '#334155' : 'rgba(16,185,129,0.2)'};">
+                                ${b.active !== false ? '숨기기' : '노출하기'}
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="openEditBubbleModal('${b.id}')" style="padding: 6px 12px; font-size: 12px; background: #2563eb; color: #ffffff;">수정</button>
+                            <button type="button" class="btn btn-secondary" onclick="deleteBubble('${b.id}')" style="padding: 6px 10px; font-size: 12px; background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #fca5a5;">삭제</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function openAddBubbleModal() {
+            document.getElementById('bubbleModalTitle').textContent = '새 추천 버블 추가';
+            document.getElementById('bubbleId').value = '';
+            document.getElementById('bubbleIcon').value = '💡';
+            document.getElementById('bubbleLabel').value = '';
+            document.getElementById('bubbleQuery').value = '';
+            document.getElementById('bubbleActive').checked = true;
+            document.getElementById('bubbleModal').classList.add('active');
+        }
+
+        function openEditBubbleModal(id) {
+            const item = adminBubbles.find(b => b.id === id);
+            if (!item) return;
+            document.getElementById('bubbleModalTitle').textContent = '추천 버블 수정';
+            document.getElementById('bubbleId').value = item.id;
+            document.getElementById('bubbleIcon').value = item.icon || '💡';
+            document.getElementById('bubbleLabel').value = item.label || '';
+            document.getElementById('bubbleQuery').value = item.query || '';
+            document.getElementById('bubbleActive').checked = item.active !== false;
+            document.getElementById('bubbleModal').classList.add('active');
+        }
+
+        function closeBubbleModal() {
+            document.getElementById('bubbleModal').classList.remove('active');
+        }
+
+        function saveBubbleItem(e) {
+            if (e) e.preventDefault();
+            const id = document.getElementById('bubbleId').value;
+            const icon = document.getElementById('bubbleIcon').value.trim() || '💡';
+            const label = document.getElementById('bubbleLabel').value.trim();
+            const query = document.getElementById('bubbleQuery').value.trim();
+            const active = document.getElementById('bubbleActive').checked;
+
+            if (!label || !query) {
+                alert('버블 표시 문구와 질의문을 모두 입력해 주세요.');
+                return;
+            }
+
+            if (id) {
+                const target = adminBubbles.find(b => b.id === id);
+                if (target) {
+                    target.icon = icon;
+                    target.label = label;
+                    target.query = query;
+                    target.active = active;
+                }
+            } else {
+                const newBubble = {
+                    id: 'b_' + Date.now(),
+                    icon: icon,
+                    label: label,
+                    query: query,
+                    active: active,
+                    order: adminBubbles.length + 1
+                };
+                adminBubbles.push(newBubble);
+            }
+
+            closeBubbleModal();
+            renderBubblesAdmin();
+        }
+
+        function toggleBubbleActive(id) {
+            const target = adminBubbles.find(b => b.id === id);
+            if (target) {
+                target.active = !target.active;
+                renderBubblesAdmin();
+            }
+        }
+
+        function moveBubble(id, direction) {
+            const index = adminBubbles.findIndex(b => b.id === id);
+            if (index < 0) return;
+            const targetIndex = index + direction;
+            if (targetIndex < 0 || targetIndex >= adminBubbles.length) return;
+
+            const temp = adminBubbles[index];
+            adminBubbles[index] = adminBubbles[targetIndex];
+            adminBubbles[targetIndex] = temp;
+
+            adminBubbles.forEach((b, idx) => b.order = idx + 1);
+            renderBubblesAdmin();
+        }
+
+        function deleteBubble(id) {
+            if (!confirm('이 추천 버블을 목록에서 삭제하시겠습니까?')) return;
+            adminBubbles = adminBubbles.filter(b => b.id !== id);
+            adminBubbles.forEach((b, idx) => b.order = idx + 1);
+            renderBubblesAdmin();
+        }
+
+        function resetDefaultBubbles() {
+            if (!confirm('기본 6대 추천 질문 버블(한식조리, 지게차, 50%감면, 준비물, 합격발표, 대리접수)로 초기화하시겠습니까?')) return;
+            adminBubbles = [
+                { id: 'b1', icon: '🍲', label: '한식조리 응시료 (14,500원)', query: '한식조리 접수비 얼마예요?', active: true, order: 1 },
+                { id: 'b2', icon: '🚜', label: '지게차 상시 시험일정', query: '지게차 시험일정 언제예요?', active: true, order: 2 },
+                { id: 'b3', icon: '💳', label: '50% 감면 혜택 (7,250원)', query: '기초생활수급자나 유공자 50% 감면 혜택 어떻게 받아요?', active: true, order: 3 },
+                { id: 'b4', icon: '🪪', label: '필수 준비물 & 신분증', query: '시험 당일 필수 준비물이 뭐예요?', active: true, order: 4 },
+                { id: 'b5', icon: '⏱️', label: 'CBT 당일 합격자 발표', query: '합격자 발표는 언제 나오나요?', active: true, order: 5 },
+                { id: 'b6', icon: '📞', label: '어르신 무료 대리접수', query: '인터넷 접수가 어려운데 전화로 대신 접수해 주나요?', active: true, order: 6 }
+            ];
+            renderBubblesAdmin();
+        }
+
+        async function saveAllBubbles() {
+            try {
+                const res = await fetch('/api/bubbles', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ bubbles: adminBubbles })
+                });
+
+                localStorage.setItem('dudu_custom_bubbles', JSON.stringify(adminBubbles));
+
+                if (window.duduChat) {
+                    window.duduChat.recommendedBubbles = [...adminBubbles];
+                    const welcomeCard = document.querySelector('.welcome-msg');
+                    if (welcomeCard && welcomeCard.parentNode && welcomeCard.parentNode.children.length === 1) {
+                        welcomeCard.parentNode.innerHTML = window.duduChat.getWelcomeMessageHTML();
+                    }
+                }
+
+                alert('✅ 추천 버블 설정이 성공적으로 저장되었습니다!\n챗봇 웰컴 카드에 즉시 반영됩니다.');
+            } catch (err) {
+                alert('버블 설정 저장 중 오류가 발생했습니다: ' + err.message);
+            }
         }
 
         function handleAdminLogin(e) {

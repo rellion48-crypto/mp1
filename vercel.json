@@ -12,6 +12,10 @@
       "dest": "/api/feedback.js"
     },
     {
+      "src": "/api/bubbles",
+      "dest": "/api/bubbles.js"
+    },
+    {
       "src": "/admin/(.*)",
       "dest": "/admin/$1"
     },
