@@ -474,13 +474,12 @@ class DuduChatbot {
 
             this.recognition.onresult = (event) => {
                 const input = document.getElementById('chatInput');
-                if (!input) return;
-
                 let transcript = '';
                 for (let i = event.resultIndex; i < event.results.length; i++) {
                     transcript += event.results[i][0].transcript;
                 }
-                input.value = transcript;
+                if (input) input.value = transcript;
+                this.updateVoiceUI(true, transcript);
             };
 
             this.recognition.onend = () => {
@@ -541,19 +540,59 @@ class DuduChatbot {
         }
     }
 
-    updateVoiceUI(listening) {
+    updateVoiceUI(listening, transcript = '') {
         const voiceBtn = document.getElementById('chatVoiceBtn');
         const input = document.getElementById('chatInput');
+        const container = document.getElementById('chatMessages');
 
         if (voiceBtn) {
             if (listening) {
                 voiceBtn.classList.add('listening');
-                voiceBtn.innerHTML = '🛑 <em>말씀하세요</em>';
-                voiceBtn.title = '음성 인식 중 (클릭 시 중지)';
+                voiceBtn.innerHTML = '🛑 <span>듣는 중...</span>';
+                voiceBtn.title = '음성 인식 중 (클릭 시 전송/중지)';
             } else {
                 voiceBtn.classList.remove('listening');
-                voiceBtn.innerHTML = '🎤 음성';
+                voiceBtn.innerHTML = '🎤 <span style="font-weight:900;">음성</span>';
                 voiceBtn.title = '음성으로 질문하기 (클릭 후 말씀하세요)';
+            }
+        }
+
+        // 실시간 음성 파형 카드 관리
+        let waveCard = document.getElementById('voiceWaveCard');
+        if (listening) {
+            if (!waveCard && container) {
+                waveCard = document.createElement('div');
+                waveCard.id = 'voiceWaveCard';
+                waveCard.className = 'voice-wave-card';
+                waveCard.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:8px; color:#f87171; font-weight:800; font-size:14px;">
+                        <span style="font-size:18px;">🎙️</span> 어르신, 편하게 말씀해 주세요...
+                    </div>
+                    <div class="voice-wave-bars">
+                        <div class="voice-wave-bar"></div>
+                        <div class="voice-wave-bar"></div>
+                        <div class="voice-wave-bar"></div>
+                        <div class="voice-wave-bar"></div>
+                        <div class="voice-wave-bar"></div>
+                        <div class="voice-wave-bar"></div>
+                    </div>
+                    <div id="voiceLiveTranscript" style="color:#ffffff; font-size:15px; font-weight:700; text-align:center; min-height:22px; word-break:keep-all;">
+                        ${transcript ? `“<span style="color:#60a5fa;">${transcript}</span>”` : '(말씀하시는 내용을 듣고 있습니다...)'}
+                    </div>
+                `;
+                container.appendChild(waveCard);
+                container.scrollTop = container.scrollHeight;
+            } else if (waveCard) {
+                const liveText = document.getElementById('voiceLiveTranscript');
+                if (liveText) {
+                    liveText.innerHTML = transcript 
+                        ? `“<span style="color:#60a5fa;">${transcript}</span>”`
+                        : '(말씀하시는 내용을 듣고 있습니다...)';
+                }
+            }
+        } else {
+            if (waveCard && waveCard.parentNode) {
+                waveCard.parentNode.removeChild(waveCard);
             }
         }
 
@@ -771,38 +810,78 @@ class DuduChatbot {
                 animation: fadeIn 0.3s ease !important;
             }
             .chat-voice-btn {
-                background: #1e293b !important;
+                background: linear-gradient(135deg, rgba(30, 58, 138, 0.8), rgba(37, 99, 235, 0.7)) !important;
                 border: 2px solid #3b82f6 !important;
                 color: #ffffff !important;
-                border-radius: 12px !important;
-                padding: 0 14px !important;
+                border-radius: 14px !important;
+                padding: 0 16px !important;
                 font-size: 15px !important;
-                font-weight: 800 !important;
+                font-weight: 900 !important;
                 cursor: pointer !important;
                 display: inline-flex !important;
                 align-items: center !important;
                 justify-content: center !important;
-                gap: 5px !important;
-                transition: all 0.2s ease !important;
+                gap: 6px !important;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 white-space: nowrap !important;
                 user-select: none !important;
+                box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3) !important;
             }
             .chat-voice-btn:hover {
-                background: #2563eb !important;
+                background: linear-gradient(135deg, #2563eb, #1d4ed8) !important;
                 border-color: #60a5fa !important;
-                transform: translateY(-1px) !important;
+                transform: translateY(-2px) !important;
+                box-shadow: 0 6px 18px rgba(37, 99, 235, 0.5) !important;
             }
             .chat-voice-btn.listening {
-                background: #dc2626 !important;
-                border-color: #ef4444 !important;
+                background: linear-gradient(135deg, #dc2626, #b91c1c) !important;
+                border-color: #f87171 !important;
                 color: #ffffff !important;
                 animation: pulseMic 1.2s infinite ease-in-out !important;
-                box-shadow: 0 0 15px rgba(239, 68, 68, 0.7) !important;
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.8) !important;
             }
             @keyframes pulseMic {
                 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
                 50% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
                 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+            }
+            .voice-wave-card {
+                background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95)) !important;
+                border: 2px solid #ef4444 !important;
+                border-radius: 18px !important;
+                padding: 16px 20px !important;
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: center !important;
+                gap: 10px !important;
+                box-shadow: 0 10px 30px rgba(239, 68, 68, 0.25) !important;
+                animation: duduSlideUp 0.25s ease !important;
+                margin: 4px 0 !important;
+                align-self: center !important;
+                width: 90% !important;
+            }
+            .voice-wave-bars {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                gap: 5px !important;
+                height: 28px !important;
+            }
+            .voice-wave-bar {
+                width: 4px !important;
+                background: #f87171 !important;
+                border-radius: 4px !important;
+                animation: waveAnim 0.8s ease-in-out infinite alternate !important;
+            }
+            .voice-wave-bar:nth-child(1) { height: 8px; animation-delay: 0.1s; }
+            .voice-wave-bar:nth-child(2) { height: 18px; animation-delay: 0.2s; }
+            .voice-wave-bar:nth-child(3) { height: 26px; animation-delay: 0.3s; }
+            .voice-wave-bar:nth-child(4) { height: 14px; animation-delay: 0.4s; }
+            .voice-wave-bar:nth-child(5) { height: 22px; animation-delay: 0.15s; }
+            .voice-wave-bar:nth-child(6) { height: 10px; animation-delay: 0.35s; }
+            @keyframes waveAnim {
+                0% { transform: scaleY(0.4); opacity: 0.5; }
+                100% { transform: scaleY(1.2); opacity: 1; }
             }
             @media (max-width: 640px) {
                 #duduChatWindow {
@@ -825,6 +904,7 @@ class DuduChatbot {
                 }
             }
         `;
+        document.head.appendChild(style);
     }
 
     adjustChatFontSize(delta) {
@@ -1080,6 +1160,63 @@ class DuduChatbot {
         }
     }
 
+    formatBotResponse(text) {
+        if (!text || typeof text !== 'string') return '';
+        
+        let formatted = text
+            // Markdown bold **text**
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="color: #93c5fd; font-weight: 800;">$1</strong>')
+            // Markdown italic *text*
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            // Headings
+            .replace(/^### (.*$)/gim, '<div style="font-weight: 900; color: #60a5fa; font-size: 1.05em; margin: 8px 0 4px;">📌 $1</div>')
+            .replace(/^## (.*$)/gim, '<div style="font-weight: 900; color: #ffffff; font-size: 1.1em; margin: 10px 0 6px;">💡 $1</div>')
+            // Bullet points
+            .replace(/^\s*-\s+(.*$)/gim, '<div style="display: flex; gap: 6px; margin: 3px 0; align-items: flex-start;"><span style="color: #3b82f6; font-size: 12px; margin-top: 2px;">●</span><div>$1</div></div>')
+            // Numbered lists
+            .replace(/^\s*(\d+)\.\s+(.*$)/gim, '<div style="display: flex; gap: 6px; margin: 3px 0; align-items: flex-start;"><span style="color: #34d399; font-weight: 800; font-size: 13px;">$1.</span><div>$2</div></div>')
+            // Newlines
+            .replace(/\n\n/g, '<div style="height: 6px;"></div>')
+            .replace(/\n/g, '<br>');
+
+        // 응시료 금액 배지 자동 강조
+        formatted = formatted.replace(/(14,500원|7,250원)/g, '<span style="background: rgba(37, 99, 235, 0.35); color: #93c5fd; border: 1.5px solid #3b82f6; border-radius: 6px; padding: 2px 7px; font-weight: 900; font-size: 0.95em;">$1</span>');
+        // 환불/일정/신분증 핵심 키워드 배지
+        formatted = formatted.replace(/(상시 CBT|실물 신분증|100% 환불|50% 환불|필기 유효기간 2년|60점 이상)/g, '<span style="background: rgba(16, 185, 129, 0.25); color: #6ee7b7; border: 1px solid #10b981; border-radius: 6px; padding: 1px 6px; font-weight: 800;">$1</span>');
+
+        return formatted;
+    }
+
+    generateQuickChips(query, answer) {
+        const q = (query || '').toLowerCase();
+        const a = (answer || '').toLowerCase();
+        const chips = [];
+
+        if (q.includes('비용') || q.includes('응시료') || q.includes('수수료') || q.includes('얼마') || q.includes('감면') || a.includes('14,500원')) {
+            chips.push({ text: '💳 50% 감면 대상 확인', query: '기초수급자나 유공자 50% 감면 혜택 어떻게 받아요?' });
+            chips.push({ text: '📅 상시 시험 일정', query: '상시 CBT 시험 일정 언제인가요?' });
+            chips.push({ text: '🎒 시험 준비물', query: '시험 당일 준비물이 뭐예요?' });
+        } else if (q.includes('일정') || q.includes('언제') || q.includes('시간') || q.includes('교시') || a.includes('상시')) {
+            chips.push({ text: '💳 응시료 얼마예요?', query: '기능사 필기 응시료 얼마인가요?' });
+            chips.push({ text: '⏰ 입실 시간/교시 안내', query: '시험 당일 몇 시까지 가야 하나요?' });
+            chips.push({ text: '🎒 신분증 안 가져가면?', query: '신분증 없으면 시험 못 보나요?' });
+        } else if (q.includes('준비물') || q.includes('신분증') || q.includes('계산기') || a.includes('신분증')) {
+            chips.push({ text: '🪪 모바일 신분증 되나요?', query: '스마트폰 모바일 신분증 인정되나요?' });
+            chips.push({ text: '💳 응시료 및 환불 규정', query: '취소하면 전액 환불되나요?' });
+            chips.push({ text: '🏆 합격 발표 언제?', query: '시험 결과 발표는 언제 나와요?' });
+        } else if (q.includes('환불') || q.includes('취소') || a.includes('환불')) {
+            chips.push({ text: '💳 응시료 확인', query: '시험 접수비 얼마인가요?' });
+            chips.push({ text: '📅 다음 시험 일정', query: '다음 시험 일정 언제인가요?' });
+            chips.push({ text: '📞 전화 상담 요청', query: '전화로 상담 받고 싶어요' });
+        } else {
+            chips.push({ text: '🍲 한식조리 접수비', query: '한식조리기능사 접수비 얼마예요?' });
+            chips.push({ text: '🚜 지게차 시험일정', query: '지게차운전기능사 시험일정 알려주세요' });
+            chips.push({ text: '🎒 신분증 지참 규정', query: '시험 당일 필수 준비물이 뭐예요?' });
+        }
+
+        return chips;
+    }
+
     appendMessage(text, sender, originQuery = '') {
         if (typeof document === 'undefined') return;
         const container = document.getElementById('chatMessages');
@@ -1089,11 +1226,30 @@ class DuduChatbot {
         msg.style.setProperty('font-size', `${this.fontSize}px`, 'important');
         
         const contentDiv = document.createElement('div');
-        contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+        if (sender === 'bot') {
+            contentDiv.innerHTML = this.formatBotResponse(text);
+        } else {
+            contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+        }
         msg.appendChild(contentDiv);
 
-        // 봇 답변이고 사용자 질문이 연결되어 있을 때 피드백 바 추가 (웰컴 메시지 제외)
+        // 봇 답변이고 사용자 질문이 연결되어 있을 때 리치 액션 추가 (추천 질문 칩스 + 피드백 바)
         if (sender === 'bot' && originQuery) {
+            // 1. 추천 질문 퀵 칩스 바
+            const chips = this.generateQuickChips(originQuery, text);
+            if (chips && chips.length > 0) {
+                const chipContainer = document.createElement('div');
+                chipContainer.className = 'quick-chips';
+                chipContainer.style.marginTop = '10px';
+                chipContainer.innerHTML = chips.map(c => `
+                    <button type="button" class="quick-chip" onclick="window.duduChat && window.duduChat.askQuestion('${c.query.replace(/'/g, "\\'")}')">
+                        ${c.text}
+                    </button>
+                `).join('');
+                msg.appendChild(chipContainer);
+            }
+
+            // 2. 피드백 액션 바
             const feedbackBar = document.createElement('div');
             feedbackBar.className = 'chat-feedback-bar';
             feedbackBar.innerHTML = `
