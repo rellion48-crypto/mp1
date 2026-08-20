@@ -14,5 +14,8 @@
     "gemini"
   ],
   "author": "DuDu Qualification Center Team",
-  "license": "ISC"
+  "license": "ISC",
+  "allowScripts": {
+    "puppeteer@25.8.0": true
+  }
 }
