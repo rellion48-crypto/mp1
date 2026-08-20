@@ -20,6 +20,85 @@ function getApiKey() {
     return Buffer.from('QVEuQWI4Uk42SmhGQ085QTN5cWtGR2FLNlcxLXIzZEhiM0hrSk5kdE5lWFlDQVE2Z3VvTWc=', 'base64').toString('utf-8');
 }
 
+// 4,705건 FAQ 지식 베이스 로딩
+let FAQ_KNOWLEDGE_BASE = [];
+try {
+    const faqPath = path.join(process.cwd(), 'data', 'faq_knowledge_base.json');
+    if (fs.existsSync(faqPath)) {
+        FAQ_KNOWLEDGE_BASE = JSON.parse(fs.readFileSync(faqPath, 'utf-8'));
+    }
+} catch (e) {
+    console.warn('FAQ knowledge base load warning:', e.message);
+}
+
+const SENIOR_SYNONYMS = {
+    '포크레인': '굴착기',
+    '포클레인': '굴착기',
+    '요보사': '요양보호사',
+    '요양사': '요양보호사',
+    '한조기': '한식조리기능사',
+    '공개사': '공인중개사',
+    '손평사': '손해평가사',
+    '전기기사': '전기기능사',
+    '지게차면허': '지게차운전기능사',
+    '접수비': '응시료',
+    '시험비': '응시료',
+    '수수료': '응시료',
+    '등록금': '응시료',
+    '돈 얼마': '응시료',
+    '동사무소': '접수방법 큐넷'
+};
+
+function tokenize(text) {
+    if (!text) return [];
+    return text.toLowerCase().match(/[가-힣a-zA-Z0-9]+/g) || [];
+}
+
+function retrieveTopFaq(query, topK = 4) {
+    if (!FAQ_KNOWLEDGE_BASE || FAQ_KNOWLEDGE_BASE.length === 0) return [];
+
+    let expandedQuery = query.toLowerCase();
+    for (const [k, v] of Object.entries(SENIOR_SYNONYMS)) {
+        if (expandedQuery.includes(k.toLowerCase())) {
+            expandedQuery += ' ' + v.toLowerCase();
+        }
+    }
+
+    const qTokens = tokenize(expandedQuery);
+    if (qTokens.length === 0) return [];
+
+    const scored = [];
+
+    for (const doc of FAQ_KNOWLEDGE_BASE) {
+        let score = 0;
+        const searchBlob = doc.search_text || '';
+        const titleBlob = (doc.title || '').toLowerCase();
+        const answerBlob = (doc.answer || '').toLowerCase();
+
+        for (const token of qTokens) {
+            if (token.length <= 1) continue;
+
+            if (titleBlob.includes(token)) score += 5;
+            if (searchBlob.includes(token)) score += 2;
+            if (answerBlob.includes(token)) score += 1;
+        }
+
+        if (doc.cert && expandedQuery.includes(doc.cert.toLowerCase())) {
+            score += 4;
+        }
+        if (doc.category && expandedQuery.includes(doc.category.toLowerCase())) {
+            score += 3;
+        }
+
+        if (score > 0) {
+            scored.push({ score, doc });
+        }
+    }
+
+    scored.sort((a, b) => b.score - a.score);
+    return scored.slice(0, topK).map(item => item.doc);
+}
+
 const DEFAULT_REGULATIONS = `1. 취급 종목: 오직 3대 핵심 국가기술자격(한식조리기능사, 지게차운전기능사, 굴착기운전기능사(포크레인))의 '필기시험' 접수만 지원 및 대행합니다.
 2. 필기 응시료: 3종 모두 14,500원으로 동일합니다. (기초생활수급자, 등록장애인, 국가유공자, 차상위계층은 50% 감면된 7,250원입니다.)
 3. 시험 방식 및 일정: 정해진 접수 기간이 없는 '상시 운영 CBT(컴퓨터) 시험'입니다. 시험장에 빈자리가 있으면 원하는 날짜와 교시(1부~5부)를 선택하여 언제든 접수할 수 있습니다.
@@ -31,7 +110,7 @@ const DEFAULT_REGULATIONS = `1. 취급 종목: 오직 3대 핵심 국가기술�
 9. 기타 자격증(전기기능사, 요양보호사, 위생사, 손해평가사, 공인중개사 등) 문의 시: 현재는 중장년 취업 수요가 가장 높은 3대 핵심 국가기술자격(한식조리, 지게차, 굴착기) 필기 원서접수에 집중하여 대행하고 있으며 기타 종목은 추후 지원 예정이라고 안내합니다.
 10. 대리 신청 안내: 인터넷 사용이 익숙지 않은 어르신들을 위해 성함과 연락처만 남기시면 담당 직원이 무료로 접수를 대행해 드립니다.`;
 
-function buildSystemPrompt(faqDocuments) {
+function buildSystemPrompt(query, faqDocuments) {
     let regulationSection = DEFAULT_REGULATIONS;
 
     if (Array.isArray(faqDocuments) && faqDocuments.length > 0) {
@@ -45,18 +124,27 @@ function buildSystemPrompt(faqDocuments) {
         }).join('\n');
     }
 
+    // 4,705건 데이터셋 RAG 검색
+    const retrievedDocs = retrieveTopFaq(query, 4);
+    let retrievedSection = '';
+    if (retrievedDocs.length > 0) {
+        retrievedSection = `\n[실시간 Q&A 및 상담 지식 베이스 검색 결과 (4,705건 상담 원장)]\n` +
+            retrievedDocs.map((r, i) => `(참고자료 ${i + 1}) [${r.cert}/${r.category}] 질문: ${r.question}\n  공식답변: ${r.answer}`).join('\n\n');
+    }
+
     return `당신은 '두두자격지원센터'의 시니어 전문 공식 AI 안내 상담원 '두두봇'입니다.
 50~70대 시니어 어르신 눈높이에 맞춰 매우 따뜻하고 정중하며, 읽기 편하게 답변합니다.
 이전 대화 맥락을 기억하여 자연스럽게 대화를 이어갑니다.
 
 [사내 필수 안내 규정 원장 (FAQ 관리자 실시간 최신 동기화 본)]
 ${regulationSection}
+${retrievedSection}
 
 [응대 가이드라인 및 규칙]
 1. [자격증/시험/규정 질문에 대한 원칙 (실시간 규정 준수 & 할루시네이션 절대 금지)]:
-   - 반드시 상기 [사내 필수 안내 규정 원장]의 최신 내용에 기반하여 정확하고 친절하게 설명합니다. 만약 관리자가 수수료나 일정 등의 안내 문구를 변경했다면 상기 원장에 기재된 최신 내용대로 정확히 답변해야 합니다.
+   - 반드시 상기 [사내 필수 안내 규정 원장] 및 [실시간 Q&A 및 상담 지식 베이스]의 내용에 기반하여 정확하고 친절하게 설명합니다. 만약 관리자가 수수료나 일정 등의 안내 문구를 변경했다면 상기 원장에 기재된 최신 내용대로 정확히 답변해야 합니다.
    - 실기/실습/2차 시험 접수 문의 시: "저희는 필기 접수만 도와드립니다. 실기 시험 관련 문의는 해당 시행기관으로 문의해 주시기 바랍니다."라는 안내를 명확히 전달합니다.
-   - 사내 규정 원장에 명시되지 않은 시험장/센터/자격증 규정 관련 질문(예: 특정 시험장 주차 여부, 셔틀버스 운행, 시험 난이도 보증, 사설 교재 추천 등)은 임의로 지어내지(환각) 말고 솔직하게 다음 문장을 포함하여 안내합니다:
+   - 사내 규정 원장과 상담 지식에 명시되지 않은 시험장/센터/자격증 규정 관련 질문(예: 특정 시험장 주차 여부, 셔틀버스 운행, 시험 난이도 보증, 사설 교재 추천 등)은 임의로 지어내지(환각) 말고 솔직하게 다음 문장을 포함하여 안내합니다:
      "해당 내용은 사내 안내 규정 문서에 나와 있지 않아 정확한 안내가 어렵습니다. (모르겠습니다)"
 
 2. [일상 대화 및 시니어 맞춤 대화 원칙 (자연스러운 맥락 응대)]:
@@ -117,8 +205,8 @@ module.exports = async (req, res) => {
         parts: [{ text: message }]
     });
 
-    // Build dynamic system prompt injected with real-time FAQ documents from Admin
-    const dynamicSystemPrompt = buildSystemPrompt(faqDocuments);
+    // Build dynamic system prompt injected with real-time FAQ documents & 4,705 RAG search results
+    const dynamicSystemPrompt = buildSystemPrompt(message, faqDocuments);
 
     const postData = JSON.stringify({
         contents: contents,

@@ -15,7 +15,11 @@ const testCases = [
     { q: '시험장에 주차 되나요?', expected: '모르겠습니다' },
     { q: '환불 규정 어떻게 되나요?', expected: '환불' },
     { q: '신분증 안 가져가면 어떻게 되나요?', expected: '신분증' },
-    { q: '필기 합격 유효기간이 어떻게 되나요?', expected: '2년간' }
+    { q: '필기 합격 유효기간이 어떻게 되나요?', expected: '2년간' },
+    { q: '동사무소 가서 접수하면 안 되나요?', expected: '온라인 접수만' },
+    { q: '수험표 스마트폰으로 보여줘도 돼요?', expected: '종이로 출력' },
+    { q: '소형 지게차 면허랑 뭐가 달라요?', expected: '별개의 자격' },
+    { q: '사진 등록이 계속 실패해요', expected: '증명사진' }
 ];
 
 console.log('=== 3-Core Qualification Chatbot Response Tests ===');

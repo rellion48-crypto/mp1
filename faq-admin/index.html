@@ -536,7 +536,8 @@
     <div class="main-container">
         <!-- Admin Navigation Tabs -->
         <div style="display: flex; gap: 10px; margin-bottom: 24px; border-bottom: 2px solid #334155; padding-bottom: 12px; flex-wrap: wrap;">
-            <button class="btn-tab active" id="tabBtnFaq" onclick="switchAdminTab('faq')">📖 사내 규정 원장 관리 (<span id="faqCountBadge">12</span>건)</button>
+            <button class="btn-tab active" id="tabBtnFaq" onclick="switchAdminTab('faq')">📖 사내 규정 원장 관리 (<span id="faqCountBadge">23</span>건)</button>
+            <button class="btn-tab" id="tabBtnDataset" onclick="switchAdminTab('dataset')">🗂️ 상담 지식 베이스 (<span id="datasetCountBadge">4,705</span>건 Q&A)</button>
             <button class="btn-tab" id="tabBtnStats" onclick="switchAdminTab('stats')">📊 자주 묻는 질문(FAQ) 통계 및 인입 히스토리</button>
         </div>
 
@@ -573,7 +574,71 @@
             <div class="faq-grid" id="faqGrid"></div>
         </div>
 
-        <!-- 2. Frequently Asked Questions Analytics & Inquiry History Section -->
+        <!-- 2. Full 4,705 Q&A / Phone Consultation Knowledgebase Section -->
+        <div id="datasetSection" style="display: none;">
+            <div class="action-bar">
+                <div>
+                    <h2 style="font-size: calc(23px * var(--font-scale)); font-weight: 900;">🗂️ 실시간 상담 지식 베이스 (4,705건 상담 원장)</h2>
+                    <p style="font-size: calc(14px * var(--font-scale)); color: var(--text-sub); margin-top: 4px;">
+                        전화 상담(3,502건) 및 Q&A 게시판(1,203건)의 실제 시니어 질의응답 원장 데이터를 검색하고 열람합니다.
+                    </p>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-secondary" onclick="loadDataset()" style="background: #2563eb; color: white;">🔄 데이터 새로고침</button>
+                </div>
+            </div>
+
+            <div class="filter-bar">
+                <input type="text" id="searchDataset" class="form-input" placeholder="질문, 답변 내용, 키워드 검색..." style="flex: 1; min-width: 240px;" oninput="renderDatasetTable()">
+                <select id="filterDatasetCert" class="form-select" onchange="renderDatasetTable()">
+                    <option value="ALL">전체 자격종목</option>
+                    <option value="한식조리기능사">한식조리기능사</option>
+                    <option value="지게차운전기능사">지게차운전기능사</option>
+                    <option value="굴착기운전기능사">굴착기운전기능사</option>
+                    <option value="전기기능사">전기기능사</option>
+                    <option value="공인중개사">공인중개사</option>
+                    <option value="손해평가사">손해평가사</option>
+                    <option value="요양보호사">요양보호사</option>
+                    <option value="위생사">위생사</option>
+                </select>
+                <select id="filterDatasetChannel" class="form-select" onchange="renderDatasetTable()">
+                    <option value="ALL">전체 인입 채널</option>
+                    <option value="전화상담">전화 상담</option>
+                    <option value="Q&A게시판">Q&A 게시판</option>
+                </select>
+            </div>
+
+            <div class="inquiry-table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 70px;">ID</th>
+                            <th style="width: 100px;">채널</th>
+                            <th style="width: 130px;">자격종목</th>
+                            <th style="width: 110px;">카테고리</th>
+                            <th style="width: 280px;">상담 질문 (Question)</th>
+                            <th>공식 답변 (Answer)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="datasetTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-sub);">
+                                지식 베이스 데이터를 불러오는 중입니다...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div id="datasetPagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; color: var(--text-sub); font-size: 13px; font-weight: 700;">
+                <span id="datasetPageInfo">1 / N 페이지</span>
+                <div style="display: flex; gap: 8px;">
+                    <button class="zoom-btn" onclick="prevDatasetPage()">이전</button>
+                    <button class="zoom-btn" onclick="nextDatasetPage()">다음</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. Frequently Asked Questions Analytics & Inquiry History Section -->
         <div id="statsSection" style="display: none;">
             <div class="action-bar">
                 <div>
@@ -958,23 +1023,113 @@
 
         function switchAdminTab(tab) {
             const faqSection = document.getElementById('faqSection');
+            const datasetSection = document.getElementById('datasetSection');
             const statsSection = document.getElementById('statsSection');
             const tabBtnFaq = document.getElementById('tabBtnFaq');
+            const tabBtnDataset = document.getElementById('tabBtnDataset');
             const tabBtnStats = document.getElementById('tabBtnStats');
 
+            faqSection.style.display = 'none';
+            datasetSection.style.display = 'none';
+            statsSection.style.display = 'none';
+            tabBtnFaq.classList.remove('active');
+            tabBtnDataset.classList.remove('active');
+            tabBtnStats.classList.remove('active');
+
             if (tab === 'stats') {
-                faqSection.style.display = 'none';
                 statsSection.style.display = 'block';
-                tabBtnFaq.classList.remove('active');
                 tabBtnStats.classList.add('active');
                 loadInquiryStats();
+            } else if (tab === 'dataset') {
+                datasetSection.style.display = 'block';
+                tabBtnDataset.classList.add('active');
+                loadDataset();
             } else {
                 faqSection.style.display = 'block';
-                statsSection.style.display = 'none';
                 tabBtnFaq.classList.add('active');
-                tabBtnStats.classList.remove('active');
                 renderList();
             }
+        }
+
+        let fullDataset = [];
+        let datasetPage = 1;
+        const datasetPageSize = 30;
+
+        async function loadDataset() {
+            if (fullDataset.length === 0) {
+                try {
+                    const resp = await fetch('../data/faq_knowledge_base.json');
+                    if (resp.ok) {
+                        fullDataset = await resp.json();
+                        const badge = document.getElementById('datasetCountBadge');
+                        if (badge) badge.textContent = fullDataset.length.toLocaleString();
+                    }
+                } catch (e) {
+                    console.log('Dataset fetch notice:', e);
+                }
+            }
+            renderDatasetTable();
+        }
+
+        function renderDatasetTable() {
+            const tbody = document.getElementById('datasetTableBody');
+            const search = (document.getElementById('searchDataset')?.value || '').trim().toLowerCase();
+            const cert = document.getElementById('filterDatasetCert')?.value || 'ALL';
+            const channel = document.getElementById('filterDatasetChannel')?.value || 'ALL';
+
+            const filtered = fullDataset.filter(item => {
+                const matchSearch = !search ||
+                    (item.question && item.question.toLowerCase().includes(search)) ||
+                    (item.answer && item.answer.toLowerCase().includes(search)) ||
+                    (item.title && item.title.toLowerCase().includes(search));
+                const matchCert = cert === 'ALL' || item.cert === cert;
+                const matchChannel = channel === 'ALL' || item.channel === channel;
+                return matchSearch && matchCert && matchChannel;
+            });
+
+            const totalPages = Math.ceil(filtered.length / datasetPageSize) || 1;
+            if (datasetPage > totalPages) datasetPage = totalPages;
+            if (datasetPage < 1) datasetPage = 1;
+
+            const pageInfo = document.getElementById('datasetPageInfo');
+            if (pageInfo) pageInfo.textContent = `전체 ${filtered.length.toLocaleString()}건 중 ${((datasetPage - 1) * datasetPageSize + 1).toLocaleString()} ~ ${Math.min(datasetPage * datasetPageSize, filtered.length).toLocaleString()}건 (페이지 ${datasetPage} / ${totalPages})`;
+
+            const startIdx = (datasetPage - 1) * datasetPageSize;
+            const pageItems = filtered.slice(startIdx, startIdx + datasetPageSize);
+
+            if (pageItems.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 40px; color: var(--text-sub);">조건에 일치하는 상담 지식 데이터가 없습니다.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pageItems.map(item => {
+                const chBadge = item.channel === '전화상담' 
+                    ? `<span style="background: rgba(37, 99, 235, 0.2); color: #93c5fd; border: 1px solid #3b82f6; border-radius: 6px; padding: 2px 6px; font-weight: 800; font-size: 11px;">📞 전화</span>`
+                    : `<span style="background: rgba(16, 185, 129, 0.2); color: #6ee7b7; border: 1px solid #10b981; border-radius: 6px; padding: 2px 6px; font-weight: 800; font-size: 11px;">💬 Q&A</span>`;
+
+                return `
+                    <tr>
+                        <td style="color: var(--text-sub); font-family: monospace; font-size: 11px;">#${item.id}</td>
+                        <td>${chBadge}</td>
+                        <td><strong style="color: #ffffff; font-size: 13px;">${item.cert}</strong></td>
+                        <td><span style="color: #cbd5e1; font-size: 12px;">${item.category}</span></td>
+                        <td><span style="color: #93c5fd; font-weight: 700; font-size: 13px;">${item.question || '-'}</span></td>
+                        <td style="color: #e2e8f0; font-size: 13px; line-height: 1.45;">${item.answer || '-'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function prevDatasetPage() {
+            if (datasetPage > 1) {
+                datasetPage--;
+                renderDatasetTable();
+            }
+        }
+
+        function nextDatasetPage() {
+            datasetPage++;
+            renderDatasetTable();
         }
 
         let allInquiries = [];

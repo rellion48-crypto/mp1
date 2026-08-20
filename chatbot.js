@@ -85,13 +85,40 @@ const DEFAULT_FAQ_KNOWLEDGE = [
         id: 8,
         category: '접수방법',
         qualification: '공통',
-        question: '인터넷 접수가 어려운데 어떻게 접수하나요?',
-        keywords: '접수방법,신청방법,인터넷접수어려워,대리접수,대리신청,도와줘요,전화접수신청,원서접수대행',
-        answer: '저희 두두자격지원센터에서는 인터넷 사용이 익숙지 않은 어르신들을 위해 성함과 연락처만 남겨주시면 시험장 배정과 원서접수를 무료로 대행해 드립니다.',
+        question: '인터넷 접수가 어려운데 어떻게 접수하나요? (동사무소 방문 등)',
+        keywords: '접수방법,신청방법,인터넷접수어려워,대리접수,대리신청,도와줘요,전화접수신청,원서접수대행,동사무소,주민센터,우체국,현장접수',
+        answer: '국가기술자격은 동사무소나 우체국 방문 접수가 불가능하며 큐넷 온라인 접수만 가능합니다. 인터넷 사용이 어려우신 어르신들을 위해 저희 두두자격지원센터에서 성함과 연락처만 남겨주시면 무료로 접수를 대행해 드립니다.',
         is_unknown: false
     },
     {
         id: 9,
+        category: '수험표',
+        qualification: '공통',
+        question: '수험표를 스마트폰으로 보여줘도 되나요?',
+        keywords: '수험표스마트폰,수험표핸드폰,수험표모바일,수험표출력,수험표인쇄,수험표어디서,입장표',
+        answer: '수험표는 큐넷 홈페이지에서 미리 종이로 출력해서 지참하시는 것을 권장드립니다. 시험장 본부나 수험자 마이페이지에서 출력이 가능합니다.',
+        is_unknown: false
+    },
+    {
+        id: 10,
+        category: '소형면허차이',
+        qualification: '지게차/굴착기',
+        question: '소형건설기계 조종면허와 국가기술자격 기능사의 차이는 무엇인가요?',
+        keywords: '소형면허,소형지게차,소형굴착기,작은거면허,차이,소형면허차이,3톤미만',
+        answer: '3톤 미만 소형건설기계 조종교육 이수증(면허)과 한국산업인력공단의 국가기술자격 기능사는 별개의 자격입니다. 소형 면허가 있더라도 기능사 자격 취득을 위해서는 필기시험부터 응시하셔야 합니다.',
+        is_unknown: false
+    },
+    {
+        id: 11,
+        category: '사진등록',
+        qualification: '공통',
+        question: '원서접수 사진 규격과 등록 오류 해결법은 무엇인가요?',
+        keywords: '사진등록,사진규격,증명사진,사진오류,사진실패,셀카,사진크기',
+        answer: '최근 6개월 이내 촬영한 3.5cm x 4.5cm 컬러 증명사진 파일(JPG)이어야 등록이 가능합니다. 배경이 깔끔하고 정면을 응시한 사진이어야 하며 셀카나 흐린 사진은 등록 오류가 발생할 수 있습니다.',
+        is_unknown: false
+    },
+    {
+        id: 12,
         category: '기타자격증',
         qualification: '기타 종목 문의 (전기/요양/공인중개사 등)',
         question: '전기기능사, 요양보호사, 공인중개사 등 다른 자격증도 접수되나요?',
@@ -100,7 +127,7 @@ const DEFAULT_FAQ_KNOWLEDGE = [
         is_unknown: false
     },
     {
-        id: 10,
+        id: 13,
         category: '확인불가',
         qualification: '공통',
         question: '시험장에 주차 되나요?',
@@ -117,15 +144,26 @@ const SENIOR_SYNONYMS = {
     '얼마예요': '응시료',
     '비용': '응시료',
     '수수료': '응시료',
+    '등록금': '응시료',
     '포크레인': '굴착기',
+    '포클레인': '굴착기',
     '요양사': '요양보호사',
+    '요보사': '요양보호사',
+    '한조기': '한식조리기능사',
+    '공개사': '공인중개사',
+    '손평사': '손해평가사',
+    '전기기사': '전기기능사',
     '지게차 면허': '지게차',
+    '지게차면허': '지게차',
     '1차': '필기',
     '이론': '필기',
     '쓰는 거': '필기',
     '2차': '실기',
     '실습': '실기',
     '직접 하는 거': '실기',
+    '동사무소': '접수방법',
+    '주민센터': '접수방법',
+    '우체국': '접수방법',
     '고마워유': '고마워',
     '감사유': '감사',
     '고맙구먼': '고마워',
@@ -137,8 +175,10 @@ class DuduChatbot {
     constructor() {
         this.knowledgeBase = [...DEFAULT_FAQ_KNOWLEDGE];
         this.isOpen = false;
-        this.fontSize = parseInt(localStorage.getItem('dudu_chat_font_size') || '16', 10);
-        this.isAIMode = localStorage.getItem('dudu_ai_mode') !== 'false';
+        const storedSize = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_chat_font_size') : null;
+        const storedMode = typeof localStorage !== 'undefined' ? localStorage.getItem('dudu_ai_mode') : null;
+        this.fontSize = parseInt(storedSize || '16', 10);
+        this.isAIMode = storedMode !== 'false';
         this.conversationHistory = []; // Up to 5 turns (10 messages: 5 user, 5 model)
         this.init();
     }
@@ -606,13 +646,17 @@ class DuduChatbot {
             return '네 어르신, 날씨 변화에 항상 건강 유의하시고 따뜻하고 편안한 하루 보내세요!';
         }
 
-        const isPrepIntent = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('수험표') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구');
+        const isPrepIntent = normalizedQuery.includes('준비물') || normalizedQuery.includes('신분증') || normalizedQuery.includes('지참물') || normalizedQuery.includes('필기구');
         const isRefundIntent = normalizedQuery.includes('환불') || normalizedQuery.includes('취소') || normalizedQuery.includes('돈돌려');
         const isDurationIntent = normalizedQuery.includes('유효기간') || normalizedQuery.includes('면제') || normalizedQuery.includes('몇년');
         const isScheduleIntent = normalizedQuery.includes('일정') || normalizedQuery.includes('언제') || normalizedQuery.includes('기간') || normalizedQuery.includes('상시') || normalizedQuery.includes('cbt');
         const isFeeIntent = normalizedQuery.includes('응시료') || normalizedQuery.includes('수수료') || normalizedQuery.includes('접수비') || normalizedQuery.includes('비용') || normalizedQuery.includes('얼마') || normalizedQuery.includes('돈');
         const isPassIntent = normalizedQuery.includes('합격') || normalizedQuery.includes('발표') || normalizedQuery.includes('점수') || normalizedQuery.includes('결과');
         const isSessionIntent = normalizedQuery.includes('몇부') || normalizedQuery.includes('교시') || normalizedQuery.includes('시간대');
+        const isTicketIntent = normalizedQuery.includes('수험표') || normalizedQuery.includes('입장표') || normalizedQuery.includes('핸드폰') || normalizedQuery.includes('스마트폰');
+        const isSmallCertIntent = normalizedQuery.includes('소형') || normalizedQuery.includes('3톤') || normalizedQuery.includes('작은 거');
+        const isPhotoIntent = normalizedQuery.includes('사진') || normalizedQuery.includes('증명사진') || normalizedQuery.includes('오류');
+        const isOfflineRegIntent = normalizedQuery.includes('동사무소') || normalizedQuery.includes('주민센터') || normalizedQuery.includes('우체국') || normalizedQuery.includes('방문');
 
         let bestMatch = null;
         let highestScore = 0;
@@ -630,6 +674,10 @@ class DuduChatbot {
             if (isScheduleIntent && cat.includes('일정')) score += 10;
             if (isPassIntent && cat.includes('합격발표')) score += 12;
             if (isSessionIntent && cat.includes('시험시간')) score += 12;
+            if (isTicketIntent && cat.includes('수험표')) score += 14;
+            if (isSmallCertIntent && cat.includes('소형면허')) score += 14;
+            if (isPhotoIntent && cat.includes('사진')) score += 14;
+            if (isOfflineRegIntent && cat.includes('접수방법')) score += 14;
 
             keywords.forEach(kw => {
                 if (kw && normalizedQuery.includes(kw)) {
@@ -669,8 +717,13 @@ function bootDuduChatbot() {
     }
 }
 
-// Expose class globally for inline onclick handlers
-window.DuduChatbot = DuduChatbot;
+// Expose class globally for inline onclick handlers and Node.js testing
+if (typeof window !== 'undefined') {
+    window.DuduChatbot = DuduChatbot;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { DuduChatbot, DEFAULT_FAQ_KNOWLEDGE, SENIOR_SYNONYMS };
+}
 
 if (typeof document !== 'undefined') {
     if (document.readyState === 'loading') {
