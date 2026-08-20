@@ -871,14 +871,25 @@
             }
 
             try {
-                const { data, error } = await client
-                    .from('applications')
-                    .select('*')
-                    .order('created_at', { ascending: false })
-                    .limit(5000);
+                let records = [];
+                let from = 0;
+                const chunkSize = 1000;
 
-                if (error) throw error;
-                allRecords = data || [];
+                while (true) {
+                    const { data, error } = await client
+                        .from('applications')
+                        .select('*')
+                        .order('created_at', { ascending: false })
+                        .range(from, from + chunkSize - 1);
+
+                    if (error) throw error;
+                    if (!data || data.length === 0) break;
+                    records = records.concat(data);
+                    if (data.length < chunkSize) break;
+                    from += chunkSize;
+                }
+
+                allRecords = records;
                 updateMetrics(allRecords);
                 applyFilters();
             } catch (err) {

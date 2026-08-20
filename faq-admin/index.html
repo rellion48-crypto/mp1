@@ -1057,6 +1057,51 @@
 
         async function loadDataset() {
             if (fullDataset.length === 0) {
+                const client = window.supabaseClient;
+                if (client) {
+                    try {
+                        let records = [];
+                        let from = 0;
+                        const chunkSize = 1000;
+                        while (true) {
+                            const { data, error } = await client
+                                .from('faq_documents')
+                                .select('*')
+                                .order('id', { ascending: true })
+                                .range(from, from + chunkSize - 1);
+                            if (error) break;
+                            if (!data || data.length === 0) break;
+                            records = records.concat(data);
+                            if (data.length < chunkSize) break;
+                            from += chunkSize;
+                        }
+                        if (records.length > 0) {
+                            fullDataset = records.map(r => {
+                                let ch = '사내규정';
+                                if (r.question && r.question.startsWith('[')) {
+                                    const m = r.question.match(/^\[(.*?)\]/);
+                                    if (m) ch = m[1];
+                                }
+                                return {
+                                    id: r.id,
+                                    channel: ch,
+                                    cert: r.qualification || '공통',
+                                    category: r.category || '일반',
+                                    question: r.question.replace(/^\[.*?\]\s*/, ''),
+                                    answer: r.answer
+                                };
+                            });
+                            const badge = document.getElementById('datasetCountBadge');
+                            if (badge) badge.textContent = fullDataset.length.toLocaleString();
+                            renderDatasetTable();
+                            return;
+                        }
+                    } catch (e) {
+                        console.log('Supabase dataset load note:', e);
+                    }
+                }
+
+                // Fallback to local json
                 try {
                     const resp = await fetch('../data/faq_knowledge_base.json');
                     if (resp.ok) {

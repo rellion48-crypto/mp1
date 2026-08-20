@@ -202,7 +202,8 @@ class DuduChatbot {
                 window.supabaseClient = client;
                 const { data, error } = await client
                     .from('faq_documents')
-                    .select('*');
+                    .select('*')
+                    .range(0, 4999);
 
                 if (!error && data && data.length > 0) {
                     this.knowledgeBase = data;
