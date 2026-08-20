@@ -558,6 +558,58 @@ class DuduChatbot {
                 background: #2563eb !important;
                 color: #ffffff !important;
             }
+            .chat-feedback-bar {
+                display: flex !important;
+                align-items: center !important;
+                justify-content: flex-end !important;
+                gap: 6px !important;
+                margin-top: 8px !important;
+                padding-top: 6px !important;
+                border-top: 1px dashed rgba(255, 255, 255, 0.12) !important;
+            }
+            .feedback-prompt-text {
+                font-size: calc(var(--chat-font-size, 16px) * 0.72) !important;
+                color: #94a3b8 !important;
+                margin-right: auto !important;
+                font-weight: 600 !important;
+            }
+            .feedback-btn {
+                background: rgba(255, 255, 255, 0.06) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                color: #cbd5e1 !important;
+                border-radius: 12px !important;
+                padding: 3px 8px !important;
+                font-size: calc(var(--chat-font-size, 16px) * 0.78) !important;
+                font-weight: 700 !important;
+                cursor: pointer !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                transition: all 0.15s ease !important;
+            }
+            .feedback-btn:hover:not(:disabled) {
+                background: rgba(255, 255, 255, 0.15) !important;
+                color: #ffffff !important;
+                transform: translateY(-1px) !important;
+            }
+            .feedback-btn.active-pos {
+                background: rgba(16, 185, 129, 0.25) !important;
+                border-color: #10b981 !important;
+                color: #34d399 !important;
+                font-weight: 800 !important;
+            }
+            .feedback-btn.active-neg {
+                background: rgba(239, 68, 68, 0.25) !important;
+                border-color: #ef4444 !important;
+                color: #f87171 !important;
+                font-weight: 800 !important;
+            }
+            .feedback-thanks {
+                font-size: calc(var(--chat-font-size, 16px) * 0.75) !important;
+                color: #34d399 !important;
+                font-weight: 700 !important;
+                animation: fadeIn 0.3s ease !important;
+            }
             @media (max-width: 640px) {
                 #duduChatWindow {
                     width: calc(100vw - 20px) !important;
@@ -773,7 +825,7 @@ class DuduChatbot {
                     const data = await response.json();
                     if (data && data.answer) {
                         this.removeLoadingMessage(loadingMsg);
-                        this.appendMessage(data.answer, 'bot');
+                        this.appendMessage(data.answer, 'bot', query);
 
                         this.conversationHistory.push({ role: 'user', text: query });
                         this.conversationHistory.push({ role: 'model', text: data.answer });
@@ -797,7 +849,7 @@ class DuduChatbot {
 
         setTimeout(() => {
             const answer = this.generateResponse(query);
-            this.appendMessage(answer, 'bot');
+            this.appendMessage(answer, 'bot', query);
 
             this.conversationHistory.push({ role: 'user', text: query });
             this.conversationHistory.push({ role: 'model', text: answer });
@@ -868,16 +920,100 @@ class DuduChatbot {
         }
     }
 
-    appendMessage(text, sender) {
+    appendMessage(text, sender, originQuery = '') {
         if (typeof document === 'undefined') return;
         const container = document.getElementById('chatMessages');
         if (!container) return;
         const msg = document.createElement('div');
         msg.className = `chat-msg ${sender}`;
         msg.style.setProperty('font-size', `${this.fontSize}px`, 'important');
-        msg.innerHTML = text.replace(/\n/g, '<br>');
+        
+        const contentDiv = document.createElement('div');
+        contentDiv.innerHTML = text.replace(/\n/g, '<br>');
+        msg.appendChild(contentDiv);
+
+        // 봇 답변이고 사용자 질문이 연결되어 있을 때 피드백 바 추가 (웰컴 메시지 제외)
+        if (sender === 'bot' && originQuery) {
+            const feedbackBar = document.createElement('div');
+            feedbackBar.className = 'chat-feedback-bar';
+            feedbackBar.innerHTML = `
+                <span class="feedback-prompt-text">답변이 도움되었나요?</span>
+                <button type="button" class="feedback-btn btn-thumbs-up" title="도움이 되었어요">👍 도움돼요</button>
+                <button type="button" class="feedback-btn btn-thumbs-down" title="아쉬워요">👎 아쉬워요</button>
+            `;
+
+            const btnUp = feedbackBar.querySelector('.btn-thumbs-up');
+            const btnDown = feedbackBar.querySelector('.btn-thumbs-down');
+
+            btnUp.onclick = () => this.sendFeedback(originQuery, text, 'positive', feedbackBar);
+            btnDown.onclick = () => this.sendFeedback(originQuery, text, 'negative', feedbackBar);
+
+            msg.appendChild(feedbackBar);
+        }
+
         container.appendChild(msg);
         container.scrollTop = container.scrollHeight;
+    }
+
+    async sendFeedback(question, answer, rating, feedbackBar) {
+        if (!feedbackBar) return;
+        const btnUp = feedbackBar.querySelector('.btn-thumbs-up');
+        const btnDown = feedbackBar.querySelector('.btn-thumbs-down');
+        const promptText = feedbackBar.querySelector('.feedback-prompt-text');
+
+        if (btnUp) btnUp.disabled = true;
+        if (btnDown) btnDown.disabled = true;
+
+        if (rating === 'positive') {
+            if (btnUp) btnUp.classList.add('active-pos');
+            if (btnDown) btnDown.style.opacity = '0.3';
+            if (promptText) promptText.innerHTML = '✨ <span class="feedback-thanks">소중한 의견 감사합니다!</span>';
+        } else {
+            if (btnDown) btnDown.classList.add('active-neg');
+            if (btnUp) btnUp.style.opacity = '0.3';
+            if (promptText) promptText.innerHTML = '📝 <span class="feedback-thanks" style="color:#fca5a5 !important;">더 나은 답변을 위해 규정을 보강하겠습니다!</span>';
+        }
+
+        const payload = {
+            id: 'fb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+            question: question,
+            answer: (answer || '').replace(/<[^>]*>?/gm, '').slice(0, 300),
+            rating: rating,
+            mode: this.isAIMode ? 'AI' : 'RULE',
+            created_at: new Date().toISOString()
+        };
+
+        // 1. LocalStorage 피드백 리스트 저장
+        try {
+            if (typeof localStorage !== 'undefined') {
+                const existing = JSON.parse(localStorage.getItem('dudu_chatbot_feedback') || '[]');
+                existing.unshift(payload);
+                if (existing.length > 300) existing.length = 300;
+                localStorage.setItem('dudu_chatbot_feedback', JSON.stringify(existing));
+            }
+        } catch (e) {
+            // ignore
+        }
+
+        // 2. Supabase / API 서버 비동기 전송
+        try {
+            // API 서버 전송
+            fetch('/api/feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).catch(() => {});
+
+            // 브라우저 Supabase 직접 저장
+            const client = window.supabaseClient || (window.supabase && typeof window.supabase.createClient === 'function' 
+                ? window.supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY) 
+                : null);
+            if (client) {
+                client.from('chatbot_feedback').insert([payload]).then(() => {}).catch(() => {});
+            }
+        } catch (err) {
+            console.log('Feedback send complete (local fallback):', err);
+        }
     }
 
     /**
