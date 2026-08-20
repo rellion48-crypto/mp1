@@ -825,8 +825,8 @@ class DuduChatbot {
                     <span>안녕하세요, 어르신!</span>
                 </div>
                 <div>
-                    저희는 <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
-                    <strong>한식조리 · 지게차운전 · 굴착기운전기능사</strong>의 응시료(<span style="color:#93c5fd; font-weight:800;">14,500원</span>), 상시 접수 일정, 당일 합격 발표 등에 대해 무엇이든 편하게 물어보세요!
+                    <strong>두두자격지원센터 상담원</strong>입니다.<br>
+                    시험비, 접수 일정, 준비물 등 <strong>무엇이든 편하게 물어보세요!</strong>
                 </div>
                 <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.15);">
                     <div style="font-size: 13px; font-weight: 800; color: #34d399; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
@@ -1257,8 +1257,8 @@ class DuduChatbot {
         }
         this.updateModeUI();
         const notice = this.isAIMode 
-            ? '🤖 <strong>[AI 정밀상담 모드]</strong>로 전환되었습니다.<br><span style="font-size: 13px; color: #93c5fd;">※ 어르신 눈높이에 맞춰 더욱 풍부하고 친절하게 안내하며 대화 맥락을 기억합니다.</span>'
-            : '⚡ <strong>[사내규정 빠른검색 모드]</strong>로 전환되었습니다.<br><span style="font-size: 13px; color: #6ee7b7;">※ 23종 사내 원장 규정 문구 그대로 100% 빠르고 정확하게 답변합니다.</span>';
+            ? '🤖 <strong>[자세한 상담 모드]</strong>로 전환되었습니다.<br><span style="font-size: 13px; color: #93c5fd;">※ 더 자세히 설명해 드리고, 대화 내용을 기억합니다.</span>'
+            : '⚡ <strong>[빠른 답변 모드]</strong>로 전환되었습니다.<br><span style="font-size: 13px; color: #6ee7b7;">※ 사내 규정 그대로 빠르고 정확하게 답변합니다.</span>';
         this.appendMessage(notice, 'bot');
     }
 
@@ -1277,14 +1277,14 @@ class DuduChatbot {
                 banner.style.borderBottom = '2px solid #3b82f6';
             }
             if (label) {
-                label.innerHTML = '🤖 <span style="color:#ffffff; font-weight:900;">AI 정밀상담 모드</span> <span style="background:#2563eb; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #60a5fa;">작동중</span>';
+                label.innerHTML = '🤖 <span style="color:#ffffff; font-weight:900;">자세한 상담 모드</span> <span style="background:#2563eb; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #60a5fa;">작동중</span>';
             }
             if (desc) {
-                desc.textContent = '친절한 대화 설명 & 맥락 기억';
+                desc.textContent = '더 자세히 설명해 드립니다';
                 desc.style.color = '#93c5fd';
             }
             if (btn) {
-                btn.innerHTML = '⚡ 빠른 규정 모드로';
+                btn.innerHTML = '⚡ 빠른 답변으로';
                 btn.style.background = 'rgba(16, 185, 129, 0.3)';
                 btn.style.borderColor = '#10b981';
                 btn.style.color = '#6ee7b7';
@@ -1296,7 +1296,7 @@ class DuduChatbot {
                 sendBtn.style.background = '#2563eb';
             }
             if (input) {
-                input.placeholder = '🤖 AI에게 질문하세요 (예: 한식조리 접수비 얼마?)';
+                input.placeholder = '궁금한 점을 입력하세요';
             }
         } else {
             if (banner) {
@@ -1304,14 +1304,14 @@ class DuduChatbot {
                 banner.style.borderBottom = '2px solid #10b981';
             }
             if (label) {
-                label.innerHTML = '⚡ <span style="color:#ffffff; font-weight:900;">사내규정 빠른검색</span> <span style="background:#059669; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #34d399;">작동중</span>';
+                label.innerHTML = '⚡ <span style="color:#ffffff; font-weight:900;">빠른 답변 모드</span> <span style="background:#059669; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #34d399;">작동중</span>';
             }
             if (desc) {
-                desc.textContent = '23종 사내 원장 규정 문구 100% 즉시 답변';
+                desc.textContent = '사내 규정 그대로 빠르게 답변';
                 desc.style.color = '#a7f3d0';
             }
             if (btn) {
-                btn.innerHTML = '🤖 AI 정밀상담으로';
+                btn.innerHTML = '🤖 자세한 상담으로';
                 btn.style.background = 'rgba(37, 99, 235, 0.3)';
                 btn.style.borderColor = '#3b82f6';
                 btn.style.color = '#93c5fd';
@@ -1323,7 +1323,7 @@ class DuduChatbot {
                 sendBtn.style.background = '#059669';
             }
             if (input) {
-                input.placeholder = '⚡ 사내 규정 즉시 검색 (예: 지게차 준비물, 환불 규정)';
+                input.placeholder = '궁금한 점을 입력하세요';
             }
         }
     }
@@ -1709,10 +1709,10 @@ class DuduChatbot {
                 suggestContainer.innerHTML = `
                     <div style="font-size: 12.5px; color: #93c5fd; font-weight: 700; line-height: 1.45; min-width: 200px; flex: 1;">
                         💡 <strong>답변이 부족하셨나요?</strong><br>
-                        <span style="color: #e2e8f0;">AI 정밀상담 모드로 전환하시면 더 상세하고 친절하게 설명해 드려요.</span>
+                        <span style="color: #e2e8f0;">자세한 상담 모드로 전환하면 더 상세하게 설명해 드려요.</span>
                     </div>
                     <button type="button" class="btn-switch-to-ai" style="background: linear-gradient(135deg, #2563eb, #1d4ed8); color: #ffffff; border: 1.5px solid #60a5fa; border-radius: 10px; padding: 8px 14px; font-size: 12.5px; font-weight: 900; cursor: pointer; box-shadow: 0 4px 12px rgba(37,99,235,0.4); white-space: nowrap; transition: all 0.2s;">
-                        🤖 AI 정밀상담으로 다시 질문 ➔
+                        🤖 자세한 상담으로 다시 질문 ➔
                     </button>
                 `;
 
@@ -1724,7 +1724,7 @@ class DuduChatbot {
                     }
                     this.updateModeUI();
                     btnSwitch.disabled = true;
-                    btnSwitch.innerHTML = '⚡ AI 정밀상담 질문 중...';
+                    btnSwitch.innerHTML = '⚡ 자세한 상담 질문 중...';
                     this.askQuestion(question);
                 };
 

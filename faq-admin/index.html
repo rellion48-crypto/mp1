@@ -2449,8 +2449,8 @@
                     <img src="/dudutrain.png" alt="두두 AI" style="width: 100%; height: 100%; object-fit: contain;">
                 </div>
                 <div>
-                    <h4 style="color: #ffffff; font-size: 17px; font-weight: 900; margin: 0;">3대 자격증 AI 안내 상담원</h4>
-                    <p style="color: #94a3b8; font-size: 12px; font-weight: 600; margin: 0;">한식·지게차·굴착기 상시 CBT 정밀 안내</p>
+                    <h4 style="color: #ffffff; font-size: 17px; font-weight: 900; margin: 0;">자격증 문의 상담원</h4>
+                    <p style="color: #94a3b8; font-size: 12px; font-weight: 600; margin: 0;">시험비·일정·준비물 무엇이든 물어보세요</p>
                 </div>
             </div>
             <div style="display: flex; align-items: center; gap: 6px;">
@@ -2463,14 +2463,14 @@
         <div id="chatModeBanner" style="background: linear-gradient(135deg, rgba(30, 58, 138, 0.75), rgba(37, 99, 235, 0.5)); border-bottom: 2px solid #3b82f6; padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; transition: all 0.3s;">
             <div>
                 <div id="chatModeStatusLabel" style="font-size: 13px; font-weight: 800; color: #60a5fa; display: flex; align-items: center; gap: 6px;">
-                    🤖 <span style="color:#ffffff; font-weight:900;">AI 정밀상담 모드</span> <span style="background:#2563eb; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #60a5fa;">작동중</span>
+                    🤖 <span style="color:#ffffff; font-weight:900;">자세한 상담 모드</span> <span style="background:#2563eb; color:#ffffff; font-size:11px; padding:2px 8px; border-radius:12px; font-weight:800; border:1px solid #60a5fa;">작동중</span>
                 </div>
                 <div id="chatModeDesc" style="font-size: 11px; color: #93c5fd; font-weight: 600; margin-top: 2px;">
-                    친절한 대화 설명 & 맥락 기억
+                    더 자세히 설명해 드립니다
                 </div>
             </div>
             <button id="chatModeToggleBtn" onclick="window.duduChat && window.duduChat.toggleAIMode()" onkeydown="if(event.key==='Enter') this.click()" style="background: rgba(16, 185, 129, 0.3); border: 1.5px solid #10b981; color: #6ee7b7; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s; white-space: nowrap;">
-                ⚡ 빠른 규정 모드로
+                ⚡ 빠른 답변으로
             </button>
         </div>
         <div id="chatMessages" style="flex: 1; padding: 18px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; background: #090d16;">
@@ -2479,8 +2479,8 @@
                     <span style="font-size:1.3em;">👋</span> 안녕하세요, 어르신!
                 </div>
                 <div>
-                    저희는 <strong>두두자격지원센터 공식 AI 상담원</strong>입니다.<br>
-                    <strong>한식조리 · 지게차운전 · 굴착기운전기능사</strong>의 응시료(<span style="color:#93c5fd; font-weight:800;">14,500원</span>), 상시 접수 일정, 당일 합격 발표 등에 대해 무엇이든 편하게 물어보세요!
+                    <strong>두두자격지원센터 상담원</strong>입니다.<br>
+                    시험비, 접수 일정, 준비물 등 <strong>무엇이든 편하게 물어보세요!</strong>
                 </div>
                 <div style="margin-top: 16px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.15);">
                     <div style="font-size: 13px; font-weight: 800; color: #34d399; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
@@ -2510,7 +2510,7 @@
             </div>
         </div>
         <div style="padding: 16px; background: #1e293b; border-top: 2px solid #334155; display: flex; gap: 10px;">
-            <input type="text" id="chatInput" placeholder="질문을 입력하세요 (예: 한식조리 접수비 얼마?)" onkeydown="if(event.key==='Enter'){event.preventDefault(); if(window.duduChat) window.duduChat.handleSend();}" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
+            <input type="text" id="chatInput" placeholder="궁금한 점을 입력하세요" onkeydown="if(event.key==='Enter'){event.preventDefault(); if(window.duduChat) window.duduChat.handleSend();}" style="flex: 1; background: #020617; border: 2px solid #475569; border-radius: 12px; padding: 14px 16px; color: #ffffff; font-size: 16px; font-weight: 600; outline: none;">
             <button id="chatVoiceBtn" class="chat-voice-btn" type="button" title="음성으로 질문하기 (클릭 후 말씀하세요)">🎤 음성</button>
             <button id="chatSendBtn" onclick="window.duduChat && window.duduChat.handleSend()" style="background: #2563eb; border: none; color: white; border-radius: 12px; padding: 0 22px; font-weight: 900; font-size: 16px; cursor: pointer;">전송</button>
         </div>
